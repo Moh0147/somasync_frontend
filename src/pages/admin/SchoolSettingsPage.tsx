@@ -39,8 +39,8 @@ export default function SchoolSettingsPage() {
       {!error && school && (
         <Card>
           <CardHeader className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-slate-900">
-              {school.name} <span className="text-slate-400">· {school.code}</span>
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              {school.name} <span className="text-slate-500 dark:text-slate-400">· {school.code}</span>
             </p>
             <StatusBadge status={school.is_active ? 'available' : 'locked'} label={school.is_active ? 'Active' : 'Inactive'} />
           </CardHeader>

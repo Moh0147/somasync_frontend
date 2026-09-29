@@ -158,7 +158,7 @@ export default function TopicDetailPage() {
 
       <Card>
         <CardHeader className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-900">Learning objectives</p>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Learning objectives</p>
           <Button size="sm" onClick={() => setLoModalOpen(true)}>
             Add objective
           </Button>
@@ -166,13 +166,13 @@ export default function TopicDetailPage() {
         <CardBody>
           {objectives.length === 0 && <EmptyState title="No learning objectives yet." />}
           {objectives.length > 0 && (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
               {objectives.map((objective) => (
                 <li key={objective.id} className="flex items-start justify-between gap-4 py-2.5 text-sm">
                   <div>
-                    <p className="text-slate-900">{objective.description}</p>
+                    <p className="text-slate-900 dark:text-slate-100">{objective.description}</p>
                     {objective.competency_code && (
-                      <p className="text-xs text-slate-500">{objective.competency_code}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{objective.competency_code}</p>
                     )}
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
@@ -205,7 +205,7 @@ export default function TopicDetailPage() {
             onChange={(event) => setEditForm({ ...editForm, description: event.target.value })}
           />
           {editError && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {editError}
             </p>
           )}
@@ -229,7 +229,7 @@ export default function TopicDetailPage() {
             onChange={(event) => setLoForm({ ...loForm, competency_code: event.target.value })}
           />
           {loError && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {loError}
             </p>
           )}

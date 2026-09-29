@@ -58,6 +58,14 @@ export async function removeClassStudent(classId: number, userId: number) {
   await apiClient.delete(`/classes/${classId}/students/`, { data: { user_id: userId } })
 }
 
+// Student self-join via class code -- the backend already validates the
+// code belongs to the student's own school and rejects an inactive class,
+// so nothing here needs to re-derive tenant scoping client-side.
+export async function joinClass(classCode: string) {
+  const response = await apiClient.post<{ data: SchoolClass }>('/classes/join/', { class_code: classCode })
+  return response.data.data
+}
+
 // The backend has no "classes I teach" filter -- /api/classes/ only scopes by
 // school. Cross-referencing each class's teacher roster client-side is the
 // only way to derive "my classes" until that endpoint exists.

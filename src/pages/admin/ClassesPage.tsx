@@ -14,9 +14,11 @@ import { Select } from '@/components/ui/Select'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { Table } from '@/components/ui/Table'
 import { listClassLevels } from '@/services/academicsService'
+import { getSchoolClassPerformance } from '@/services/analyticsService'
 import { getApiErrorMessage } from '@/services/apiError'
 import { createClass, listClasses } from '@/services/classesService'
 import type { ClassLevel } from '@/types/academics'
+import type { ClassPerformance } from '@/types/analytics'
 import type { SchoolClass } from '@/types/class'
 
 const currentYear = new Date().getFullYear()
@@ -28,6 +30,7 @@ export default function ClassesPage() {
 
   const [classes, setClasses] = useState<SchoolClass[] | null>(null)
   const [classLevels, setClassLevels] = useState<ClassLevel[]>([])
+  const [performanceByClassId, setPerformanceByClassId] = useState<Map<number, ClassPerformance>>(new Map())
   const [error, setError] = useState<string | null>(null)
 
   const [modalOpen, setModalOpen] = useState(false)
@@ -44,6 +47,14 @@ export default function ClassesPage() {
       setClassLevels(levelsData)
     } catch (err) {
       setError(getApiErrorMessage(err))
+      return
+    }
+    try {
+      const performance = await getSchoolClassPerformance()
+      setPerformanceByClassId(new Map(performance.map((row) => [row.class_id, row])))
+    } catch {
+      // Best-effort enrichment -- the table still works with just the base
+      // class list if the analytics endpoint has a hiccup.
     }
   }
 
@@ -96,7 +107,15 @@ export default function ClassesPage() {
       {error && <ErrorState description={error} onRetry={load} />}
       {!error && !classes && <LoadingState message="Loading classes…" />}
       {!error && classes && classes.length === 0 && (
-        <EmptyState title="No classes yet." description="Create the first class for this school." />
+        <EmptyState
+          title="No classes yet."
+          description="Create the first class for this school to start enrolling students."
+          action={
+            <Button size="sm" onClick={() => setModalOpen(true)}>
+              Create class
+            </Button>
+          }
+        />
       )}
       {!error && classes && classes.length > 0 && (
         <Table
@@ -108,7 +127,7 @@ export default function ClassesPage() {
                 <button
                   type="button"
                   onClick={() => navigate(`/admin/classes/${row.id}`)}
-                  className="font-medium text-blue-600 hover:underline"
+                  className="font-medium text-blue-600 hover:underline dark:text-blue-400"
                 >
                   {row.name}
                 </button>
@@ -117,6 +136,19 @@ export default function ClassesPage() {
             { key: 'level', header: 'Level', render: (row: SchoolClass) => levelName(row.class_level) },
             { key: 'year', header: 'Year', render: (row: SchoolClass) => String(row.academic_year) },
             { key: 'code', header: 'Class code', render: (row: SchoolClass) => row.class_code },
+            {
+              key: 'students',
+              header: 'Students',
+              render: (row: SchoolClass) => String(performanceByClassId.get(row.id)?.student_count ?? '—'),
+            },
+            {
+              key: 'avgQuiz',
+              header: 'Avg quiz %',
+              render: (row: SchoolClass) => {
+                const value = performanceByClassId.get(row.id)?.avg_quiz_percentage
+                return value === null || value === undefined ? '—' : `${value}%`
+              },
+            },
             {
               key: 'status',
               header: 'Status',
@@ -162,7 +194,7 @@ export default function ClassesPage() {
             onChange={(event) => setForm({ ...form, academic_year: event.target.value })}
           />
           {formError && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {formError}
             </p>
           )}

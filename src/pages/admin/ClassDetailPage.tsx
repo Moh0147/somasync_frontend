@@ -27,9 +27,15 @@ import {
   removeClassTeacher,
   updateClass,
 } from '@/services/classesService'
+import { listSchoolStudents, listSchoolTeachers } from '@/services/schoolsService'
 import type { ClassLevel } from '@/types/academics'
 import type { AuthUser } from '@/types/auth'
 import type { SchoolClass } from '@/types/class'
+
+function memberLabel(member: AuthUser) {
+  const fullName = `${member.first_name} ${member.last_name}`.trim()
+  return fullName ? `${fullName} (${member.username})` : member.username
+}
 
 function MemberList({
   members,
@@ -43,16 +49,14 @@ function MemberList({
   if (members.length === 0) return <EmptyState title={emptyLabel} />
 
   return (
-    <ul className="divide-y divide-slate-100">
+    <ul className="divide-y divide-slate-100 dark:divide-slate-800">
       {members.map((member) => (
         <li key={member.id} className="flex items-center justify-between py-2.5 text-sm">
           <div>
-            <p className="font-medium text-slate-900">
+            <p className="font-medium text-slate-900 dark:text-slate-100">
               {member.first_name || member.last_name ? `${member.first_name} ${member.last_name}`.trim() : member.username}
             </p>
-            <p className="text-xs text-slate-500">
-              {member.username} · #{member.id}
-            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{member.username}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={() => onRemove(member.id)}>
             Remove
@@ -72,6 +76,11 @@ export default function ClassDetailPage() {
   const [classLevels, setClassLevels] = useState<ClassLevel[]>([])
   const [teachers, setTeachers] = useState<AuthUser[]>([])
   const [students, setStudents] = useState<AuthUser[]>([])
+  // Every teacher/student account in the school -- used to build the
+  // "assign by name" pickers below, since asking an admin to type a raw
+  // numeric user ID (with no way to look one up) was a real dead end.
+  const [schoolTeachers, setSchoolTeachers] = useState<AuthUser[]>([])
+  const [schoolStudents, setSchoolStudents] = useState<AuthUser[]>([])
   const [error, setError] = useState<string | null>(null)
 
   const [editOpen, setEditOpen] = useState(false)
@@ -82,27 +91,33 @@ export default function ClassDetailPage() {
   const [confirmToggleOpen, setConfirmToggleOpen] = useState(false)
   const [isToggling, setIsToggling] = useState(false)
 
-  const [teacherIdInput, setTeacherIdInput] = useState('')
+  const [selectedTeacherId, setSelectedTeacherId] = useState('')
   const [teacherError, setTeacherError] = useState<string | null>(null)
   const [isAssigningTeacher, setIsAssigningTeacher] = useState(false)
 
-  const [studentIdInput, setStudentIdInput] = useState('')
+  const [selectedStudentId, setSelectedStudentId] = useState('')
   const [studentError, setStudentError] = useState<string | null>(null)
   const [isEnrollingStudent, setIsEnrollingStudent] = useState(false)
 
   async function load() {
     setError(null)
     try {
-      const [classData, levelsData, teachersData, studentsData] = await Promise.all([
-        getClass(id),
+      // getClass() first -- everything else that's school-scoped needs the
+      // school id it returns, so it can't all run in one Promise.all.
+      const classData = await getClass(id)
+      const [levelsData, teachersData, studentsData, schoolTeachersData, schoolStudentsData] = await Promise.all([
         listClassLevels(),
         listClassTeachers(id),
         listClassStudents(id),
+        listSchoolTeachers(classData.school),
+        listSchoolStudents(classData.school),
       ])
       setSchoolClass(classData)
       setClassLevels(levelsData)
       setTeachers(teachersData)
       setStudents(studentsData)
+      setSchoolTeachers(schoolTeachersData)
+      setSchoolStudents(schoolStudentsData)
       setEditForm({
         name: classData.name,
         class_level: String(classData.class_level),
@@ -159,16 +174,16 @@ export default function ClassDetailPage() {
   async function handleAssignTeacher(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setTeacherError(null)
-    const userId = Number(teacherIdInput)
+    const userId = Number(selectedTeacherId)
     if (!userId) {
-      setTeacherError('Enter a valid user ID.')
+      setTeacherError('Choose a teacher first.')
       return
     }
     setIsAssigningTeacher(true)
     try {
       const teacher = await assignClassTeacher(id, userId)
       setTeachers((current) => [...current, teacher])
-      setTeacherIdInput('')
+      setSelectedTeacherId('')
       showToast('success', 'Teacher assigned.')
     } catch (err) {
       setTeacherError(getApiErrorMessage(err))
@@ -190,16 +205,16 @@ export default function ClassDetailPage() {
   async function handleEnrollStudent(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setStudentError(null)
-    const userId = Number(studentIdInput)
+    const userId = Number(selectedStudentId)
     if (!userId) {
-      setStudentError('Enter a valid user ID.')
+      setStudentError('Choose a student first.')
       return
     }
     setIsEnrollingStudent(true)
     try {
       const student = await enrollClassStudent(id, userId)
       setStudents((current) => [...current, student])
-      setStudentIdInput('')
+      setSelectedStudentId('')
       showToast('success', 'Student enrolled.')
     } catch (err) {
       setStudentError(getApiErrorMessage(err))
@@ -220,6 +235,11 @@ export default function ClassDetailPage() {
 
   if (error) return <ErrorState description={error} onRetry={load} />
   if (!schoolClass) return <LoadingState message="Loading class…" />
+
+  const assignedTeacherIds = new Set(teachers.map((teacher) => teacher.id))
+  const assignedStudentIds = new Set(students.map((student) => student.id))
+  const availableTeachers = schoolTeachers.filter((teacher) => !assignedTeacherIds.has(teacher.id))
+  const availableStudents = schoolStudents.filter((student) => !assignedStudentIds.has(student.id))
 
   return (
     <div className="flex flex-col gap-4">
@@ -244,7 +264,7 @@ export default function ClassDetailPage() {
 
       <Card>
         <CardHeader className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-900">Class details</p>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Class details</p>
           <StatusBadge
             status={schoolClass.is_active ? 'available' : 'locked'}
             label={schoolClass.is_active ? 'Active' : 'Inactive'}
@@ -264,45 +284,83 @@ export default function ClassDetailPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <p className="text-sm font-semibold text-slate-900">Teachers</p>
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Teachers</p>
           </CardHeader>
           <CardBody className="flex flex-col gap-4">
             <MemberList members={teachers} emptyLabel="No teachers assigned yet." onRemove={handleRemoveTeacher} />
-            <form onSubmit={handleAssignTeacher} className="flex items-end gap-2" noValidate>
-              <Input
-                label="Assign by user ID"
-                placeholder="e.g. 42"
-                value={teacherIdInput}
-                onChange={(event) => setTeacherIdInput(event.target.value)}
-                className="flex-1"
+            {schoolTeachers.length === 0 ? (
+              <EmptyState
+                title="This school has no teacher accounts yet."
+                description="Create a teacher account first, then come back here to assign them."
               />
-              <Button type="submit" size="sm" disabled={isAssigningTeacher}>
-                {isAssigningTeacher ? 'Assigning…' : 'Assign'}
-              </Button>
-            </form>
-            {teacherError && <p className="text-sm text-red-600">{teacherError}</p>}
+            ) : availableTeachers.length === 0 ? (
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Every teacher in this school is already assigned to this class.
+              </p>
+            ) : (
+              <form onSubmit={handleAssignTeacher} className="flex items-end gap-2" noValidate>
+                <Select
+                  label="Assign a teacher"
+                  value={selectedTeacherId}
+                  onChange={(event) => setSelectedTeacherId(event.target.value)}
+                  className="flex-1"
+                >
+                  <option value="" disabled>
+                    Select a teacher
+                  </option>
+                  {availableTeachers.map((teacher) => (
+                    <option key={teacher.id} value={teacher.id}>
+                      {memberLabel(teacher)}
+                    </option>
+                  ))}
+                </Select>
+                <Button type="submit" size="sm" disabled={isAssigningTeacher}>
+                  {isAssigningTeacher ? 'Assigning…' : 'Assign'}
+                </Button>
+              </form>
+            )}
+            {teacherError && <p className="text-sm text-red-600 dark:text-red-400">{teacherError}</p>}
           </CardBody>
         </Card>
 
         <Card>
           <CardHeader>
-            <p className="text-sm font-semibold text-slate-900">Students</p>
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Students</p>
           </CardHeader>
           <CardBody className="flex flex-col gap-4">
             <MemberList members={students} emptyLabel="No students enrolled yet." onRemove={handleRemoveStudent} />
-            <form onSubmit={handleEnrollStudent} className="flex items-end gap-2" noValidate>
-              <Input
-                label="Enroll by user ID"
-                placeholder="e.g. 108"
-                value={studentIdInput}
-                onChange={(event) => setStudentIdInput(event.target.value)}
-                className="flex-1"
+            {schoolStudents.length === 0 ? (
+              <EmptyState
+                title="This school has no student accounts yet."
+                description="Create a student account first, then come back here to enroll them -- or have them join with the class code themselves."
               />
-              <Button type="submit" size="sm" disabled={isEnrollingStudent}>
-                {isEnrollingStudent ? 'Enrolling…' : 'Enroll'}
-              </Button>
-            </form>
-            {studentError && <p className="text-sm text-red-600">{studentError}</p>}
+            ) : availableStudents.length === 0 ? (
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Every student in this school is already enrolled in this class.
+              </p>
+            ) : (
+              <form onSubmit={handleEnrollStudent} className="flex items-end gap-2" noValidate>
+                <Select
+                  label="Enroll a student"
+                  value={selectedStudentId}
+                  onChange={(event) => setSelectedStudentId(event.target.value)}
+                  className="flex-1"
+                >
+                  <option value="" disabled>
+                    Select a student
+                  </option>
+                  {availableStudents.map((student) => (
+                    <option key={student.id} value={student.id}>
+                      {memberLabel(student)}
+                    </option>
+                  ))}
+                </Select>
+                <Button type="submit" size="sm" disabled={isEnrollingStudent}>
+                  {isEnrollingStudent ? 'Enrolling…' : 'Enroll'}
+                </Button>
+              </form>
+            )}
+            {studentError && <p className="text-sm text-red-600 dark:text-red-400">{studentError}</p>}
           </CardBody>
         </Card>
       </div>
@@ -335,7 +393,7 @@ export default function ClassDetailPage() {
             onChange={(event) => setEditForm({ ...editForm, academic_year: event.target.value })}
           />
           {editError && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {editError}
             </p>
           )}

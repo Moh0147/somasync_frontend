@@ -13,7 +13,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { DescriptionList } from '@/components/ui/DescriptionList'
 import { Dropdown } from '@/components/ui/Dropdown'
-import { AlertIcon, CheckIcon, ChevronDownIcon } from '@/components/ui/icons'
+import { AlertIcon, CheckIcon, DashboardIcon, LessonsIcon, LightbulbIcon, QuizzesIcon } from '@/components/ui/icons'
 import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { Pagination } from '@/components/ui/Pagination'
@@ -26,9 +26,9 @@ import { Table } from '@/components/ui/Table'
 import { Tabs } from '@/components/ui/Tabs'
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', to: '/design-system' },
-  { label: 'Lessons', to: '/design-system' },
-  { label: 'Quizzes', to: '/design-system' },
+  { label: 'Dashboard', to: '/design-system', icon: DashboardIcon },
+  { label: 'Lessons', to: '/design-system', icon: LessonsIcon },
+  { label: 'Quizzes', to: '/design-system', icon: QuizzesIcon },
 ]
 
 const statuses: StatusBadgeStatus[] = [
@@ -68,7 +68,7 @@ export default function DesignSystemPreviewPage() {
         <Breadcrumb items={[{ label: 'Design System', href: '/design-system' }, { label: 'Preview' }]} />
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-slate-900">Buttons</h2>
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Buttons</h2>
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="primary">Primary</Button>
             <Button variant="secondary">Secondary</Button>
@@ -87,7 +87,7 @@ export default function DesignSystemPreviewPage() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-slate-900">Form controls</h2>
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Form controls</h2>
           <div className="grid max-w-lg grid-cols-1 gap-4 sm:grid-cols-2">
             <Input label="Full name" placeholder="Asha Mwangi" />
             <Input label="Email" placeholder="asha@example.com" error="This field is required." />
@@ -103,7 +103,7 @@ export default function DesignSystemPreviewPage() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-slate-900">Profile layout</h2>
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Profile layout</h2>
           <Card>
             <PageHeader
               title="Profile"
@@ -128,10 +128,10 @@ export default function DesignSystemPreviewPage() {
                   tone="secondary"
                 />
                 <StatTile
-                  icon={<ChevronDownIcon className="h-5 w-5" />}
-                  label="Continuity Status"
-                  value="Continuing"
-                  tone="accent"
+                  icon={<LightbulbIcon className="h-5 w-5" />}
+                  label="AI Requests"
+                  value="12"
+                  tone="ai"
                 />
               </div>
             </CardBody>
@@ -139,13 +139,13 @@ export default function DesignSystemPreviewPage() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-slate-900">Cards</h2>
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Cards</h2>
           <Card className="max-w-sm">
             <CardHeader>
-              <p className="text-sm font-semibold text-slate-900">Biology — Form II</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Biology — Form II</p>
             </CardHeader>
             <CardBody className="flex flex-col gap-3">
-              <p className="text-sm text-slate-600">Photosynthesis</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Photosynthesis</p>
               <ProgressBar value={60} label="Progress" />
               <Button size="sm">Continue Learning</Button>
             </CardBody>
@@ -153,7 +153,7 @@ export default function DesignSystemPreviewPage() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-slate-900">Dialogs</h2>
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Dialogs</h2>
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" onClick={() => setModalOpen(true)}>
               Open modal
@@ -163,7 +163,7 @@ export default function DesignSystemPreviewPage() {
             </Button>
           </div>
           <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Lesson details">
-            <p className="text-sm text-slate-600">This is a standard modal used for detail views and forms.</p>
+            <p className="text-sm text-slate-600 dark:text-slate-400">This is a standard modal used for detail views and forms.</p>
           </Modal>
           <ConfirmDialog
             open={confirmOpen}
@@ -177,7 +177,7 @@ export default function DesignSystemPreviewPage() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-slate-900">Status badges</h2>
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Status badges</h2>
           <div className="flex flex-wrap gap-2">
             {statuses.map((status) => (
               <StatusBadge key={status} status={status} />
@@ -186,7 +186,7 @@ export default function DesignSystemPreviewPage() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-slate-900">Tabs &amp; dropdown</h2>
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Tabs &amp; dropdown</h2>
           <Tabs
             tabs={[
               { id: 'overview', label: 'Overview' },
@@ -206,7 +206,7 @@ export default function DesignSystemPreviewPage() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-slate-900">Table &amp; pagination</h2>
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Table &amp; pagination</h2>
           <Table
             columns={[
               { key: 'name', header: 'Student', render: (row: StudentRow) => row.name },
@@ -219,7 +219,7 @@ export default function DesignSystemPreviewPage() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-slate-900">Loading, empty &amp; error states</h2>
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Loading, empty &amp; error states</h2>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <Card>
               <LoadingState message="Loading lessons…" />
@@ -238,7 +238,7 @@ export default function DesignSystemPreviewPage() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-slate-900">Toasts</h2>
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Toasts</h2>
           <div className="flex flex-wrap gap-2">
             <Button variant="success" onClick={() => showToast('success', '12 items synced.')}>
               Trigger success

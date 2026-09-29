@@ -10,7 +10,11 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // 'prompt', not 'autoUpdate' -- a waiting service worker must never
+      // take over silently mid-session (see src/sw.ts's message-based
+      // skipWaiting). src/components/pwa/UpdatePrompt.tsx surfaces the
+      // "A new version is available" banner and drives the actual update.
+      registerType: 'prompt',
       // Custom service worker (src/sw.ts) instead of generateSW's
       // declarative config -- see that file for why: generateSW's
       // `navigateFallback` registers its NavigationRoute ahead of any
@@ -32,10 +36,16 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: 'icon.svg',
-            sizes: 'any',
-            type: 'image/svg+xml',
-            purpose: 'any',
+            src: 'soma-icon-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
+          {
+            src: 'soma-icon.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable',
           },
         ],
       },

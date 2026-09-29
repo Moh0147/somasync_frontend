@@ -60,7 +60,7 @@ export default function TeacherClassDetailPage() {
 
       <Card>
         <CardHeader className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-900">Class details</p>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Class details</p>
           <StatusBadge
             status={schoolClass.is_active ? 'available' : 'locked'}
             label={schoolClass.is_active ? 'Active' : 'Inactive'}
@@ -79,20 +79,20 @@ export default function TeacherClassDetailPage() {
 
       <Card>
         <CardHeader>
-          <p className="text-sm font-semibold text-slate-900">Students</p>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Students</p>
         </CardHeader>
         <CardBody>
           {students.length === 0 && <EmptyState title="No students enrolled yet." />}
           {students.length > 0 && (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
               {students.map((student) => (
                 <li key={student.id} className="flex items-center justify-between py-2.5 text-sm">
-                  <span className="font-medium text-slate-900">
+                  <span className="font-medium text-slate-900 dark:text-slate-100">
                     {student.first_name || student.last_name
                       ? `${student.first_name} ${student.last_name}`.trim()
                       : student.username}
                   </span>
-                  <span className="text-slate-500">{student.username}</span>
+                  <span className="text-slate-500 dark:text-slate-400">{student.username}</span>
                 </li>
               ))}
             </ul>

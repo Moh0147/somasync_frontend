@@ -21,6 +21,12 @@ export interface SchoolAdminPayload {
   password: string
 }
 
+// Same shape as SchoolAdminPayload -- kept as a separate alias so callers
+// read clearly (a TeacherPayload isn't accidentally interchangeable with a
+// StudentPayload just because the fields match).
+export type TeacherPayload = SchoolAdminPayload
+export type StudentPayload = SchoolAdminPayload
+
 export async function listSchools() {
   const response = await apiClient.get<{ data: PaginatedResult<School> }>('/schools/')
   return response.data.data.results
@@ -58,5 +64,25 @@ export async function listSchoolAdmins(schoolId: number) {
 
 export async function createSchoolAdmin(schoolId: number, payload: SchoolAdminPayload) {
   const response = await apiClient.post<{ data: AuthUser }>(`/schools/${schoolId}/admins/`, payload)
+  return response.data.data
+}
+
+export async function listSchoolTeachers(schoolId: number) {
+  const response = await apiClient.get<{ data: AuthUser[] }>(`/schools/${schoolId}/teachers/`)
+  return response.data.data
+}
+
+export async function createTeacher(schoolId: number, payload: TeacherPayload) {
+  const response = await apiClient.post<{ data: AuthUser }>(`/schools/${schoolId}/teachers/`, payload)
+  return response.data.data
+}
+
+export async function listSchoolStudents(schoolId: number) {
+  const response = await apiClient.get<{ data: AuthUser[] }>(`/schools/${schoolId}/students/`)
+  return response.data.data
+}
+
+export async function createStudent(schoolId: number, payload: StudentPayload) {
+  const response = await apiClient.post<{ data: AuthUser }>(`/schools/${schoolId}/students/`, payload)
   return response.data.data
 }

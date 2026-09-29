@@ -5,9 +5,13 @@ import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/features/auth/AuthContext'
 import { studentNavItems } from '@/features/student/studentNav'
 
+import ExamResultDetailPage from './ExamResultDetailPage'
+import ExamResultsPage from './ExamResultsPage'
+import JoinClassPage from './JoinClassPage'
 import LessonReaderPage from './LessonReaderPage'
 import QuizDetailPage from './QuizDetailPage'
 import QuizzesPage from './QuizzesPage'
+import StorageManagementPage from './StorageManagementPage'
 import StudentDashboardPage from './StudentDashboardPage'
 
 export default function StudentAreaPage() {
@@ -29,6 +33,10 @@ export default function StudentAreaPage() {
         <Route path="lessons/:lessonId/sections/:sectionId" element={<LessonReaderPage />} />
         <Route path="quizzes" element={<QuizzesPage />} />
         <Route path="quizzes/:quizId" element={<QuizDetailPage />} />
+        <Route path="results" element={<ExamResultsPage />} />
+        <Route path="results/:resultId" element={<ExamResultDetailPage />} />
+        <Route path="storage" element={<StorageManagementPage />} />
+        <Route path="join-class" element={<JoinClassPage />} />
       </Routes>
     </AppShell>
   )

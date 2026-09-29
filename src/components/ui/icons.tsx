@@ -1,43 +1,37 @@
-import type { SVGProps } from 'react'
-
-export function CloseIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} {...props}>
-      <path strokeLinecap="round" d="M5 5l10 10M15 5L5 15" />
-    </svg>
-  )
-}
-
-export function ChevronDownIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} {...props}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M5 7.5l5 5 5-5" />
-    </svg>
-  )
-}
-
-export function MenuIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} {...props}>
-      <path strokeLinecap="round" d="M3 6h14M3 10h14M3 14h14" />
-    </svg>
-  )
-}
-
-export function CheckIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} {...props}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M4 10l4 4 8-8" />
-    </svg>
-  )
-}
-
-export function AlertIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} {...props}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M10 4l8 14H2l8-14z" />
-      <path strokeLinecap="round" d="M10 8.5v3.25" />
-      <circle cx="10" cy="14.25" r="0.75" fill="currentColor" stroke="none" />
-    </svg>
-  )
-}
+// One consistent icon library (Lucide) across the whole app, re-exported
+// under stable names so every consuming file keeps working unchanged.
+export {
+  X as CloseIcon,
+  ChevronDown as ChevronDownIcon,
+  ChevronRight as ChevronRightIcon,
+  Menu as MenuIcon,
+  CheckCircle as CheckIcon,
+  XCircle as WrongIcon,
+  AlertCircle as AlertIcon,
+  WifiOff as OfflineIcon,
+  RefreshCw as SyncIcon,
+  Lightbulb as LightbulbIcon,
+  Eye as EyeIcon,
+  EyeOff as EyeOffIcon,
+  LayoutDashboard as DashboardIcon,
+  BookOpen as LessonsIcon,
+  ClipboardCheck as QuizzesIcon,
+  FileText as ExamsIcon,
+  Users as UsersIcon,
+  GraduationCap as StudentsIcon,
+  Library as SubjectsIcon,
+  LayoutGrid as ClassesIcon,
+  Building2 as SchoolsIcon,
+  BarChart3 as AnalyticsIcon,
+  Settings as SettingsIcon,
+  Download as DownloadIcon,
+  Upload as UploadIcon,
+  Play as PlayIcon,
+  Lock as LockIcon,
+  Clock as ClockIcon,
+  MoreHorizontal as MoreIcon,
+  ArrowRight as ArrowRightIcon,
+  KeyRound as JoinClassIcon,
+  Sun as LightModeIcon,
+  Moon as DarkModeIcon,
+} from 'lucide-react'

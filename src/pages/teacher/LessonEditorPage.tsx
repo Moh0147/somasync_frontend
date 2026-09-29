@@ -266,7 +266,7 @@ export default function LessonEditorPage() {
 
       <Card>
         <CardHeader className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-900">Lesson details</p>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Lesson details</p>
           <StatusBadge
             status={lesson.status === 'PUBLISHED' ? 'completed' : lesson.status === 'ARCHIVED' ? 'locked' : 'pending'}
             label={lesson.status}
@@ -286,7 +286,7 @@ export default function LessonEditorPage() {
 
       <Card>
         <CardHeader className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-900">Supporting attachments</p>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Supporting attachments</p>
           <Button size="sm" disabled={isUploading} onClick={() => fileInputRef.current?.click()}>
             {isUploading ? 'Uploading…' : 'Upload file'}
           </Button>
@@ -297,7 +297,7 @@ export default function LessonEditorPage() {
             <EmptyState title="No attachments yet." description="A PDF is supporting material, not the lesson itself." />
           )}
           {attachments.length > 0 && (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
               {attachments.map((attachment) => (
                 <li key={attachment.id} className="flex items-center justify-between py-2.5 text-sm">
                   <div>
@@ -309,7 +309,7 @@ export default function LessonEditorPage() {
                     >
                       {attachment.file_name}
                     </a>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       {formatBytes(attachment.file_size)} · v{attachment.version}
                     </p>
                   </div>
@@ -325,7 +325,7 @@ export default function LessonEditorPage() {
 
       <Card>
         <CardHeader className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-900">Sections</p>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Sections</p>
           <Button size="sm" onClick={() => setSectionModalOpen(true)}>
             Add section
           </Button>
@@ -335,11 +335,11 @@ export default function LessonEditorPage() {
             <EmptyState title="No sections yet." description="Break this lesson into sections for the mastery-based reader." />
           )}
           {sortedSections.length > 0 && (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
               {sortedSections.map((section, index) => (
                 <li key={section.id} className="flex items-center justify-between gap-2 py-2.5 text-sm">
                   <div>
-                    <p className="font-medium text-slate-900">
+                    <p className="font-medium text-slate-900 dark:text-slate-100">
                       Section {index + 1}: {section.title}
                     </p>
                   </div>
@@ -399,7 +399,7 @@ export default function LessonEditorPage() {
             onChange={(event) => setEditForm({ ...editForm, description: event.target.value })}
           />
           {editError && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {editError}
             </p>
           )}
@@ -419,7 +419,7 @@ export default function LessonEditorPage() {
             onChange={(event) => setSectionTitle(event.target.value)}
           />
           {sectionError && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {sectionError}
             </p>
           )}

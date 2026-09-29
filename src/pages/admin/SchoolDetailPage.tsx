@@ -147,7 +147,7 @@ export default function SchoolDetailPage() {
 
       <Card>
         <CardHeader className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-900">School details</p>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">School details</p>
           <StatusBadge status={school.is_active ? 'available' : 'locked'} label={school.is_active ? 'Active' : 'Inactive'} />
         </CardHeader>
         <CardBody>
@@ -163,7 +163,7 @@ export default function SchoolDetailPage() {
 
       <Card>
         <CardHeader className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-900">School admins</p>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">School admins</p>
           <Button size="sm" onClick={() => setAdminModalOpen(true)}>
             Create school admin
           </Button>
@@ -171,15 +171,15 @@ export default function SchoolDetailPage() {
         <CardBody>
           {admins && admins.length === 0 && <EmptyState title="No school admins yet." />}
           {admins && admins.length > 0 && (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
               {admins.map((admin) => (
                 <li key={admin.id} className="flex items-center justify-between py-2.5 text-sm">
-                  <span className="font-medium text-slate-900">
+                  <span className="font-medium text-slate-900 dark:text-slate-100">
                     {admin.first_name || admin.last_name
                       ? `${admin.first_name} ${admin.last_name}`.trim()
                       : admin.username}
                   </span>
-                  <span className="text-slate-500">{admin.email}</span>
+                  <span className="text-slate-500 dark:text-slate-400">{admin.email}</span>
                 </li>
               ))}
             </ul>
@@ -218,7 +218,7 @@ export default function SchoolDetailPage() {
             onChange={(event) => setEditForm({ ...editForm, email: event.target.value })}
           />
           {editError && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {editError}
             </p>
           )}
@@ -282,7 +282,7 @@ export default function SchoolDetailPage() {
             onChange={(event) => setAdminForm({ ...adminForm, password: event.target.value })}
           />
           {adminError && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {adminError}
             </p>
           )}

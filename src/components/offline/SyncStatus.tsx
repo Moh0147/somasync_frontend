@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { useToast } from '@/components/feedback/Toast'
 import { Button } from '@/components/ui/Button'
+import { AlertIcon, CheckIcon, SyncIcon } from '@/components/ui/icons'
 import { useAuth } from '@/features/auth/AuthContext'
 import { getSyncCounts, runSync } from '@/features/sync/syncEngine'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
@@ -40,16 +41,16 @@ export function SyncStatus() {
   if (counts.synced === 0 && counts.pending === 0 && counts.failed === 0) return null
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm">
-      <span className="flex items-center gap-1 text-green-700">
-        <span aria-hidden="true">✓</span> {counts.synced} synced
+    <div className="flex flex-wrap items-center gap-3 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-900">
+      <span className="flex items-center gap-1 text-green-700 dark:text-green-400">
+        <CheckIcon aria-hidden="true" className="h-3.5 w-3.5" /> {counts.synced} synced
       </span>
-      <span className="flex items-center gap-1 text-amber-700">
-        <span aria-hidden="true">↻</span> {counts.pending} pending
+      <span className="flex items-center gap-1 text-teal-700 dark:text-teal-400">
+        <SyncIcon aria-hidden="true" className="h-3.5 w-3.5" /> {counts.pending} pending
       </span>
       {counts.failed > 0 && (
-        <span className="flex items-center gap-1 text-red-700">
-          <span aria-hidden="true">⚠</span> {counts.failed} failed
+        <span className="flex items-center gap-1 text-red-700 dark:text-red-400">
+          <AlertIcon aria-hidden="true" className="h-3.5 w-3.5" /> {counts.failed} failed
         </span>
       )}
       <Button size="sm" variant="secondary" disabled={isSyncing || !isOnline} onClick={handleSyncNow}>

@@ -87,7 +87,7 @@ export default function SubjectsPage() {
                 <button
                   type="button"
                   onClick={() => navigate(`/admin/subjects/${row.id}`)}
-                  className="font-medium text-blue-600 hover:underline"
+                  className="font-medium text-blue-600 hover:underline dark:text-blue-400"
                 >
                   {row.name}
                 </button>
@@ -129,7 +129,7 @@ export default function SubjectsPage() {
             onChange={(event) => setForm({ ...form, curriculum_code: event.target.value })}
           />
           {formError && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {formError}
             </p>
           )}

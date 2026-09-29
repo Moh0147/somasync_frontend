@@ -5,6 +5,7 @@ import { ErrorState } from '@/components/feedback/ErrorState'
 import { LoadingState } from '@/components/feedback/LoadingState'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody } from '@/components/ui/Card'
+import { CheckIcon, LightbulbIcon, LockIcon, OfflineIcon, WrongIcon } from '@/components/ui/icons'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { Select } from '@/components/ui/Select'
 import type { StatusBadgeStatus } from '@/components/ui/StatusBadge'
@@ -20,24 +21,25 @@ import { getLesson, getLessonStructure, getSectionContent, submitSectionQuiz } f
 import { listMyAttempts } from '@/services/quizzesService'
 import type { Lesson, LessonStructure, SectionContentBlock, SectionContentResponse } from '@/types/lesson'
 import type { SectionQuizAnswerInput, SectionQuizResult } from '@/types/quiz'
+import { sanitizeLessonHtml } from '@/utils/sanitizeHtml'
 
 function ContentBlockView({ block }: { block: SectionContentBlock }) {
   switch (block.block_type) {
     case 'HEADING':
-      return <h3 className="text-lg font-semibold text-slate-900">{block.content}</h3>
+      return <div className="lesson-rich-content mt-2 text-lg font-semibold text-slate-900 dark:text-slate-100" dangerouslySetInnerHTML={{ __html: sanitizeLessonHtml(block.content) }} />
     case 'KEY_POINT':
+      // Blue, not amber -- amber is reserved for AI-related content in this
+      // app's color system, and a key-point callout isn't that.
       return (
-        <div className="rounded-md border-l-4 border-amber-500 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          {block.content}
-        </div>
+        <div className="lesson-rich-content rounded-md border-l-4 border-blue-500 bg-blue-50 px-4 py-3 text-sm text-blue-900 dark:border-blue-400 dark:bg-blue-500/10 dark:text-blue-200" dangerouslySetInnerHTML={{ __html: sanitizeLessonHtml(block.content) }} />
       )
     case 'IMAGE':
       return block.image_reference ? (
-        <img src={resolveMediaUrl(block.image_reference)} alt="" className="rounded-md border border-slate-200" />
+        <img src={resolveMediaUrl(block.image_reference)} alt="" className="rounded-md border border-slate-200 dark:border-slate-800" />
       ) : null
     case 'TEXT':
     default:
-      return <p className="whitespace-pre-wrap text-base leading-relaxed text-slate-700">{block.content}</p>
+      return <div className="lesson-rich-content text-base leading-[1.7] text-slate-700 dark:text-slate-300" dangerouslySetInnerHTML={{ __html: sanitizeLessonHtml(block.content) }} />
   }
 }
 
@@ -116,12 +118,24 @@ export default function LessonReaderPage() {
     loadContent()
   }, [sectionIdNum, isOnline])
 
+  // Offline section content resolves each IMAGE block to a blob: URL (see
+  // offlineReaderService.getOfflineSectionContent) -- those are never
+  // freed by the browser on their own, so they're revoked here whenever
+  // this section's content is replaced or the reader unmounts.
+  useEffect(() => {
+    return () => {
+      content?.content_blocks.forEach((block) => {
+        if (block.image_reference?.startsWith('blob:')) URL.revokeObjectURL(block.image_reference)
+      })
+    }
+  }, [content])
+
   if (notDownloaded) {
     return (
       <Card>
         <CardBody className="flex flex-col items-center gap-2 py-10 text-center">
-          <p className="text-sm font-medium text-slate-700">This lesson hasn't been downloaded.</p>
-          <p className="text-sm text-slate-500">Go back online and download it from your dashboard to study it offline.</p>
+          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">This lesson hasn't been downloaded.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Go back online and download it from your dashboard to study it offline.</p>
         </CardBody>
       </Card>
     )
@@ -136,8 +150,8 @@ export default function LessonReaderPage() {
     return (
       <Card>
         <CardBody className="flex flex-col gap-3">
-          <h1 className="text-xl font-semibold text-slate-900">{flatLesson.title}</h1>
-          <p className="whitespace-pre-wrap text-base leading-relaxed text-slate-700">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{flatLesson.title}</h1>
+          <p className="whitespace-pre-wrap text-base leading-[1.7] text-slate-700 dark:text-slate-300">
             {flatLesson.content || flatLesson.description || 'This lesson has no content yet.'}
           </p>
         </CardBody>
@@ -176,7 +190,7 @@ export default function LessonReaderPage() {
 
   const sectionNav = (
     <div className="flex flex-col gap-2">
-      <ProgressBar value={progressPercentage} label="Lesson progress" />
+      <ProgressBar value={progressPercentage} label="Your progress" />
       <div className="flex flex-wrap gap-2">
         {sortedSections.map((section, index) => (
           <button
@@ -185,10 +199,12 @@ export default function LessonReaderPage() {
             disabled={section.status === 'LOCKED'}
             onClick={() => navigate(`/student/lessons/${lessonIdNum}/sections/${section.id}`)}
             className={`flex flex-col items-center gap-1 rounded-md border px-3 py-2 disabled:cursor-not-allowed disabled:opacity-60 ${
-              section.id === sectionIdNum ? 'border-blue-400 bg-blue-50' : 'border-slate-200 bg-white hover:bg-slate-50'
+              section.id === sectionIdNum
+                ? 'border-blue-400 bg-blue-50 dark:border-blue-500/50 dark:bg-blue-500/10'
+                : 'border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800'
             }`}
           >
-            <span className="text-xs text-slate-500">Section {index + 1}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">Section {index + 1}</span>
             <StatusBadge status={statusFor(section)} />
           </button>
         ))}
@@ -203,8 +219,11 @@ export default function LessonReaderPage() {
         {sectionNav}
         <Card>
           <CardBody className="flex flex-col items-center gap-3 py-10 text-center">
-            <p className="text-sm font-medium text-slate-700">This section is locked.</p>
-            <p className="text-sm text-slate-500">Complete the previous section's Quick Check to unlock it.</p>
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
+              <LockIcon aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">This section is locked.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Complete the previous section's Quick Check to unlock it.</p>
             {firstAvailable && (
               <Button size="sm" onClick={() => navigate(`/student/lessons/${lessonIdNum}/sections/${firstAvailable.id}`)}>
                 Go to available section
@@ -219,12 +238,14 @@ export default function LessonReaderPage() {
   if (!content) return <LoadingState message="Loading section…" />
 
   const miniQuiz = content.mini_quiz
-  const allAnswered =
-    miniQuiz?.questions.every((question) =>
-      question.question_type === 'MATCHING'
-        ? question.pairs.every((pair) => Boolean(matchingResponses[question.id]?.[String(pair.id)]))
-        : selectedOptions[question.id] !== undefined,
-    ) ?? false
+  const answeredCount = miniQuiz
+    ? miniQuiz.questions.filter((question) =>
+        question.question_type === 'MATCHING'
+          ? question.pairs.every((pair) => Boolean(matchingResponses[question.id]?.[String(pair.id)]))
+          : selectedOptions[question.id] !== undefined,
+      ).length
+    : 0
+  const allAnswered = miniQuiz ? answeredCount === miniQuiz.questions.length : false
 
   async function handleSubmit() {
     if (!miniQuiz) return
@@ -238,6 +259,22 @@ export default function LessonReaderPage() {
       if (isOnline) {
         const apiResult = await submitSectionQuiz(sectionIdNum!, answers)
         setResult(apiResult)
+        if (apiResult.passed) {
+          // The quiz response unlocks the next section on the server, but the
+          // reader still holds the structure fetched before submission. Keep
+          // the local navigation in sync immediately so Continue can open it
+          // without showing the stale locked-state message.
+          setStructure((current) => current ? {
+            ...current,
+            sections: current.sections.map((section) =>
+              section.id === sectionIdNum
+                ? { ...section, status: 'COMPLETED', best_score: apiResult.best_score ?? apiResult.score, attempts: apiResult.attempts }
+                : section.id === apiResult.next_section_id
+                  ? { ...section, status: 'AVAILABLE' }
+                  : section,
+            ),
+          } : current)
+        }
         if (!apiResult.passed) {
           // submit-quiz's response doesn't include each StudentQuizAnswer's
           // own id (needed for "Explain My Mistake"), so resolve it via the
@@ -288,46 +325,56 @@ export default function LessonReaderPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-5">
       {sectionNav}
 
       <div>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
           {structure.title} · Section {sectionIndex + 1} of {sortedSections.length}
         </p>
-        <h1 className="text-xl font-semibold text-slate-900">{currentSection.title}</h1>
+        <h1 className="mt-0.5 text-2xl font-bold text-slate-900 dark:text-slate-100"># {currentSection.title}</h1>
       </div>
 
-      <Card>
-        <CardBody className="flex flex-col gap-4">
-          {content.content_blocks
-            .slice()
-            .sort((a, b) => a.order - b.order)
-            .map((block) => (
-              <ContentBlockView key={block.id} block={block} />
-            ))}
-        </CardBody>
-      </Card>
+      <div className="flex flex-col gap-4">
+        {content.content_blocks
+          .slice()
+          .sort((a, b) => a.order - b.order)
+          .map((block) => (
+            <ContentBlockView key={block.id} block={block} />
+          ))}
+      </div>
 
       {miniQuiz && !result && !queuedOffline && (
-        <Card>
+        <Card className="border-blue-200 dark:border-blue-500/30">
           <CardBody className="flex flex-col gap-6">
-            <div className="border-t border-slate-200 pt-4">
-              <p className="text-sm font-semibold text-slate-900">Quick Check</p>
-              <p className="text-xs text-slate-500">Pass mark: {miniQuiz.passing_score}%</p>
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+                  <LightbulbIcon aria-hidden="true" className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Quick Check</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Pass mark: {miniQuiz.passing_score}%</p>
+                </div>
+              </div>
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                {answeredCount} / {miniQuiz.questions.length} answered
+              </span>
             </div>
 
             {miniQuiz.questions
               .slice()
               .sort((a, b) => a.order - b.order)
-              .map((question) => (
+              .map((question, index) => (
                 <div key={question.id} className="flex flex-col gap-2">
-                  <p className="text-sm font-medium text-slate-900">{question.text}</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                    {index + 1}. {question.text}
+                  </p>
                   {question.question_type === 'MATCHING' ? (
                     <div className="flex flex-col gap-2">
                       {question.pairs.map((pair) => (
                         <div key={pair.id} className="flex items-center gap-3">
-                          <span className="w-40 shrink-0 text-sm text-slate-700">{pair.left_text}</span>
+                          <span className="w-40 shrink-0 text-sm text-slate-700 dark:text-slate-300">{pair.left_text}</span>
                           <Select
                             value={matchingResponses[question.id]?.[String(pair.id)] ?? ''}
                             onChange={(event) =>
@@ -352,24 +399,34 @@ export default function LessonReaderPage() {
                     </div>
                   ) : (
                     <div className="flex flex-col gap-1.5">
-                      {question.options.map((option) => (
-                        <label key={option.id} className="flex items-center gap-2 text-sm text-slate-700">
-                          <input
-                            type="radio"
-                            name={`question-${question.id}`}
-                            checked={selectedOptions[question.id] === option.id}
-                            onChange={() => setSelectedOptions((current) => ({ ...current, [question.id]: option.id }))}
-                            className="h-4 w-4 accent-blue-600"
-                          />
-                          {option.text}
-                        </label>
-                      ))}
+                      {question.options.map((option) => {
+                        const checked = selectedOptions[question.id] === option.id
+                        return (
+                          <label
+                            key={option.id}
+                            className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors duration-150 ${
+                              checked
+                                ? 'border-blue-400 bg-blue-50 text-blue-900 dark:border-blue-500/50 dark:bg-blue-500/10 dark:text-blue-100'
+                                : 'border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name={`question-${question.id}`}
+                              checked={checked}
+                              onChange={() => setSelectedOptions((current) => ({ ...current, [question.id]: option.id }))}
+                              className="h-4 w-4 accent-blue-600"
+                            />
+                            {option.text}
+                          </label>
+                        )
+                      })}
                     </div>
                   )}
                 </div>
               ))}
 
-            <Button disabled={!allAnswered || isSubmitting} onClick={handleSubmit} className="self-start">
+            <Button disabled={!allAnswered || isSubmitting} onClick={handleSubmit}>
               {isSubmitting ? 'Submitting…' : 'Submit Answer'}
             </Button>
           </CardBody>
@@ -379,42 +436,54 @@ export default function LessonReaderPage() {
       {!miniQuiz && (
         <Card>
           <CardBody>
-            <p className="text-sm text-slate-500">This section doesn't have a Quick Check yet.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">This section doesn't have a Quick Check yet.</p>
           </CardBody>
         </Card>
       )}
 
       {queuedOffline && (
-        <Card>
+        <Card className="border-teal-200 bg-teal-50/40 dark:border-teal-500/20 dark:bg-teal-500/5">
           <CardBody className="flex flex-col gap-2">
-            <p className="text-sm font-semibold text-teal-700">⚡ Saved offline</p>
-            <p className="text-sm text-slate-600">
-              You're offline. Your answers have been saved and will be marked once you're back online.
+            <p className="flex items-center gap-1.5 text-sm font-semibold text-teal-700 dark:text-teal-400">
+              <OfflineIcon aria-hidden="true" className="h-4 w-4" /> Saved offline
+            </p>
+            <p className="text-sm text-teal-800 dark:text-teal-300">
+              Your answers have been saved and will be marked once you're back online.
             </p>
           </CardBody>
         </Card>
       )}
 
       {result && (
-        <Card>
+        <Card className={result.passed ? 'border-green-200 bg-green-50/40 dark:border-green-500/20 dark:bg-green-500/5' : undefined}>
           <CardBody className="flex flex-col gap-3">
             {result.passed ? (
               <>
-                <p className="text-sm font-semibold text-green-700">
-                  ✓ Passed — {result.score}% (needed {result.passing_score}%)
-                </p>
+                <div className="flex items-center gap-2">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-green-600 text-white">
+                    <CheckIcon aria-hidden="true" className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="text-base font-semibold text-green-800 dark:text-green-300">Section completed</p>
+                    <p className="text-sm text-green-700 dark:text-green-400">
+                      {result.score}% (needed {result.passing_score}%)
+                    </p>
+                  </div>
+                </div>
+                <ProgressBar value={100} showPercentage={false} />
                 {result.next_section_id ? (
-                  <Button size="sm" onClick={handleContinue}>
+                  <Button size="sm" onClick={handleContinue} className="self-start">
                     Continue to next section
                   </Button>
                 ) : (
-                  <p className="text-sm text-slate-600">You've completed this lesson.</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">You've completed this lesson. 🎉</p>
                 )}
               </>
             ) : (
               <>
-                <p className="text-sm font-semibold text-red-700">
-                  ✗ Not quite — {result.score}% (needed {result.passing_score}%)
+                <p className="flex items-center gap-1.5 text-sm font-semibold text-red-700 dark:text-red-400">
+                  <WrongIcon aria-hidden="true" className="h-4 w-4" /> Not quite — {result.score}% (needed{' '}
+                  {result.passing_score}%)
                 </p>
                 {result.wrong_answers.length > 0 && (
                   <ul className="flex flex-col gap-2">

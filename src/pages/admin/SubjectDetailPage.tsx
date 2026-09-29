@@ -144,7 +144,7 @@ export default function SubjectDetailPage() {
 
       <Card>
         <CardHeader className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-900">Topics</p>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Topics</p>
           <Button size="sm" onClick={() => setTopicModalOpen(true)}>
             Add topic
           </Button>
@@ -161,7 +161,7 @@ export default function SubjectDetailPage() {
                     <button
                       type="button"
                       onClick={() => navigate(`/admin/subjects/${id}/topics/${row.id}`)}
-                      className="font-medium text-blue-600 hover:underline"
+                      className="font-medium text-blue-600 hover:underline dark:text-blue-400"
                     >
                       {row.title}
                     </button>
@@ -202,7 +202,7 @@ export default function SubjectDetailPage() {
             onChange={(event) => setEditForm({ ...editForm, curriculum_code: event.target.value })}
           />
           {editError && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {editError}
             </p>
           )}
@@ -242,7 +242,7 @@ export default function SubjectDetailPage() {
             onChange={(event) => setTopicForm({ ...topicForm, description: event.target.value })}
           />
           {topicError && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {topicError}
             </p>
           )}

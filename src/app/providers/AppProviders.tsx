@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { ToastProvider } from '@/components/feedback/Toast'
 import { AuthProvider, useAuth } from '@/features/auth/AuthContext'
 import { runSync } from '@/features/sync/syncEngine'
+import { ThemeProvider } from '@/features/theme/ThemeContext'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 
 // Runs whenever the app is online with an authenticated student -- both on
@@ -26,12 +27,14 @@ function AutoSync() {
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <ToastProvider>
-          <AutoSync />
-          {children}
-        </ToastProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <AutoSync />
+            {children}
+          </ToastProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   )
 }

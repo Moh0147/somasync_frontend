@@ -4,17 +4,22 @@ import { ComingSoonPage } from '@/components/feedback/ComingSoonPage'
 import { AppShell } from '@/components/layout/AppShell'
 import { Button } from '@/components/ui/Button'
 import { schoolAdminNavItems, systemAdminNavItems } from '@/features/admin/adminNav'
+import { RequireSchoolAdmin, RequireSystemAdmin } from '@/features/admin/AdminScopeGuard'
 import { useAuth } from '@/features/auth/AuthContext'
 
 import ClassDetailPage from './ClassDetailPage'
 import ClassesPage from './ClassesPage'
 import SchoolAdminDashboardPage from './SchoolAdminDashboardPage'
+import SchoolAnalyticsPage from './SchoolAnalyticsPage'
 import SchoolDetailPage from './SchoolDetailPage'
 import SchoolSettingsPage from './SchoolSettingsPage'
 import SchoolsPage from './SchoolsPage'
+import StudentsPage from './StudentsPage'
 import SubjectDetailPage from './SubjectDetailPage'
 import SubjectsPage from './SubjectsPage'
 import SystemAdminDashboardPage from './SystemAdminDashboardPage'
+import SystemAnalyticsPage from './SystemAnalyticsPage'
+import TeachersPage from './TeachersPage'
 import TopicDetailPage from './TopicDetailPage'
 
 export default function AdminAreaPage() {
@@ -34,76 +39,139 @@ export default function AdminAreaPage() {
         </Button>
       }
     >
-      {isSystemAdmin ? (
-        <Routes>
-          <Route index element={<SystemAdminDashboardPage />} />
-          <Route path="schools" element={<SchoolsPage />} />
-          <Route path="schools/:schoolId" element={<SchoolDetailPage />} />
-          <Route
-            path="users"
-            element={
+      {/* One merged route tree for both admin scopes -- see AdminScopeGuard
+          for why a scope-mismatched path is guarded per-route instead of
+          the whole tree being duplicated behind an isSystemAdmin branch. */}
+      <Routes>
+        <Route index element={isSystemAdmin ? <SystemAdminDashboardPage /> : <SchoolAdminDashboardPage />} />
+
+        {/* System admin only */}
+        <Route
+          path="schools"
+          element={
+            <RequireSystemAdmin>
+              <SchoolsPage />
+            </RequireSystemAdmin>
+          }
+        />
+        <Route
+          path="schools/:schoolId"
+          element={
+            <RequireSystemAdmin>
+              <SchoolDetailPage />
+            </RequireSystemAdmin>
+          }
+        />
+        <Route
+          path="users"
+          element={
+            <RequireSystemAdmin>
               <ComingSoonPage
                 title="Users"
                 description="A cross-school user directory isn't wired up on the backend yet."
               />
-            }
-          />
-          <Route
-            path="analytics"
-            element={<ComingSoonPage title="Analytics" description="Platform analytics arrive in a later phase." />}
-          />
-          <Route
-            path="settings"
-            element={<ComingSoonPage title="Settings" description="Platform settings arrive in a later phase." />}
-          />
-          <Route path="*" element={<Navigate to="/admin" replace />} />
-        </Routes>
-      ) : (
-        <Routes>
-          <Route index element={<SchoolAdminDashboardPage />} />
-          <Route path="classes" element={<ClassesPage />} />
-          <Route path="classes/:classId" element={<ClassDetailPage />} />
-          <Route
-            path="teachers"
-            element={
-              <ComingSoonPage
-                title="Teachers"
-                description="Teacher accounts are provisioned by your system administrator for now."
-              />
-            }
-          />
-          <Route
-            path="students"
-            element={
-              <ComingSoonPage
-                title="Students"
-                description="Student accounts are provisioned by your system administrator for now."
-              />
-            }
-          />
-          <Route path="subjects" element={<SubjectsPage />} />
-          <Route path="subjects/:subjectId" element={<SubjectDetailPage />} />
-          <Route path="subjects/:subjectId/topics/:topicId" element={<TopicDetailPage />} />
-          <Route
-            path="lessons"
-            element={<ComingSoonPage title="Lessons" description="Lesson authoring arrives in a later phase." />}
-          />
-          <Route
-            path="quizzes"
-            element={<ComingSoonPage title="Quizzes" description="Quiz management arrives in a later phase." />}
-          />
-          <Route
-            path="exams"
-            element={<ComingSoonPage title="Exams" description="Exam management arrives in a later phase." />}
-          />
-          <Route
-            path="analytics"
-            element={<ComingSoonPage title="Analytics" description="School analytics arrive in a later phase." />}
-          />
-          <Route path="settings" element={<SchoolSettingsPage />} />
-          <Route path="*" element={<Navigate to="/admin" replace />} />
-        </Routes>
-      )}
+            </RequireSystemAdmin>
+          }
+        />
+
+        {/* School admin only */}
+        <Route
+          path="classes"
+          element={
+            <RequireSchoolAdmin>
+              <ClassesPage />
+            </RequireSchoolAdmin>
+          }
+        />
+        <Route
+          path="classes/:classId"
+          element={
+            <RequireSchoolAdmin>
+              <ClassDetailPage />
+            </RequireSchoolAdmin>
+          }
+        />
+        <Route
+          path="teachers"
+          element={
+            <RequireSchoolAdmin>
+              <TeachersPage />
+            </RequireSchoolAdmin>
+          }
+        />
+        <Route
+          path="students"
+          element={
+            <RequireSchoolAdmin>
+              <StudentsPage />
+            </RequireSchoolAdmin>
+          }
+        />
+        <Route
+          path="subjects"
+          element={
+            <RequireSchoolAdmin>
+              <SubjectsPage />
+            </RequireSchoolAdmin>
+          }
+        />
+        <Route
+          path="subjects/:subjectId"
+          element={
+            <RequireSchoolAdmin>
+              <SubjectDetailPage />
+            </RequireSchoolAdmin>
+          }
+        />
+        <Route
+          path="subjects/:subjectId/topics/:topicId"
+          element={
+            <RequireSchoolAdmin>
+              <TopicDetailPage />
+            </RequireSchoolAdmin>
+          }
+        />
+        <Route
+          path="lessons"
+          element={
+            <RequireSchoolAdmin>
+              <ComingSoonPage title="Lessons" description="Lesson authoring arrives in a later phase." />
+            </RequireSchoolAdmin>
+          }
+        />
+        <Route
+          path="quizzes"
+          element={
+            <RequireSchoolAdmin>
+              <ComingSoonPage title="Quizzes" description="Quiz management arrives in a later phase." />
+            </RequireSchoolAdmin>
+          }
+        />
+        <Route
+          path="exams"
+          element={
+            <RequireSchoolAdmin>
+              <ComingSoonPage title="Exams" description="Exam management arrives in a later phase." />
+            </RequireSchoolAdmin>
+          }
+        />
+
+        {/* Same path, different content per scope -- no guard needed, each
+            scope only ever sees its own component. */}
+        <Route path="analytics" element={isSystemAdmin ? <SystemAnalyticsPage /> : <SchoolAnalyticsPage />} />
+        <Route
+          path="settings"
+          element={
+            isSystemAdmin ? (
+              <ComingSoonPage title="Settings" description="Platform settings arrive in a later phase." />
+            ) : (
+              <SchoolSettingsPage />
+            )
+          }
+        />
+
+        <Route path="*" element={<Navigate to="/admin" replace />} />
+      </Routes>
     </AppShell>
   )
 }

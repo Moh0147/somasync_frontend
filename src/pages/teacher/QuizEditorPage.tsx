@@ -15,6 +15,7 @@ import { Modal } from '@/components/ui/Modal'
 import { Select } from '@/components/ui/Select'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { QuestionCard } from '@/features/quizzes/QuestionEditor'
+import { QuickQuestionBuilder } from '@/features/quizzes/QuickQuestionBuilder'
 import { useAuth } from '@/features/auth/AuthContext'
 import { listClassLevels, listSubjects, listTopics } from '@/services/academicsService'
 import { getApiErrorMessage } from '@/services/apiError'
@@ -265,7 +266,7 @@ export default function QuizEditorPage() {
 
       <Card>
         <CardHeader className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-900">Quiz details</p>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Quiz details</p>
           <StatusBadge
             status={quiz.status === 'PUBLISHED' ? 'completed' : quiz.status === 'ARCHIVED' ? 'locked' : 'pending'}
             label={quiz.status}
@@ -285,14 +286,14 @@ export default function QuizEditorPage() {
 
       <Card>
         <CardHeader>
-          <p className="text-sm font-semibold text-slate-900">Assigned classes</p>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Assigned classes</p>
         </CardHeader>
         <CardBody className="flex flex-col gap-4">
           {assignments.length === 0 && (
             <EmptyState title="Not assigned to any class yet." description="A student can only attempt this quiz once it's assigned to their class." />
           )}
           {assignments.length > 0 && (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
               {assignments.map((assignment) => (
                 <li key={assignment.id} className="flex items-center justify-between py-2 text-sm">
                   <span>{className(assignment.school_class)}</span>
@@ -326,7 +327,7 @@ export default function QuizEditorPage() {
             </form>
           )}
           {quiz.status === 'DRAFT' && (
-            <p className="text-sm text-slate-500">Publish this quiz before assigning it to a class.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Publish this quiz before assigning it to a class.</p>
           )}
         </CardBody>
       </Card>
@@ -339,10 +340,12 @@ export default function QuizEditorPage() {
           <QuestionCard key={question.id} question={question} onChanged={refreshQuestions} onDeleted={refreshQuestions} />
         ))}
 
-      {quiz.status === 'DRAFT' && (
+      {quiz.status === 'DRAFT' && <QuickQuestionBuilder quizId={id} nextOrder={questions.length + 1} onCreated={refreshQuestions} />}
+
+      {false && quiz!.status === 'DRAFT' && (
         <Card>
           <CardHeader>
-            <p className="text-sm font-semibold text-slate-900">Add question</p>
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Add question</p>
           </CardHeader>
           <CardBody>
             <form onSubmit={handleAddQuestion} className="flex flex-col gap-4" noValidate>
@@ -373,7 +376,7 @@ export default function QuizEditorPage() {
                 onChange={(event) => setQuestionForm({ ...questionForm, marks: event.target.value })}
               />
               {questionError && (
-                <p role="alert" className="text-sm text-red-600">
+                <p role="alert" className="text-sm text-red-600 dark:text-red-400">
                   {questionError}
                 </p>
               )}
@@ -399,7 +402,7 @@ export default function QuizEditorPage() {
             onChange={(event) => setEditForm({ ...editForm, description: event.target.value })}
           />
           {editError && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {editError}
             </p>
           )}

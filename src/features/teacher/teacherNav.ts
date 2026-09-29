@@ -1,11 +1,22 @@
+import {
+  AnalyticsIcon,
+  DashboardIcon,
+  ExamsIcon,
+  LessonsIcon,
+  QuizzesIcon,
+  StudentsIcon,
+  UsersIcon,
+} from '@/components/ui/icons'
 import type { NavItem } from '@/components/layout/Sidebar'
 
+// Order matters beyond the first 4 -- BottomNav shows those as tabs and
+// folds the rest into "More" on small screens.
 export const teacherNavItems: NavItem[] = [
-  { label: 'Dashboard', to: '/teacher' },
-  { label: 'My Classes', to: '/teacher/classes' },
-  { label: 'Lessons', to: '/teacher/lessons' },
-  { label: 'Quizzes', to: '/teacher/quizzes' },
-  { label: 'Exams', to: '/teacher/exams' },
-  { label: 'Students', to: '/teacher/students' },
-  { label: 'Analytics', to: '/teacher/analytics' },
+  { label: 'Dashboard', to: '/teacher', icon: DashboardIcon },
+  { label: 'My Classes', to: '/teacher/classes', icon: UsersIcon },
+  { label: 'Lessons', to: '/teacher/lessons', icon: LessonsIcon },
+  { label: 'Quizzes', to: '/teacher/quizzes', icon: QuizzesIcon },
+  { label: 'Exams', to: '/teacher/exams', icon: ExamsIcon },
+  { label: 'Students', to: '/teacher/students', icon: StudentsIcon },
+  { label: 'Analytics', to: '/teacher/analytics', icon: AnalyticsIcon },
 ]

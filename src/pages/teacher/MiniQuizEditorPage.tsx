@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { QuestionCard } from '@/features/quizzes/QuestionEditor'
+import { QuickQuestionBuilder } from '@/features/quizzes/QuickQuestionBuilder'
 import { getApiErrorMessage } from '@/services/apiError'
 import { createMiniQuiz, getMiniQuiz } from '@/services/lessonsService'
 import { createQuestion, getQuiz, listQuestions, publishQuiz } from '@/services/quizzesService'
@@ -142,11 +143,12 @@ export default function MiniQuizEditorPage() {
           { label: 'Mini-Quiz' },
         ]}
       />
+      <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Mini-Quiz</h1>
 
       {!hasMiniQuiz && (
         <Card>
           <CardHeader>
-            <p className="text-sm font-semibold text-slate-900">Create a mini-quiz for this section</p>
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Create a mini-quiz for this section</p>
           </CardHeader>
           <CardBody>
             <form onSubmit={handleCreateMiniQuiz} className="flex flex-col gap-4" noValidate>
@@ -171,7 +173,7 @@ export default function MiniQuizEditorPage() {
         <>
           <Card>
             <CardHeader className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-slate-900">Pass mark: {miniQuiz.passing_score}%</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Pass mark: {miniQuiz.passing_score}%</p>
               <div className="flex items-center gap-2">
                 <StatusBadge status={quiz.status === 'PUBLISHED' ? 'completed' : 'pending'} label={quiz.status} />
                 {quiz.status === 'DRAFT' && (
@@ -196,10 +198,12 @@ export default function MiniQuizEditorPage() {
               />
             ))}
 
-          {quiz.status === 'DRAFT' && (
+          {quiz.status === 'DRAFT' && <QuickQuestionBuilder quizId={miniQuiz.quiz} nextOrder={questions.length + 1} onCreated={refreshQuestions} />}
+
+      {false && quiz!.status === 'DRAFT' && (
             <Card>
               <CardHeader>
-                <p className="text-sm font-semibold text-slate-900">Add question</p>
+                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Add question</p>
               </CardHeader>
               <CardBody>
                 <form onSubmit={handleAddQuestion} className="flex flex-col gap-4" noValidate>
@@ -226,11 +230,13 @@ export default function MiniQuizEditorPage() {
                     label="Marks"
                     type="number"
                     min={1}
+                    step={1}
+                    helperText={questionForm.question_type === 'MATCHING' ? 'For matching, this is the total mark for the whole question. It is shared equally across all matches.' : 'Total marks awarded for a correct answer.'}
                     value={questionForm.marks}
                     onChange={(event) => setQuestionForm({ ...questionForm, marks: event.target.value })}
                   />
                   {questionError && (
-                    <p role="alert" className="text-sm text-red-600">
+                    <p role="alert" className="text-sm text-red-600 dark:text-red-400">
                       {questionError}
                     </p>
                   )}

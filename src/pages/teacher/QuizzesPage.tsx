@@ -235,7 +235,7 @@ export default function QuizzesPage() {
             onChange={(event) => setForm({ ...form, description: event.target.value })}
           />
           {formError && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {formError}
             </p>
           )}

@@ -1,5 +1,5 @@
 import type { PaginatedResult } from '@/types/api'
-import type { AuthoredQuestion, MatchingPair, QuestionOption, QuestionType, Quiz, QuizAssignment } from '@/types/quiz'
+import type { AuthoredQuestion, MatchingPair, QuestionOption, QuestionType, Quiz, QuizAssignment, SafeQuestion } from '@/types/quiz'
 import type { StudentQuizAttempt } from '@/types/quizAttempt'
 
 import { apiClient } from './apiClient'
@@ -20,6 +20,11 @@ export async function listQuizzes() {
 
 export async function getQuiz(id: number) {
   const response = await apiClient.get<{ data: Quiz }>(`/quizzes/${id}/`)
+  return response.data.data
+}
+
+export async function getStudentQuizQuestions(id: number) {
+  const response = await apiClient.get<{ data: SafeQuestion[] }>(`/quizzes/${id}/student-questions/`)
   return response.data.data
 }
 
@@ -135,5 +140,26 @@ export async function startAttempt(quizId: number) {
     quiz: quizId,
     client_attempt_id: crypto.randomUUID(),
   })
+  return response.data.data
+}
+
+export async function startQuizAttempt(quizId: number) {
+  const clientAttemptId = `quiz-${quizId}-${crypto.randomUUID()}`
+  const response = await apiClient.post<{ data: StudentQuizAttempt }>('/quizzes/attempts/start/', {
+    quiz: quizId,
+    client_attempt_id: clientAttemptId,
+  })
+  return response.data.data
+}
+
+export async function answerQuizQuestion(clientAttemptId: string, question: number, selectedOption?: number, matchingResponse?: Record<string, string>) {
+  const response = await apiClient.post<{ data: StudentQuizAttempt }>(`/quizzes/attempts/${encodeURIComponent(clientAttemptId)}/answer/`, {
+    client_answer_id: crypto.randomUUID(), question, selected_option: selectedOption, matching_response: matchingResponse,
+  })
+  return response.data.data
+}
+
+export async function submitQuizAttempt(clientAttemptId: string) {
+  const response = await apiClient.post<{ data: StudentQuizAttempt }>(`/quizzes/attempts/${encodeURIComponent(clientAttemptId)}/submit/`)
   return response.data.data
 }

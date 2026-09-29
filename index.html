@@ -2,10 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="icon" type="image/png" href="/soma-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0f172a" />
     <title>SomaSync</title>
+    <script>
+      // Applied before React mounts, synchronously, so the page never
+      // flashes the wrong theme on load. ThemeContext is the source of
+      // truth after mount; this only sets the initial class.
+      (function () {
+        try {
+          var stored = localStorage.getItem('somasync-theme')
+          var isDark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches
+          if (isDark) document.documentElement.classList.add('dark')
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

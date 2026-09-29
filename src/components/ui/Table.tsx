@@ -16,16 +16,16 @@ interface TableProps<T> {
 
 export function Table<T>({ columns, data, getRowKey, emptyMessage = 'No records found.' }: TableProps<T>) {
   if (data.length === 0) {
-    return <p className="py-8 text-center text-sm text-slate-500">{emptyMessage}</p>
+    return <p className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">{emptyMessage}</p>
   }
 
   return (
-    <div className="overflow-x-auto rounded-md border border-slate-200">
+    <div className="overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800">
       <table className="w-full min-w-[480px] border-collapse text-sm">
         <thead>
-          <tr className="border-b border-slate-200 bg-slate-50 text-left">
+          <tr className="border-b border-slate-200 bg-slate-50 text-left dark:border-slate-800 dark:bg-slate-900">
             {columns.map((column) => (
-              <th key={column.key} className="px-4 py-2.5 font-medium text-slate-600">
+              <th key={column.key} className="px-4 py-2.5 font-medium text-slate-600 dark:text-slate-400">
                 {column.header}
               </th>
             ))}
@@ -33,9 +33,12 @@ export function Table<T>({ columns, data, getRowKey, emptyMessage = 'No records 
         </thead>
         <tbody>
           {data.map((row) => (
-            <tr key={getRowKey(row)} className="border-b border-slate-100 last:border-b-0 hover:bg-slate-50">
+            <tr
+              key={getRowKey(row)}
+              className="border-b border-slate-100 last:border-b-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+            >
               {columns.map((column) => (
-                <td key={column.key} className={`px-4 py-2.5 text-slate-700 ${column.className ?? ''}`}>
+                <td key={column.key} className={`px-4 py-2.5 text-slate-700 dark:text-slate-300 ${column.className ?? ''}`}>
                   {column.render(row)}
                 </td>
               ))}

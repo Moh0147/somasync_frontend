@@ -7,6 +7,7 @@ import { deleteSectionQuiz, getQuizForSection } from '@/db/repositories/sectionQ
 import { getLesson, getLessonStructure, getSectionContent } from '@/services/lessonsService'
 import { resolveMediaUrl } from '@/services/mediaUrl'
 import type { OfflineContentBlockType } from '@/types/offline'
+import { compressImageBlob } from '@/utils/imageCompression'
 
 import { saveContentBlock, saveLesson, saveSection } from './lessonOfflineService'
 import { saveQuestion, saveQuiz } from './quizOfflineService'
@@ -65,7 +66,7 @@ export async function downloadLessonForOffline(
       if (block.block_type === 'IMAGE' && block.image_reference) {
         localAssetKey = `content-block-${block.id}`
         const response = await fetch(resolveMediaUrl(block.image_reference)!)
-        const blob = await response.blob()
+        const blob = await compressImageBlob(await response.blob())
         await saveAsset(localAssetKey, blob, blob.type)
       }
       await saveContentBlock({
