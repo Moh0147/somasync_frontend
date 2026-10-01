@@ -56,6 +56,7 @@ export async function downloadLessonForOffline(
       lessonId: localLessonId,
       title: sectionRow.title,
       order: sectionRow.order,
+      miniQuizId: sectionRow.mini_quiz_id,
       version: 1,
     })
 

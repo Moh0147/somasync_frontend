@@ -11,8 +11,11 @@ interface SchoolCardProps {
 
 export function SchoolCard({ school, counts }: SchoolCardProps) {
   return (
-    <Link to={`/admin/schools/${school.id}`}>
-      <Card className="h-full transition-colors duration-150 hover:border-blue-300 dark:hover:border-blue-700">
+    <Link
+      to={`/admin/schools/${school.id}`}
+      className="group block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+    >
+      <Card className="h-full transition duration-150 group-hover:-translate-y-0.5 group-hover:border-blue-300 group-hover:shadow-md dark:group-hover:border-blue-700">
         <CardBody className="flex flex-col gap-3">
           <div className="flex items-start justify-between gap-2">
             <div>

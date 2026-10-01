@@ -333,7 +333,7 @@ export default function LessonReaderPage() {
         <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
           {structure.title} · Section {sectionIndex + 1} of {sortedSections.length}
         </p>
-        <h1 className="mt-0.5 text-2xl font-bold text-slate-900 dark:text-slate-100"># {currentSection.title}</h1>
+        <h1 className="mt-0.5 text-2xl font-bold text-slate-900 dark:text-slate-100">{currentSection.title}</h1>
       </div>
 
       <div className="flex flex-col gap-4">

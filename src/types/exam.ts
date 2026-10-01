@@ -24,7 +24,7 @@ export interface MarkingSchemeItem {
   id: number
   criterion: string
   description: string
-  marks: number
+  marks: number | string
   order: number
 }
 
@@ -33,6 +33,15 @@ export interface ExamCandidate {
   exam: number
   student: number
   candidate_number: string
+  created_at: string
+}
+
+export interface StudentCandidateNumber {
+  id: number
+  candidate_number: string
+  exam_title: string
+  exam_date: string | null
+  academic_year: number
   created_at: string
 }
 
@@ -126,7 +135,7 @@ export interface ExamQuestion {
   question_number: string
   question_text: string
   question_type: ExamQuestionType
-  max_marks: number
+  max_marks: number | string
   correct_answer: string
   learning_objective: number | null
   order: number

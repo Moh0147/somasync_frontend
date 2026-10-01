@@ -25,7 +25,7 @@ export function AppShell({ title, navItems, children, topBarActions }: AppShellP
       >
         Skip to main content
       </a>
-      <Sidebar navItems={navItems} />
+      <Sidebar navItems={navItems} roleLabel={title} />
       <div className="flex flex-1 flex-col">
         <TopBar title={title} actions={topBarActions} />
         <OfflineBanner />

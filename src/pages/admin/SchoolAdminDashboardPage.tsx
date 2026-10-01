@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { ErrorState } from '@/components/feedback/ErrorState'
-import { PageHeader } from '@/components/layout/PageHeader'
+import { WelcomeBanner } from '@/components/layout/WelcomeBanner'
 import { AlertIcon, CheckIcon } from '@/components/ui/icons'
 import { StatTileSkeleton } from '@/components/ui/Skeleton'
 import { StatTile } from '@/components/ui/StatTile'
@@ -41,7 +41,7 @@ export default function SchoolAdminDashboardPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title={user ? `Welcome back, ${displayName(user)}` : 'Dashboard'} description="School overview" />
+      <WelcomeBanner eyebrow="School admin dashboard" title={user ? `Welcome back, ${displayName(user)} 👋` : 'Welcome back 👋'} description="Here's what's happening at your school." />
       {error && <ErrorState description={error} onRetry={load} />}
       {!error && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">

@@ -29,7 +29,7 @@ import type {
 } from '@/types/analytics'
 
 function percent(value: number | null) {
-  return value === null ? '—' : `${value}%`
+  return value === null ? '—' : `${value.toFixed(1)}%`
 }
 
 export default function TeacherAnalyticsPage() {
@@ -136,7 +136,7 @@ export default function TeacherAnalyticsPage() {
           ) : (
             <BarChart
               items={classes.map((c) => ({ label: c.class_name, value: c.avg_quiz_percentage ?? 0 }))}
-              valueFormatter={(v) => `${v}%`}
+              valueFormatter={(v) => percent(v)}
             />
           )}
         </>
@@ -192,7 +192,7 @@ export default function TeacherAnalyticsPage() {
           {questions && (
             <BarChart
               items={questions.map((q) => ({ label: q.text.slice(0, 40), value: q.percent_correct ?? 0 }))}
-              valueFormatter={(v) => `${v}%`}
+              valueFormatter={(v) => percent(v)}
             />
           )}
         </div>

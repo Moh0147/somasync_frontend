@@ -37,6 +37,7 @@ import {
 } from '@/services/examsService'
 import type { Subject } from '@/types/academics'
 import type { AuthUser } from '@/types/auth'
+import type { SchoolClass } from '@/types/class'
 import type { Exam, ExamCandidate, ExamQuestion, ExamQuestionType, ExamScript } from '@/types/exam'
 
 const questionTypeOptions: { value: ExamQuestionType; label: string }[] = [
@@ -55,7 +56,11 @@ export default function ExamEditorPage() {
   const [candidates, setCandidates] = useState<ExamCandidate[]>([])
   const [scripts, setScripts] = useState<ExamScript[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
+  const [candidateClasses, setCandidateClasses] = useState<SchoolClass[]>([])
+  const [selectedCandidateClassId, setSelectedCandidateClassId] = useState<number | null>(null)
   const [classStudents, setClassStudents] = useState<AuthUser[]>([])
+  const [isLoadingClassStudents, setIsLoadingClassStudents] = useState(false)
+  const [classStudentsError, setClassStudentsError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const [editOpen, setEditOpen] = useState(false)
@@ -96,8 +101,9 @@ export default function ExamEditorPage() {
       setCandidates(candidatesData)
       setScripts(scriptsData)
       setSubjects(subjectsData)
-      const matchingClass = classesData.find((schoolClass) => schoolClass.class_level === examData.class_level && schoolClass.academic_year === examData.academic_year)
-      setClassStudents(matchingClass ? await listClassStudents(matchingClass.id) : [])
+      const matchingClasses = classesData.filter((schoolClass) => schoolClass.class_level === examData.class_level && schoolClass.academic_year === examData.academic_year)
+      setCandidateClasses(matchingClasses)
+      setSelectedCandidateClassId(matchingClasses.length === 1 ? matchingClasses[0].id : null)
       setEditForm({ title: examData.title, description: examData.description, exam_date: examData.exam_date ?? '' })
     } catch (err) {
       setError(getApiErrorMessage(err))
@@ -115,6 +121,32 @@ export default function ExamEditorPage() {
   useEffect(() => {
     load()
   }, [id])
+
+  useEffect(() => {
+    if (selectedCandidateClassId === null) {
+      setClassStudents([])
+      setClassStudentsError(null)
+      setIsLoadingClassStudents(false)
+      return
+    }
+
+    let cancelled = false
+    setClassStudents([])
+    setClassStudentsError(null)
+    setIsLoadingClassStudents(true)
+    listClassStudents(selectedCandidateClassId)
+      .then((students) => {
+        if (!cancelled) setClassStudents(students)
+      })
+      .catch((err) => {
+        if (!cancelled) setClassStudentsError(getApiErrorMessage(err))
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingClassStudents(false)
+      })
+
+    return () => { cancelled = true }
+  }, [selectedCandidateClassId])
 
   function subjectName(subjectId: number) {
     return subjects.find((subject) => subject.id === subjectId)?.name ?? `#${subjectId}`
@@ -265,9 +297,10 @@ export default function ExamEditorPage() {
   if (error) return <ErrorState description={error} onRetry={load} />
   if (!exam) return <LoadingState message="Loading exam…" />
 
-  const totalMarks = questions.reduce((sum, question) => sum + question.max_marks, 0)
+  const totalMarksCents = questions.reduce((sum, question) => sum + Math.round(Number(question.max_marks) * 100), 0)
+  const totalMarks = totalMarksCents / 100
   const configuredTotal = exam.total_marks ?? totalMarks
-  const distributionOk = totalMarks === configuredTotal
+  const distributionOk = totalMarksCents === Math.round(configuredTotal * 100)
   const isDraft = exam.status === 'DRAFT'
   const isPublished = exam.status === 'PUBLISHED'
   const isClosed = exam.status === 'CLOSED'
@@ -331,7 +364,7 @@ export default function ExamEditorPage() {
             <div className="flex flex-wrap gap-2"><Button size="sm" variant="ghost" disabled={isUploadingPaper || !isDraft} onClick={() => paperInputRef.current?.click()}>{isUploadingPaper ? 'Extracting…' : 'Upload exam paper'}</Button><input ref={paperInputRef} type="file" accept=".pdf,.png,.jpg,.jpeg" className="hidden" onChange={handlePaperUpload} /><Button size="sm" variant="secondary" disabled={isUploadingScheme || !isDraft} onClick={() => schemeInputRef.current?.click()}>{isUploadingScheme ? 'Extracting…' : isDraft ? 'Upload marking scheme' : 'Marking scheme locked'}</Button><input ref={schemeInputRef} type="file" accept=".pdf,.png,.jpg,.jpeg" className="hidden" onChange={handleSchemeUpload} /></div>
           </CardHeader>
           <CardBody>
-            <div className="flex flex-wrap gap-3 text-sm">{questions.map(q => <span key={q.id} className="rounded-md bg-slate-100 px-2 py-1 dark:bg-slate-800">Q{q.question_number}: {q.max_marks}</span>)}</div>
+            <div className="flex flex-wrap gap-3 text-sm">{questions.map(q => <span key={q.id} className="rounded-md bg-slate-100 px-2 py-1 dark:bg-slate-800">Q{q.question_number}: {Number(q.max_marks).toFixed(2)}</span>)}</div>
           </CardBody>
         </Card>
 
@@ -360,17 +393,28 @@ export default function ExamEditorPage() {
           <ExamQuestionCard
             key={question.id}
             question={question}
+            canEdit={isDraft}
             onChanged={refreshQuestions}
             onDeleted={refreshQuestions}
           />
         ))}
 
-      <CandidatesPanel examId={id} candidates={candidates} students={classStudents} onChanged={refreshCandidates} />
+      <CandidatesPanel
+        examId={id}
+        candidates={candidates}
+        classes={candidateClasses}
+        selectedClassId={selectedCandidateClassId}
+        onClassChange={setSelectedCandidateClassId}
+        students={classStudents}
+        isLoadingStudents={isLoadingClassStudents}
+        studentsError={classStudentsError}
+        onChanged={refreshCandidates}
+      />
       <ScriptsPanel
         examId={id}
         candidates={candidates}
         scripts={scripts}
-        canUpload={isClosed}
+        examStatus={exam.status}
         onChanged={refreshScripts}
       />
 

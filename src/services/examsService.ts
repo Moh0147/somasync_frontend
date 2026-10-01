@@ -9,6 +9,7 @@ import type {
   MarkingSchemeItem,
   StudentExamAnswer,
   StudentExamAttempt,
+  StudentCandidateNumber,
 } from '@/types/exam'
 
 import { apiClient } from './apiClient'
@@ -92,7 +93,7 @@ export async function uploadExamPaper(examId: number, file: File) {
 export async function uploadMarkingScheme(examId: number, file: File) {
   const formData = new FormData()
   formData.append('file', file)
-  const response = await apiClient.post<{ data: { id: number; file_name: string; extracted_text: string; created_item_ids: number[] } }>(`/exams/${examId}/marking-scheme/upload/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+  const response = await apiClient.post<{ data: { id: number; file_name: string; extracted_text: string; created_item_ids: number[] } }>(`/exams/${examId}/marking-scheme/upload/`, formData)
   return response.data.data
 }
 
@@ -146,6 +147,11 @@ export async function publishExamResults(examId: number) {
 }
 
 // --- student-facing results ---
+
+export async function listMyCandidateNumbers() {
+  const response = await apiClient.get<{ data: StudentCandidateNumber[] }>('/exams/results/candidate-numbers/')
+  return response.data.data
+}
 
 export async function listExamResults() {
   const response = await apiClient.get<{ data: PaginatedResult<ExamResult> }>('/exams/results/')

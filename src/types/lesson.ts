@@ -25,6 +25,7 @@ export interface LessonSection {
   lesson: number
   title: string
   order: number
+  mini_quiz_id: number | null
   created_at: string
   updated_at: string
 }
@@ -61,6 +62,7 @@ export interface SectionStatusRow {
   best_score: number | null
   attempts: number
   has_mini_quiz: boolean
+  mini_quiz_id: number | null
 }
 
 export interface LessonStructure {

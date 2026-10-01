@@ -35,6 +35,7 @@ export async function getOfflineLessonStructure(
         id: section.serverId,
         title: section.title,
         order: section.order,
+        mini_quiz_id: section.miniQuizId ?? null,
         status,
         best_score: progress?.bestScore ?? null,
         attempts: progress?.attempts ?? 0,

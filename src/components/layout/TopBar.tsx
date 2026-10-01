@@ -10,7 +10,7 @@ interface TopBarProps {
 
 export function TopBar({ title, actions }: TopBarProps) {
   return (
-    <header className="flex h-14 items-center justify-between border-b border-slate-300 bg-slate-200 px-4 dark:border-slate-700 dark:bg-slate-900">
+    <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-slate-300 bg-slate-200 px-4 md:-ml-12 dark:border-slate-700 dark:bg-slate-900">
       <div className="flex items-center gap-2">
         {/* The sidebar carries the SomaSync brand on desktop -- on mobile,
             where the sidebar is hidden, this is the only place it appears. */}
@@ -19,7 +19,7 @@ export function TopBar({ title, actions }: TopBarProps) {
             page supplies its real <h1> (via PageHeader or its own markup),
             so a screen-reader user navigating by headings lands on actual
             page content rather than this static area name every time. */}
-        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{title}</p>
+        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 md:hidden">{title}</p>
       </div>
       <div className="flex items-center gap-2">
         <InstallPrompt />

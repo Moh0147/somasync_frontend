@@ -9,7 +9,7 @@ import type { NavItem } from './Sidebar'
 const MAX_TABS = 4
 
 const linkClasses = ({ isActive }: { isActive: boolean }) =>
-  `flex flex-1 flex-col items-center justify-center gap-0.5 py-1.5 text-[11px] font-medium ${
+  `flex flex-1 flex-col items-center justify-center gap-0.5 rounded-md py-1.5 text-[11px] font-medium transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/70 ${
     isActive ? 'text-blue-700 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'
   }`
 
@@ -73,7 +73,7 @@ export function BottomNav({ navItems }: { navItems: NavItem[] }) {
                       to={item.to}
                       onClick={() => setMoreOpen(false)}
                       className={({ isActive }) =>
-                        `flex flex-col items-center gap-1.5 rounded-md px-2 py-3 text-xs font-medium ${
+                        `flex flex-col items-center gap-1.5 rounded-md px-2 py-3 text-xs font-medium transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/70 ${
                           isActive
                             ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
                             : 'text-slate-600 dark:text-slate-400'

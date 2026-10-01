@@ -40,13 +40,13 @@ export function ScriptsPanel({
   examId,
   candidates,
   scripts,
-  canUpload,
+  examStatus,
   onChanged,
 }: {
   examId: number
   candidates: ExamCandidate[]
   scripts: ExamScript[]
-  canUpload: boolean
+  examStatus: 'DRAFT' | 'PUBLISHED' | 'CLOSED' | 'MARKING' | 'REVIEW' | 'FINALIZED' | 'RESULTS_PUBLISHED'
   onChanged: () => void
 }) {
   const { showToast } = useToast()
@@ -63,6 +63,7 @@ export function ScriptsPanel({
   const awaitingReviewCount = scripts.filter((s) => s.status === 'TEACHER_REVIEW').length
   const finalizedCount = scripts.filter((s) => s.status === 'FINALIZED' || s.status === 'PUBLISHED').length
   const progressPercentage = scripts.length > 0 ? Math.round((finalizedCount / scripts.length) * 100) : 0
+  const canUpload = examStatus === 'CLOSED'
 
   async function handleFileSelected(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -84,7 +85,12 @@ export function ScriptsPanel({
   return (
     <Card>
       <CardHeader>
-        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Scripts</p>
+        <div>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Upload student scripts</p>
+          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+            {candidates.length} registered {candidates.length === 1 ? 'candidate' : 'candidates'} · {scripts.length} {scripts.length === 1 ? 'script' : 'scripts'} uploaded
+          </p>
+        </div>
       </CardHeader>
       <CardBody className="flex flex-col gap-4">
         {scripts.length > 0 && (
@@ -102,7 +108,7 @@ export function ScriptsPanel({
           </div>
         )}
 
-        {scripts.length === 0 && <EmptyState title="No scripts uploaded yet." />}
+        {scripts.length === 0 && <EmptyState title="No scripts uploaded yet." description="Once the exam is closed, choose each candidate and upload their scanned answer script (PDF or image)." />}
         {scripts.length > 0 && (
           <ul className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
             {scripts.map((script) => (
@@ -136,7 +142,11 @@ export function ScriptsPanel({
           </ul>
         )}
 
-        {canUpload ? (
+        {candidates.length === 0 ? (
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+            Register students as candidates first. Their generated candidate numbers will be used to match each script.
+          </p>
+        ) : canUpload ? (
           <div className="flex flex-wrap items-end gap-2">
             <Select
               label="Candidate"
@@ -169,7 +179,14 @@ export function ScriptsPanel({
             />
           </div>
         ) : (
-          <p className="text-sm text-slate-500 dark:text-slate-400">Close the exam to start uploading scripts.</p>
+          <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-800 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200">
+            <p className="font-medium">Next: publish, then close the exam</p>
+            <p className="mt-0.5 text-xs text-blue-700 dark:text-blue-300">
+              {examStatus === 'DRAFT'
+                ? 'Use Publish at the top of this page. After publishing, choose Close Exam to enable script uploads.'
+                : 'Use Close Exam at the top of this page. Script uploads become available once the exam is closed.'}
+            </p>
+          </div>
         )}
       </CardBody>
     </Card>

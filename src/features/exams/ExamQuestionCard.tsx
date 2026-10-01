@@ -12,10 +12,12 @@ import type { ExamQuestion } from '@/types/exam'
 
 export function ExamQuestionCard({
   question,
+  canEdit,
   onChanged,
   onDeleted,
 }: {
   question: ExamQuestion
+  canEdit: boolean
   onChanged: () => void
   onDeleted: () => void
 }) {
@@ -24,14 +26,21 @@ export function ExamQuestionCard({
   const [marks, setMarks] = useState('1')
   const [isBusy, setIsBusy] = useState(false)
 
-  const totalMarks = question.marking_scheme_items.reduce((sum, item) => sum + item.marks, 0)
-  const isComplete = totalMarks === question.max_marks
+  const maxMarks = Number(question.max_marks)
+  const totalMarksCents = question.marking_scheme_items.reduce(
+    (sum, item) => sum + Math.round(Number(item.marks) * 100),
+    0,
+  )
+  const totalMarks = totalMarksCents / 100
+  const isComplete = totalMarksCents === Math.round(maxMarks * 100)
 
   async function handleAddItem(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setIsBusy(true)
     try {
-      const nextOrder = question.marking_scheme_items.length + 1
+      const usedOrders = new Set(question.marking_scheme_items.map((item) => item.order))
+      let nextOrder = 1
+      while (usedOrders.has(nextOrder)) nextOrder += 1
       await addMarkingSchemeItem(question.id, { criterion, marks: Number(marks), order: nextOrder })
       setCriterion('')
       setMarks('1')
@@ -77,11 +86,13 @@ export function ExamQuestionCard({
         <div className="flex shrink-0 items-center gap-2">
           <StatusBadge
             status={isComplete ? 'completed' : 'pending'}
-            label={`${totalMarks} / ${question.max_marks} marks`}
+            label={`${totalMarks.toFixed(2)} / ${maxMarks.toFixed(2)} marks`}
           />
-          <Button variant="danger" size="sm" onClick={handleDeleteQuestion}>
-            Delete
-          </Button>
+          {canEdit && (
+            <Button variant="danger" size="sm" onClick={handleDeleteQuestion}>
+              Delete
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardBody className="flex flex-col gap-3">
@@ -93,16 +104,18 @@ export function ExamQuestionCard({
             {question.marking_scheme_items.map((item) => (
               <li key={item.id} className="flex items-center justify-between text-sm">
                 <span>
-                  {item.criterion} <span className="text-slate-500 dark:text-slate-400">({item.marks} marks)</span>
+                  {item.criterion} <span className="text-slate-500 dark:text-slate-400">({Number(item.marks).toFixed(2)} marks)</span>
                 </span>
-                <Button variant="ghost" size="sm" onClick={() => handleRemoveItem(item.id)}>
-                  Remove
-                </Button>
+                {canEdit && (
+                  <Button variant="ghost" size="sm" onClick={() => handleRemoveItem(item.id)}>
+                    Remove
+                  </Button>
+                )}
               </li>
             ))}
           </ul>
         )}
-        {!isComplete && (
+        {canEdit && !isComplete && (
           <form onSubmit={handleAddItem} className="flex flex-wrap items-end gap-2">
             <Input
               label="Criterion"
@@ -114,7 +127,7 @@ export function ExamQuestionCard({
               label="Marks"
               type="number"
               min={1}
-              max={question.max_marks - totalMarks}
+              max={(Math.round(maxMarks * 100) - totalMarksCents) / 100}
               value={marks}
               onChange={(event) => setMarks(event.target.value)}
               className="w-24"

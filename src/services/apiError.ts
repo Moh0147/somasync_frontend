@@ -1,20 +1,29 @@
 import axios from 'axios'
 
+function firstMessage(value: unknown): string | null {
+  if (typeof value === 'string') return value
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const message = firstMessage(item)
+      if (message) return message
+    }
+  }
+  if (value && typeof value === 'object') {
+    for (const item of Object.values(value)) {
+      const message = firstMessage(item)
+      if (message) return message
+    }
+  }
+  return null
+}
+
 export function getApiErrorMessage(error: unknown, fallback = 'Something went wrong. Please try again.'): string {
-  if (!axios.isAxiosError(error)) return fallback
+  if (!axios.isAxiosError(error)) return error instanceof Error && error.message ? error.message : fallback
   if (!error.response) return 'Network error. Check your connection and try again.'
 
-  const errors = (error.response.data as { errors?: unknown } | undefined)?.errors
-  if (typeof errors === 'string') return errors
-
-  if (errors && typeof errors === 'object') {
-    const record = errors as Record<string, unknown>
-    if (typeof record.detail === 'string') return record.detail
-
-    const firstValue = Object.values(record)[0]
-    if (Array.isArray(firstValue) && typeof firstValue[0] === 'string') return firstValue[0]
-    if (typeof firstValue === 'string') return firstValue
-  }
+  const body = error.response.data as { errors?: unknown; detail?: unknown; message?: unknown } | undefined
+  const message = firstMessage(body?.errors ?? body?.detail ?? body?.message)
+  if (message) return message
 
   return fallback
 }

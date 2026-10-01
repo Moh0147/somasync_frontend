@@ -21,6 +21,7 @@ export interface OfflineLessonSection {
   lessonId: number
   title: string
   order: number
+  miniQuizId?: number | null
   version: number
 }
 
