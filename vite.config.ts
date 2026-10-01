@@ -15,6 +15,9 @@ export default defineConfig({
       // skipWaiting). src/components/pwa/UpdatePrompt.tsx surfaces the
       // "A new version is available" banner and drives the actual update.
       registerType: 'prompt',
+      // Enable the service worker in local development too, so installability
+      // can be tested before deploying to production.
+      devOptions: { enabled: true },
       // Custom service worker (src/sw.ts) instead of generateSW's
       // declarative config -- see that file for why: generateSW's
       // `navigateFallback` registers its NavigationRoute ahead of any

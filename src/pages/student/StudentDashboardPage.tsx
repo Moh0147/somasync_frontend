@@ -1,25 +1,23 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
+import { db } from '@/db/db'
+import { isLessonDownloaded } from '@/db/offlineServices/downloadService'
+import { listSectionsForLesson } from '@/db/repositories/lessonSectionsRepository'
+import { listDownloadedLessons } from '@/db/repositories/lessonsRepository'
+import { getSectionProgress } from '@/db/repositories/progressRepository'
 import { StorageUsage } from '@/components/offline/StorageUsage'
 import { SyncStatus } from '@/components/offline/SyncStatus'
 import { EmptyState } from '@/components/feedback/EmptyState'
 import { ErrorState } from '@/components/feedback/ErrorState'
 import { LoadingState } from '@/components/feedback/LoadingState'
-import { useToast } from '@/components/feedback/Toast'
-import { CheckIcon, DownloadIcon, JoinClassIcon } from '@/components/ui/icons'
-import { db } from '@/db/db'
-import { downloadLessonForOffline, isLessonDownloaded, removeLessonOffline } from '@/db/offlineServices/downloadService'
-import { listSectionsForLesson } from '@/db/repositories/lessonSectionsRepository'
-import { getLessonByServerId, listDownloadedLessons } from '@/db/repositories/lessonsRepository'
-import { getSectionProgress } from '@/db/repositories/progressRepository'
+import { CheckIcon, DownloadIcon, JoinClassIcon, CalculatorIcon, BiologyIcon, ChemistryIcon, PhysicsIcon, LessonsIcon, LanguagesIcon, GeographyIcon, HistoryIcon, CivicsIcon, ComputerIcon } from '@/components/ui/icons'
 import { useAuth } from '@/features/auth/AuthContext'
-import { LessonCard } from '@/features/student/LessonCard'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { listClassLevels, listSubjects } from '@/services/academicsService'
 import { getApiErrorMessage } from '@/services/apiError'
 import { getLessonStructure, listLessons } from '@/services/lessonsService'
-import type { ClassLevel, Subject } from '@/types/academics'
+import type { Subject } from '@/types/academics'
 import { displayName } from '@/utils/displayName'
 
 interface DashboardLessonRow {
@@ -42,16 +40,12 @@ function greeting() {
 export default function StudentDashboardPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { showToast } = useToast()
   const isOnline = useOnlineStatus()
 
   const [rows, setRows] = useState<DashboardLessonRow[] | null>(null)
   const [subjects, setSubjects] = useState<Subject[]>([])
-  const [classLevels, setClassLevels] = useState<ClassLevel[]>([])
   const [error, setError] = useState<string | null>(null)
 
-  const [downloadingId, setDownloadingId] = useState<number | null>(null)
-  const [downloadProgress, setDownloadProgress] = useState<{ completed: number; total: number } | null>(null)
 
   async function load() {
     setError(null)
@@ -64,7 +58,6 @@ export default function StudentDashboardPage() {
           listClassLevels(),
         ])
         setSubjects(subjectsData)
-        setClassLevels(levelsData)
         // Opportunistic cache so the offline path below can still show
         // subject/level names, not just raw ids.
         await db.metadata.put({ key: 'cache.subjects', value: subjectsData })
@@ -87,13 +80,12 @@ export default function StudentDashboardPage() {
         )
         setRows(withProgress)
       } else {
-        const [cachedSubjects, cachedLevels, downloadedLessons] = await Promise.all([
+        const [cachedSubjects, _cachedLevels, downloadedLessons] = await Promise.all([
           db.metadata.get('cache.subjects'),
           db.metadata.get('cache.classLevels'),
           listDownloadedLessons(),
         ])
         setSubjects((cachedSubjects?.value as Subject[] | undefined) ?? [])
-        setClassLevels((cachedLevels?.value as ClassLevel[] | undefined) ?? [])
 
         const withProgress = await Promise.all(
           downloadedLessons.map(async (lesson) => {
@@ -128,32 +120,7 @@ export default function StudentDashboardPage() {
   function subjectName(subjectId: number) {
     return subjects.find((subject) => subject.id === subjectId)?.name ?? `#${subjectId}`
   }
-  function levelName(levelId: number) {
-    return classLevels.find((level) => level.id === levelId)?.name ?? `#${levelId}`
-  }
 
-  async function handleDownload(lessonServerId: number) {
-    setDownloadingId(lessonServerId)
-    setDownloadProgress({ completed: 0, total: 1 })
-    try {
-      await downloadLessonForOffline(lessonServerId, (update) => setDownloadProgress(update))
-      showToast('success', 'Lesson downloaded for offline use.')
-      await load()
-    } catch (err) {
-      showToast('error', getApiErrorMessage(err))
-    } finally {
-      setDownloadingId(null)
-      setDownloadProgress(null)
-    }
-  }
-
-  async function handleRemove(lessonServerId: number) {
-    const local = await getLessonByServerId(lessonServerId)
-    if (!local) return
-    await removeLessonOffline(local.id!)
-    showToast('success', 'Download removed.')
-    await load()
-  }
 
   if (error) return <ErrorState description={error} onRetry={load} />
   if (!rows) return <LoadingState message="Loading your lessons…" />
@@ -187,94 +154,43 @@ export default function StudentDashboardPage() {
       })),
   ].slice(0, 4)
 
+  const subjectStyles = [
+    { match: ['math'], className: 'bg-[#0057FF] text-white', icon: CalculatorIcon },
+    { match: ['bio'], className: 'bg-[#064E3B] text-white', icon: BiologyIcon },
+    { match: ['chem'], className: 'bg-[#3A0CA3] text-white', icon: ChemistryIcon },
+    { match: ['phys'], className: 'bg-[#5B3DF5] text-white', icon: PhysicsIcon },
+    { match: ['english'], className: 'bg-[#E8DEFF] text-[#1E1033]', icon: LessonsIcon },
+    { match: ['kiswahili', 'swahili'], className: 'bg-[#F8E7C9] text-[#1E1033]', icon: LanguagesIcon },
+    { match: ['geograph'], className: 'bg-[#FFD6A5] text-[#1E1033]', icon: GeographyIcon },
+    { match: ['history'], className: 'bg-[#FFF4D6] text-[#1E1033]', icon: HistoryIcon },
+    { match: ['civic'], className: 'bg-[#1E1033] text-white', icon: CivicsIcon },
+    { match: ['computer', 'ict'], className: 'bg-[#5B3DF5] text-white', icon: ComputerIcon },
+  ]
+  function subjectStyle(subject: Subject, index: number) {
+    const found = subjectStyles.find((style) => style.match.some((word) => subject.name.toLowerCase().includes(word)))
+    return found ?? { className: index % 2 ? 'bg-slate-800 text-white' : 'bg-blue-700 text-white', icon: LessonsIcon }
+  }
+  const subjectRows = subjects.map((subject, index) => {
+    const subjectLessons = withPercentage.filter((row) => row.subjectId === subject.id)
+    if (!subjectLessons.length) return null
+    const total = subjectLessons.reduce((sum, row) => sum + row.totalSections, 0)
+    const completed = subjectLessons.reduce((sum, row) => sum + row.completedSections, 0)
+    return { subject, lessons: subjectLessons, total, completed, percentage: total ? Math.round(completed / total * 100) : 0, style: subjectStyle(subject, index) }
+  }).filter(Boolean) as Array<{ subject: Subject; lessons: typeof withPercentage; total: number; completed: number; percentage: number; style: { className: string; icon: typeof LessonsIcon } }>
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-            {greeting()}
-            {user ? `, ${displayName(user)}` : ''} 👋
-          </h1>
-          <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Continue your learning journey.</p>
-        </div>
-        <Link
-          to="/student/join-class"
-          className="flex shrink-0 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition-colors duration-150 hover:border-blue-300 hover:text-blue-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-blue-500/40 dark:hover:text-blue-400"
-        >
-          <JoinClassIcon aria-hidden="true" className="h-3.5 w-3.5" />
-          Join a class
-        </Link>
+        <div><h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{greeting()}{user ? `, ${displayName(user)}` : ''} 👋</h1><p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Continue your learning journey.</p></div>
+        <Link to="/student/join-class" className="flex shrink-0 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 hover:border-blue-300 hover:text-blue-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"><JoinClassIcon className="h-3.5 w-3.5" />Join a class</Link>
       </div>
-
       <SyncStatus />
-
-      {rows.length === 0 ? (
-        <EmptyState
-          title={isOnline ? 'No lessons available yet.' : 'No downloaded lessons.'}
-          description={
-            isOnline
-              ? 'Check back once your teacher publishes a lesson.'
-              : "You're offline — download a lesson while online to study it later."
-          }
-        />
-      ) : (
-        <>
-          {featured && (
-            <LessonCard
-              variant="featured"
-              title={featured.title}
-              subjectLabel={`${subjectName(featured.subjectId)} • ${levelName(featured.formId)}`}
-              percentage={featured.percentage}
-              isDownloaded={featured.isDownloaded}
-              isDownloading={downloadingId === featured.lessonServerId}
-              downloadProgress={downloadingId === featured.lessonServerId ? downloadProgress : null}
-              canOpen={featured.isDownloaded || isOnline}
-              isOnline={isOnline}
-              onOpen={() => navigate(`/student/lessons/${featured.lessonServerId}`)}
-              onDownload={() => handleDownload(featured.lessonServerId)}
-              onRemove={() => handleRemove(featured.lessonServerId)}
-            />
-          )}
-
-          <div>
-            <h2 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">Your Learning</h2>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {withPercentage.map((row) => (
-                <LessonCard
-                  key={row.lessonServerId}
-                  title={row.title}
-                  subjectLabel={`${subjectName(row.subjectId)} • ${levelName(row.formId)}`}
-                  percentage={row.percentage}
-                  isDownloaded={row.isDownloaded}
-                  isDownloading={downloadingId === row.lessonServerId}
-                  downloadProgress={downloadingId === row.lessonServerId ? downloadProgress : null}
-                  canOpen={row.isDownloaded || isOnline}
-                  isOnline={isOnline}
-                  onOpen={() => navigate(`/student/lessons/${row.lessonServerId}`)}
-                  onDownload={() => handleDownload(row.lessonServerId)}
-                  onRemove={() => handleRemove(row.lessonServerId)}
-                />
-              ))}
-            </div>
-          </div>
-
-          {activity.length > 0 && (
-            <div>
-              <h2 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">Recent Activity</h2>
-              <ul className="flex flex-col gap-2 rounded-md border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
-                {activity.map((item) => (
-                  <li key={item.key} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                    <item.icon aria-hidden="true" className="h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
-                    {item.text}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <StorageUsage />
-        </>
-      )}
+      {rows.length === 0 ? <EmptyState title={isOnline ? 'No lessons available yet.' : 'No downloaded lessons.'} description={isOnline ? 'Check back once your teacher publishes a lesson.' : "You're offline — download a lesson while online to study it later."} /> : <>
+        {featured && <section><h2 className="mb-3 text-lg font-semibold text-slate-900 dark:text-slate-100">Continue Learning</h2><div className="flex items-center justify-between gap-4 rounded-2xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-500/20 dark:bg-blue-500/10"><div><p className="text-xs font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-400">{subjectName(featured.subjectId)}</p><p className="mt-1 text-xl font-semibold text-slate-900 dark:text-slate-100">{featured.title}</p>{featured.percentage !== null && <p className="mt-1 text-sm text-slate-500">Section {featured.completedSections + 1} of {featured.totalSections}</p>}</div><button type="button" onClick={() => navigate(`/student/lessons/${featured.lessonServerId}`)} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Continue →</button></div></section>}
+        <section><div className="mb-3 flex items-end justify-between"><div><h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">My Subjects</h2><p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Choose a subject to see its lessons.</p></div></div><div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">{subjectRows.map(({ subject, lessons, total, completed, percentage, style }) => { const Icon = style.icon; return <Link key={subject.id} to={`/student/subjects/${subject.id}`} className={`group min-h-[205px] rounded-3xl p-5 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-lg ${style.className}`}><div className="flex items-start justify-between"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15"><Icon className="h-6 w-6" /></span><span className="text-sm font-semibold opacity-90">{lessons.length} {lessons.length === 1 ? 'lesson' : 'lessons'}</span></div><h3 className="mt-8 text-2xl font-bold">{subject.name}</h3><p className="mt-1 text-sm opacity-80">{completed} of {total} sections completed</p><div className="mt-4"><div className="mb-1 flex justify-between text-xs font-medium"><span>Progress</span><span>{percentage}%</span></div><div className="h-2 overflow-hidden rounded-full bg-black/20"><div className="h-full rounded-full bg-white/90" style={{ width: `${percentage}%` }} /></div></div><p className="mt-4 text-sm font-semibold">Continue {subject.name} <span className="inline-block transition-transform group-hover:translate-x-1">→</span></p></Link> })}</div></section>
+        {activity.length > 0 && <section><h2 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">Recent Activity</h2><ul className="flex flex-col gap-2 rounded-md border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">{activity.map((item) => <li key={item.key} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400"><item.icon className="h-4 w-4 shrink-0 text-green-600" />{item.text}</li>)}</ul></section>}
+        <StorageUsage />
+      </>}
     </div>
   )
 }

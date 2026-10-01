@@ -13,6 +13,7 @@ import QuizDetailPage from './QuizDetailPage'
 import QuizzesPage from './QuizzesPage'
 import StorageManagementPage from './StorageManagementPage'
 import StudentDashboardPage from './StudentDashboardPage'
+import SubjectPage from './SubjectPage'
 
 export default function StudentAreaPage() {
   const { logout } = useAuth()
@@ -29,6 +30,7 @@ export default function StudentAreaPage() {
     >
       <Routes>
         <Route index element={<StudentDashboardPage />} />
+        <Route path="subjects/:subjectId" element={<SubjectPage />} />
         <Route path="lessons/:lessonId" element={<LessonReaderPage />} />
         <Route path="lessons/:lessonId/sections/:sectionId" element={<LessonReaderPage />} />
         <Route path="quizzes" element={<QuizzesPage />} />

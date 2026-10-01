@@ -1,4 +1,4 @@
-export type AttemptStatus = 'IN_PROGRESS' | 'SUBMITTED' | 'SYNC_PENDING' | 'SYNCED' | 'FAILED'
+export type AttemptStatus = 'IN PROGRESS' | 'SUBMITTED' | 'SYNC PENDING' | 'SYNCED' | 'FAILED'
 
 export interface StudentQuizAnswerRecord {
   id: number

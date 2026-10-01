@@ -8,6 +8,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Card, CardBody } from '@/components/ui/Card'
 import { getApiErrorMessage } from '@/services/apiError'
 import { listExamResults } from '@/services/examsService'
+import { formatPercentage } from '@/utils/formatPercentage'
 import type { ExamResult } from '@/types/exam'
 
 export default function ExamResultsPage() {
@@ -48,7 +49,7 @@ export default function ExamResultsPage() {
               <CardBody className="flex flex-col gap-1">
                 <p className="text-base font-semibold text-slate-900 dark:text-slate-100">{result.exam_title}</p>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  {result.score} / {result.total_marks} ({result.percentage}%)
+                  {result.score} / {result.total_marks} ({formatPercentage(result.percentage)})
                 </p>
               </CardBody>
             </Card>

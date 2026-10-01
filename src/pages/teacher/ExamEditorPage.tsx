@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -18,6 +18,7 @@ import { CandidatesPanel } from '@/features/exams/CandidatesPanel'
 import { ExamQuestionCard } from '@/features/exams/ExamQuestionCard'
 import { ScriptsPanel } from '@/features/exams/ScriptsPanel'
 import { listSubjects } from '@/services/academicsService'
+import { listClasses, listClassStudents } from '@/services/classesService'
 import { getApiErrorMessage } from '@/services/apiError'
 import {
   closeExam,
@@ -31,8 +32,11 @@ import {
   publishExamResults,
   startMarking,
   updateExam,
+  uploadMarkingScheme,
+  uploadExamPaper,
 } from '@/services/examsService'
 import type { Subject } from '@/types/academics'
+import type { AuthUser } from '@/types/auth'
 import type { Exam, ExamCandidate, ExamQuestion, ExamQuestionType, ExamScript } from '@/types/exam'
 
 const questionTypeOptions: { value: ExamQuestionType; label: string }[] = [
@@ -51,6 +55,7 @@ export default function ExamEditorPage() {
   const [candidates, setCandidates] = useState<ExamCandidate[]>([])
   const [scripts, setScripts] = useState<ExamScript[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
+  const [classStudents, setClassStudents] = useState<AuthUser[]>([])
   const [error, setError] = useState<string | null>(null)
 
   const [editOpen, setEditOpen] = useState(false)
@@ -59,6 +64,10 @@ export default function ExamEditorPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const schemeInputRef = useRef<HTMLInputElement>(null)
+  const paperInputRef = useRef<HTMLInputElement>(null)
+  const [isUploadingScheme, setIsUploadingScheme] = useState(false)
+  const [isUploadingPaper, setIsUploadingPaper] = useState(false)
 
   const [questionForm, setQuestionForm] = useState({
     section: '',
@@ -74,18 +83,21 @@ export default function ExamEditorPage() {
   async function load() {
     setError(null)
     try {
-      const [examData, questionsData, candidatesData, scriptsData, subjectsData] = await Promise.all([
+      const [examData, questionsData, candidatesData, scriptsData, subjectsData, classesData] = await Promise.all([
         getExam(id),
         listExamQuestions(id),
         listCandidates(id),
         listScripts(id),
         listSubjects(),
+        listClasses(),
       ])
       setExam(examData)
       setQuestions(questionsData)
       setCandidates(candidatesData)
       setScripts(scriptsData)
       setSubjects(subjectsData)
+      const matchingClass = classesData.find((schoolClass) => schoolClass.class_level === examData.class_level && schoolClass.academic_year === examData.academic_year)
+      setClassStudents(matchingClass ? await listClassStudents(matchingClass.id) : [])
       setEditForm({ title: examData.title, description: examData.description, exam_date: examData.exam_date ?? '' })
     } catch (err) {
       setError(getApiErrorMessage(err))
@@ -180,6 +192,24 @@ export default function ExamEditorPage() {
     }
   }
 
+  async function handlePaperUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]; event.target.value = ''
+    if (!file) return
+    setIsUploadingPaper(true)
+    try { await uploadExamPaper(id, file); showToast('success', 'Exam paper extracted. Review imported questions below.'); await refreshQuestions() }
+    catch (err) { showToast('error', getApiErrorMessage(err)) }
+    finally { setIsUploadingPaper(false) }
+  }
+
+  async function handleSchemeUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]; event.target.value = ''
+    if (!file) return
+    setIsUploadingScheme(true)
+    try { await uploadMarkingScheme(id, file); showToast('success', 'Marking scheme extracted. Review the generated points below.'); await refreshQuestions() }
+    catch (err) { showToast('error', getApiErrorMessage(err)) }
+    finally { setIsUploadingScheme(false) }
+  }
+
   async function handleDelete() {
     setIsDeleting(true)
     try {
@@ -236,6 +266,8 @@ export default function ExamEditorPage() {
   if (!exam) return <LoadingState message="Loading exam…" />
 
   const totalMarks = questions.reduce((sum, question) => sum + question.max_marks, 0)
+  const configuredTotal = exam.total_marks ?? totalMarks
+  const distributionOk = totalMarks === configuredTotal
   const isDraft = exam.status === 'DRAFT'
   const isPublished = exam.status === 'PUBLISHED'
   const isClosed = exam.status === 'CLOSED'
@@ -282,6 +314,27 @@ export default function ExamEditorPage() {
         }
       />
 
+      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex min-w-[720px] items-center justify-between text-xs font-medium">
+          {['Exam Setup', 'Questions', 'Marking Scheme', 'Review & Publish', 'Marking', 'Results'].map((label, index) => (
+            <div key={label} className={`flex items-center gap-2 ${index <= (isDraft ? 2 : isMarking ? 4 : 3) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}`}><span className="flex h-7 w-7 items-center justify-center rounded-full border">{index + 1}</span>{label}</div>
+          ))}
+        </div>
+      </div>
+
+      <Card>
+          <CardHeader className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Marking scheme & distribution</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{!isDraft ? 'Locked after publishing — create a new draft version to change it.' : distributionOk ? '✓ Distribution complete' : `⚠ Questions total ${totalMarks} / ${configuredTotal} marks`}</p>
+            </div>
+            <div className="flex flex-wrap gap-2"><Button size="sm" variant="ghost" disabled={isUploadingPaper || !isDraft} onClick={() => paperInputRef.current?.click()}>{isUploadingPaper ? 'Extracting…' : 'Upload exam paper'}</Button><input ref={paperInputRef} type="file" accept=".pdf,.png,.jpg,.jpeg" className="hidden" onChange={handlePaperUpload} /><Button size="sm" variant="secondary" disabled={isUploadingScheme || !isDraft} onClick={() => schemeInputRef.current?.click()}>{isUploadingScheme ? 'Extracting…' : isDraft ? 'Upload marking scheme' : 'Marking scheme locked'}</Button><input ref={schemeInputRef} type="file" accept=".pdf,.png,.jpg,.jpeg" className="hidden" onChange={handleSchemeUpload} /></div>
+          </CardHeader>
+          <CardBody>
+            <div className="flex flex-wrap gap-3 text-sm">{questions.map(q => <span key={q.id} className="rounded-md bg-slate-100 px-2 py-1 dark:bg-slate-800">Q{q.question_number}: {q.max_marks}</span>)}</div>
+          </CardBody>
+        </Card>
+
       <Card>
         <CardHeader className="flex items-center justify-between">
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Exam details</p>
@@ -299,7 +352,7 @@ export default function ExamEditorPage() {
         </CardBody>
       </Card>
 
-      {questions.length === 0 && <EmptyState title="No questions yet." />}
+      {questions.length === 0 && isDraft && <EmptyState title="No questions imported yet." description="Upload an exam paper or marking scheme above. SomaSync will build the question structure for you." />}
       {questions
         .slice()
         .sort((a, b) => a.order - b.order)
@@ -312,23 +365,21 @@ export default function ExamEditorPage() {
           />
         ))}
 
-      {!isDraft && (
-        <>
-          <CandidatesPanel examId={id} candidates={candidates} onChanged={refreshCandidates} />
-          <ScriptsPanel
-            examId={id}
-            candidates={candidates}
-            scripts={scripts}
-            canUpload={isClosed}
-            onChanged={refreshScripts}
-          />
-        </>
-      )}
+      <CandidatesPanel examId={id} candidates={candidates} students={classStudents} onChanged={refreshCandidates} />
+      <ScriptsPanel
+        examId={id}
+        candidates={candidates}
+        scripts={scripts}
+        canUpload={isClosed}
+        onChanged={refreshScripts}
+      />
+
+
 
       {isDraft && (
         <Card>
           <CardHeader>
-            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Add question</p>
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Manual question entry (optional)</p>
           </CardHeader>
           <CardBody>
             <form onSubmit={handleAddQuestion} className="flex flex-col gap-4" noValidate>

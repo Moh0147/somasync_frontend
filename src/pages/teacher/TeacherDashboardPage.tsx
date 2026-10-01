@@ -11,6 +11,7 @@ import { getTeacherClassPerformance, getTeacherExamPerformance } from '@/service
 import { getApiErrorMessage } from '@/services/apiError'
 import type { ClassPerformance } from '@/types/analytics'
 import { displayName } from '@/utils/displayName'
+import { formatPercentage } from '@/utils/formatPercentage'
 
 const quickActions = [
   { to: '/teacher/lessons', label: 'Create Lesson', icon: LessonsIcon },
@@ -76,7 +77,7 @@ export default function TeacherDashboardPage() {
                   </p>
                   {schoolClass.avg_quiz_percentage !== null && (
                     <p className="text-xs font-medium text-teal-700 dark:text-teal-400">
-                      {schoolClass.avg_quiz_percentage}% average quiz score
+                      {formatPercentage(schoolClass.avg_quiz_percentage)} average quiz score
                     </p>
                   )}
                 </CardBody>

@@ -13,6 +13,7 @@ import { ExamAnswerReviewCard } from '@/features/exams/ExamAnswerReviewCard'
 import { getApiErrorMessage } from '@/services/apiError'
 import {
   aiMarkScript,
+  ocrScript,
   finalizeScript,
   getExam,
   getScript,
@@ -55,6 +56,7 @@ export default function ScriptReviewPage() {
   const [error, setError] = useState<string | null>(null)
 
   const [isRunningAi, setIsRunningAi] = useState(false)
+  const [isRunningOcr, setIsRunningOcr] = useState(false)
   const [isSubmittingReview, setIsSubmittingReview] = useState(false)
   const [isFinalizing, setIsFinalizing] = useState(false)
 
@@ -79,6 +81,17 @@ export default function ScriptReviewPage() {
   useEffect(() => {
     load()
   }, [examIdNum, scriptIdNum])
+
+  async function handleRunOcr() {
+    setIsRunningOcr(true)
+    try {
+      const updated = await ocrScript(scriptIdNum)
+      setScript(updated)
+      showToast('success', 'Text extraction complete. Please review the detected answers.')
+      await load()
+    } catch (err) { showToast('error', getApiErrorMessage(err)) }
+    finally { setIsRunningOcr(false) }
+  }
 
   async function handleRunAiMarking() {
     setIsRunningAi(true)
@@ -135,7 +148,12 @@ export default function ScriptReviewPage() {
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge status={scriptStatusMap[script.status] ?? 'pending'} label={scriptStatusLabel[script.status] ?? script.status} />
           {(script.status === 'UPLOADED' || script.status === 'FAILED') && (
-            <Button size="sm" variant="secondary" disabled={isRunningAi} onClick={handleRunAiMarking}>
+            <Button size="sm" variant="ghost" disabled={isRunningOcr || script.ocr_status === 'PROCESSING'} onClick={handleRunOcr}>
+              {isRunningOcr ? 'Extracting…' : 'Extract answers'}
+            </Button>
+          )}
+          {(script.status === 'UPLOADED' || script.status === 'FAILED') && (
+            <Button size="sm" variant="secondary" disabled={isRunningAi || isRunningOcr || script.ocr_status === 'PROCESSING'} onClick={handleRunAiMarking}>
               {isRunningAi ? 'Running…' : 'Run AI Marking'}
             </Button>
           )}
@@ -151,6 +169,8 @@ export default function ScriptReviewPage() {
           )}
         </div>
       </div>
+
+      <p className="text-xs text-slate-500 dark:text-slate-400">Extraction: {script.ocr_status === 'READY' ? 'Ready for teacher review' : script.ocr_status === 'FAILED' ? script.ocr_error : script.ocr_status}</p>
 
       {script.marking_error && <p className="text-sm text-red-600 dark:text-red-400">{script.marking_error}</p>}
 

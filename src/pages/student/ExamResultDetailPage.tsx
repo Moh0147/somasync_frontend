@@ -7,6 +7,7 @@ import { Card, CardBody } from '@/components/ui/Card'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { getApiErrorMessage } from '@/services/apiError'
 import { getExamResult } from '@/services/examsService'
+import { formatPercentage } from '@/utils/formatPercentage'
 import type { ExamResult } from '@/types/exam'
 
 export default function ExamResultDetailPage() {
@@ -44,7 +45,7 @@ export default function ExamResultDetailPage() {
           <p className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
             {result.score} / {result.total_marks}
           </p>
-          <ProgressBar value={result.percentage ?? 0} label="Score" />
+          <ProgressBar value={result.percentage ?? 0} label={`Score (${formatPercentage(result.percentage)})`} />
         </CardBody>
       </Card>
 

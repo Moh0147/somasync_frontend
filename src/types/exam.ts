@@ -9,6 +9,8 @@ export interface Exam {
   description: string
   academic_year: number
   exam_date: string | null
+  total_marks: number | null
+  duration_minutes: number | null
   status: ExamStatus
   created_by: number
   published_at: string | null
@@ -56,6 +58,9 @@ export interface ExamScript {
   version: number
   status: ExamScriptStatus
   marking_error: string
+  ocr_status: 'NOT_STARTED' | 'PROCESSING' | 'READY' | 'FAILED'
+  extracted_text: string
+  ocr_error: string
   uploaded_by: number
   uploaded_at: string
   updated_at: string
@@ -90,6 +95,7 @@ export interface StudentExamAnswer {
   is_correct: boolean | null
   ai_marks_awarded: number | null
   ai_feedback: string
+  ocr_confidence: string
   teacher_final_marks: number | null
   teacher_comment: string
   marked_at: string | null

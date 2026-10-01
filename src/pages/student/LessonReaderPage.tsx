@@ -22,6 +22,7 @@ import { listMyAttempts } from '@/services/quizzesService'
 import type { Lesson, LessonStructure, SectionContentBlock, SectionContentResponse } from '@/types/lesson'
 import type { SectionQuizAnswerInput, SectionQuizResult } from '@/types/quiz'
 import { sanitizeLessonHtml } from '@/utils/sanitizeHtml'
+import { formatPercentage } from '@/utils/formatPercentage'
 
 function ContentBlockView({ block }: { block: SectionContentBlock }) {
   switch (block.block_type) {
@@ -466,7 +467,7 @@ export default function LessonReaderPage() {
                   <div>
                     <p className="text-base font-semibold text-green-800 dark:text-green-300">Section completed</p>
                     <p className="text-sm text-green-700 dark:text-green-400">
-                      {result.score}% (needed {result.passing_score}%)
+                      {formatPercentage(result.score)} (needed {formatPercentage(result.passing_score)})
                     </p>
                   </div>
                 </div>
@@ -482,8 +483,8 @@ export default function LessonReaderPage() {
             ) : (
               <>
                 <p className="flex items-center gap-1.5 text-sm font-semibold text-red-700 dark:text-red-400">
-                  <WrongIcon aria-hidden="true" className="h-4 w-4" /> Not quite — {result.score}% (needed{' '}
-                  {result.passing_score}%)
+                  <WrongIcon aria-hidden="true" className="h-4 w-4" /> Not quite — {formatPercentage(result.score)} (needed{' '}
+                  {formatPercentage(result.passing_score)})
                 </p>
                 {result.wrong_answers.length > 0 && (
                   <ul className="flex flex-col gap-2">

@@ -82,6 +82,20 @@ export async function removeCandidate(examId: number, candidateNumber: string) {
   await apiClient.delete(`/exams/${examId}/candidates/`, { data: { candidate_number: candidateNumber } })
 }
 
+export async function uploadExamPaper(examId: number, file: File) {
+  const formData = new FormData()
+  formData.append('file', file)
+  const response = await apiClient.post<{ data: { id: number; file_name: string; extracted_text: string; created_question_ids: number[] } }>(`/exams/${examId}/exam-paper/upload/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+  return response.data.data
+}
+
+export async function uploadMarkingScheme(examId: number, file: File) {
+  const formData = new FormData()
+  formData.append('file', file)
+  const response = await apiClient.post<{ data: { id: number; file_name: string; extracted_text: string; created_item_ids: number[] } }>(`/exams/${examId}/marking-scheme/upload/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+  return response.data.data
+}
+
 // --- scripts ---
 
 export async function listScripts(examId: number) {
@@ -101,6 +115,11 @@ export async function uploadScript(examId: number, candidateNumber: string, file
 
 export async function getScript(scriptId: number) {
   const response = await apiClient.get<{ data: ExamScript }>(`/exams/scripts/${scriptId}/`)
+  return response.data.data
+}
+
+export async function ocrScript(scriptId: number) {
+  const response = await apiClient.post<{ data: ExamScript }>(`/exams/scripts/${scriptId}/ocr/`)
   return response.data.data
 }
 

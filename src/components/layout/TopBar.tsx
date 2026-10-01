@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { ThemeToggle } from './ThemeToggle'
+import { InstallPrompt } from '@/components/pwa/InstallPrompt'
 
 interface TopBarProps {
   title: string
@@ -21,6 +22,7 @@ export function TopBar({ title, actions }: TopBarProps) {
         <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{title}</p>
       </div>
       <div className="flex items-center gap-2">
+        <InstallPrompt />
         <ThemeToggle />
         {actions}
       </div>
