@@ -109,19 +109,7 @@ export default function ExamsPage() {
       {!error && exams && exams.length > 0 && (
         <Table
           columns={[
-            {
-              key: 'title',
-              header: 'Exam',
-              render: (row: Exam) => (
-                <button
-                  type="button"
-                  onClick={() => navigate(`/teacher/exams/${row.id}`)}
-                  className="font-medium text-blue-600 hover:underline"
-                >
-                  {row.title}
-                </button>
-              ),
-            },
+            { key: 'title', header: 'Exam', render: (row: Exam) => <span className="font-medium text-slate-900 dark:text-slate-100">{row.title}</span> },
             { key: 'subject', header: 'Subject', render: (row: Exam) => subjectName(row.subject) },
             { key: 'level', header: 'Level', render: (row: Exam) => levelName(row.class_level) },
             { key: 'year', header: 'Year', render: (row: Exam) => String(row.academic_year) },
@@ -143,6 +131,7 @@ export default function ExamsPage() {
           ]}
           data={exams}
           getRowKey={(row) => String(row.id)}
+          onRowClick={(row) => navigate(`/teacher/exams/${row.id}`)}
         />
       )}
 

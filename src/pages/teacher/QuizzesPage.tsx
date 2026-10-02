@@ -135,19 +135,7 @@ export default function QuizzesPage() {
       {!error && quizzes && quizzes.length > 0 && (
         <Table
           columns={[
-            {
-              key: 'title',
-              header: 'Quiz',
-              render: (row: Quiz) => (
-                <button
-                  type="button"
-                  onClick={() => navigate(`/teacher/quizzes/${row.id}`)}
-                  className="font-medium text-blue-600 hover:underline"
-                >
-                  {row.title}
-                </button>
-              ),
-            },
+            { key: 'title', header: 'Quiz', render: (row: Quiz) => <span className="font-medium text-slate-900 dark:text-slate-100">{row.title}</span> },
             { key: 'subject', header: 'Subject', render: (row: Quiz) => subjectName(row.subject) },
             { key: 'level', header: 'Level', render: (row: Quiz) => levelName(row.class_level) },
             {
@@ -161,6 +149,7 @@ export default function QuizzesPage() {
           ]}
           data={quizzes}
           getRowKey={(row) => String(row.id)}
+          onRowClick={(row) => navigate(`/teacher/quizzes/${row.id}`)}
         />
       )}
 

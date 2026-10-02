@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { Card, CardBody } from '@/components/ui/Card'
@@ -15,15 +15,24 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-slate-50 px-4 dark:bg-slate-950">
-      {/* Background watermark -- large, centered, faded well behind the
-          card so the form stays fully readable. `pointer-events-none` and
-          `aria-hidden` since it's purely decorative. */}
       <img
         src="/soma-icon.png"
         alt=""
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 h-full w-full object-contain opacity-[0.06] dark:opacity-[0.1]"
       />
+
+      <div className="absolute top-4 left-4 z-10">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-200/60 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5">
+            <path fillRule="evenodd" d="M9.78 4.22a.75.75 0 0 1 0 1.06L7.06 8l2.72 2.72a.75.75 0 1 1-1.06 1.06L5.47 8.53a.75.75 0 0 1 0-1.06l3.25-3.25a.75.75 0 0 1 1.06 0Z" clipRule="evenodd" />
+          </svg>
+          Back to home
+        </Link>
+      </div>
 
       <div className="absolute top-4 right-4 z-10">
         <ThemeToggle />

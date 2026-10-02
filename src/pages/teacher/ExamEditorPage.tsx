@@ -348,15 +348,15 @@ export default function ExamEditorPage() {
       />
 
       <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex min-w-[720px] items-center justify-between text-xs font-medium">
-          {['Exam Setup', 'Questions', 'Marking Scheme', 'Review & Publish', 'Marking', 'Results'].map((label, index) => (
-            <div key={label} className={`flex items-center gap-2 ${index <= (isDraft ? 2 : isMarking ? 4 : 3) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}`}><span className="flex h-7 w-7 items-center justify-center rounded-full border">{index + 1}</span>{label}</div>
+        <div className="flex min-w-[560px] items-center justify-between text-xs font-medium">
+          {['Setup', 'Questions', 'Scheme', 'Publish', 'Marking', 'Results'].map((label, index) => (
+            <div key={label} className={`flex items-center gap-1.5 ${index <= (isDraft ? 2 : isMarking ? 4 : 3) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}`}><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[10px]">{index + 1}</span><span className="whitespace-nowrap">{label}</span></div>
           ))}
         </div>
       </div>
 
       <Card>
-          <CardHeader className="flex items-center justify-between">
+          <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Marking scheme & distribution</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">{!isDraft ? 'Locked after publishing — create a new draft version to change it.' : distributionOk ? '✓ Distribution complete' : `⚠ Questions total ${totalMarks} / ${configuredTotal} marks`}</p>

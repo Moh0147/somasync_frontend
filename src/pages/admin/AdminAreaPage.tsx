@@ -19,6 +19,7 @@ import SubjectDetailPage from './SubjectDetailPage'
 import SubjectsPage from './SubjectsPage'
 import SystemAdminDashboardPage from './SystemAdminDashboardPage'
 import SystemAnalyticsPage from './SystemAnalyticsPage'
+import SystemUsersPage from './SystemUsersPage'
 import TeachersPage from './TeachersPage'
 import TopicDetailPage from './TopicDetailPage'
 
@@ -66,10 +67,7 @@ export default function AdminAreaPage() {
           path="users"
           element={
             <RequireSystemAdmin>
-              <ComingSoonPage
-                title="Users"
-                description="A cross-school user directory isn't wired up on the backend yet."
-              />
+              <SystemUsersPage />
             </RequireSystemAdmin>
           }
         />

@@ -112,13 +112,20 @@ export function ScriptsPanel({
         {scripts.length > 0 && (
           <ul className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
             {scripts.map((script) => (
-              <li key={script.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+              <li
+                key={script.id}
+                onClick={() => navigate(`/teacher/exams/${examId}/scripts/${script.id}`)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/teacher/exams/${examId}/scripts/${script.id}`) } }}
+                tabIndex={0}
+                className="flex cursor-pointer items-center justify-between gap-3 py-2.5 text-sm transition-colors duration-150 hover:bg-blue-50/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 dark:hover:bg-blue-500/5"
+              >
                 <div className="min-w-0">
                   <p className="font-medium text-slate-900 dark:text-slate-100">{candidateLabel(script.candidate)}</p>
                   <a
                     href={resolveMediaUrl(script.file_reference)}
                     target="_blank"
                     rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
                     className="block truncate text-xs text-blue-600 hover:underline dark:text-blue-400"
                   >
                     {script.file_name}
@@ -129,13 +136,6 @@ export function ScriptsPanel({
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <StatusBadge status={scriptStatusMap[script.status]} label={scriptStatusLabel[script.status]} />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate(`/teacher/exams/${examId}/scripts/${script.id}`)}
-                  >
-                    Review
-                  </Button>
                 </div>
               </li>
             ))}

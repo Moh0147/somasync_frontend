@@ -56,19 +56,7 @@ export default function MyClassesPage() {
       {!error && classes && classes.length > 0 && (
         <Table
           columns={[
-            {
-              key: 'name',
-              header: 'Class',
-              render: (row: SchoolClass) => (
-                <button
-                  type="button"
-                  onClick={() => navigate(`/teacher/classes/${row.id}`)}
-                  className="font-medium text-blue-600 hover:underline"
-                >
-                  {row.name}
-                </button>
-              ),
-            },
+            { key: 'name', header: 'Class', render: (row: SchoolClass) => <span className="font-medium text-slate-900 dark:text-slate-100">{row.name}</span> },
             { key: 'level', header: 'Level', render: (row: SchoolClass) => levelName(row.class_level) },
             { key: 'year', header: 'Year', render: (row: SchoolClass) => String(row.academic_year) },
             {
@@ -81,6 +69,7 @@ export default function MyClassesPage() {
           ]}
           data={classes}
           getRowKey={(row) => String(row.id)}
+          onRowClick={(row) => navigate(`/teacher/classes/${row.id}`)}
         />
       )}
     </div>

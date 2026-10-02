@@ -85,6 +85,21 @@ export interface SystemUsers {
   by_role: Record<string, number>
 }
 
+export interface SystemDirectoryUser {
+  id: number
+  username: string
+  email: string
+  first_name: string
+  last_name: string
+  phone_number: string
+  role: 'ADMIN' | 'TEACHER' | 'STUDENT'
+  admin_scope: 'SYSTEM' | 'SCHOOL' | null
+  school: number | null
+  school_name: string
+  is_active: boolean
+  date_joined: string
+}
+
 export interface SystemUsage {
   school_count: number
   active_school_count: number

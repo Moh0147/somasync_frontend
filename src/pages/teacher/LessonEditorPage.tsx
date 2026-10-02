@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { Textarea } from '@/components/ui/Textarea'
+import { UploadIcon } from '@/components/ui/icons'
 import { listClassLevels, listSubjects, listTopics } from '@/services/academicsService'
 import { getApiErrorMessage } from '@/services/apiError'
 import { resolveMediaUrl } from '@/services/mediaUrl'
@@ -285,40 +286,76 @@ export default function LessonEditorPage() {
       </Card>
 
       <Card>
-        <CardHeader className="flex items-center justify-between">
+        <CardHeader>
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Supporting attachments</p>
-          <Button size="sm" disabled={isUploading} onClick={() => fileInputRef.current?.click()}>
-            {isUploading ? 'Uploading…' : 'Upload file'}
-          </Button>
-          <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSelected} />
         </CardHeader>
+        <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSelected} />
         <CardBody>
-          {attachments.length === 0 && (
-            <EmptyState title="No attachments yet." description="A PDF is supporting material, not the lesson itself." />
-          )}
-          {attachments.length > 0 && (
-            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
-              {attachments.map((attachment) => (
-                <li key={attachment.id} className="flex items-center justify-between py-2.5 text-sm">
-                  <div>
-                    <a
-                      href={resolveMediaUrl(attachment.file_reference)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="font-medium text-blue-600 hover:underline"
+          {attachments.length === 0 ? (
+            <button
+              type="button"
+              disabled={isUploading}
+              onClick={() => fileInputRef.current?.click()}
+              className="flex w-full cursor-pointer flex-col items-center gap-3 rounded-lg border-2 border-dashed border-slate-200 px-6 py-10 text-center transition-colors hover:border-blue-400 hover:bg-blue-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:hover:border-blue-500 dark:hover:bg-blue-500/5"
+            >
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                <UploadIcon className="h-5 w-5" />
+              </span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">
+                {isUploading ? 'Uploading…' : 'Click to upload a file'}
+              </span>
+              <span className="mt-1 rounded-md bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
+                {isUploading ? 'Uploading…' : 'Upload file'}
+              </span>
+            </button>
+          ) : (
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click() } }}
+              tabIndex={0}
+              role="button"
+              aria-label="Upload attachment"
+              className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
+            >
+              <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+                {attachments.map((attachment) => (
+                  <li key={attachment.id} className="flex items-center justify-between py-2.5 text-sm">
+                    <div>
+                      <a
+                        href={resolveMediaUrl(attachment.file_reference)}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="font-medium text-blue-600 hover:underline"
+                      >
+                        {attachment.file_name}
+                      </a>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        {formatBytes(attachment.file_size)} · v{attachment.version}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => { e.stopPropagation(); void handleDeleteAttachment(attachment.id) }}
                     >
-                      {attachment.file_name}
-                    </a>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      {formatBytes(attachment.file_size)} · v{attachment.version}
-                    </p>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={() => handleDeleteAttachment(attachment.id)}>
-                    Remove
-                  </Button>
-                </li>
-              ))}
-            </ul>
+                      Remove
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-3 flex items-center justify-center border-t border-slate-100 pt-3 dark:border-slate-800">
+                <button
+                  type="button"
+                  disabled={isUploading}
+                  onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click() }}
+                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 disabled:opacity-60 dark:text-blue-400 dark:hover:bg-blue-500/10"
+                >
+                  <UploadIcon className="h-4 w-4" />
+                  {isUploading ? 'Uploading…' : 'Add file'}
+                </button>
+              </div>
+            </div>
           )}
         </CardBody>
       </Card>

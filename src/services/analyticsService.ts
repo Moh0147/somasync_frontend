@@ -8,6 +8,7 @@ import type {
   StudentPerformance,
   SubjectPerformance,
   SystemSchoolRow,
+  SystemDirectoryUser,
   SystemUsage,
   SystemUsers,
 } from '@/types/analytics'
@@ -76,6 +77,11 @@ export async function getSystemSchools() {
 
 export async function getSystemUsers() {
   const response = await apiClient.get<{ data: SystemUsers }>('/analytics/system/users/')
+  return response.data.data
+}
+
+export async function getSystemUserDirectory() {
+  const response = await apiClient.get<{ data: SystemDirectoryUser[] }>('/analytics/system/user-directory/')
   return response.data.data
 }
 

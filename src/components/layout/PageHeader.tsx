@@ -15,29 +15,30 @@ export function PageHeader({ title, description, actions, backHref, backLabel = 
   const location = useLocation()
   const navigate = useNavigate()
   const segments = location.pathname.split('/').filter(Boolean)
-  // List/dashboard pages remain uncluttered. Detail/editor pages get a
-  // consistent parent affordance without every page having to duplicate it.
   const shouldShowBack = !hideBack && (Boolean(backHref) || segments.length >= 3)
 
   return (
-    <div className="flex items-start justify-between gap-4 border-l-4 border-blue-600 bg-white px-4 py-3 dark:bg-slate-900">
-      <div className="flex items-start gap-3">
-        {shouldShowBack && (
-          <button
-            type="button"
-            onClick={() => (backHref ? navigate(backHref) : navigate(-1))}
-            className="mt-0.5 inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-            aria-label={backLabel}
-          >
-            ← <span className="hidden sm:inline">{backLabel}</span>
-          </button>
-        )}
+    <div className="border-l-4 border-blue-600 bg-white px-4 py-3 dark:bg-slate-900">
+      {shouldShowBack && (
+        <button
+          type="button"
+          onClick={() => (backHref ? navigate(backHref) : navigate(-1))}
+          className="mb-1.5 inline-flex items-center gap-1 text-xs font-medium text-slate-400 transition-colors hover:text-blue-600 dark:text-slate-500 dark:hover:text-blue-400"
+          aria-label={backLabel}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3 w-3">
+            <path fillRule="evenodd" d="M9.78 4.22a.75.75 0 0 1 0 1.06L7.06 8l2.72 2.72a.75.75 0 1 1-1.06 1.06L5.47 8.53a.75.75 0 0 1 0-1.06l3.25-3.25a.75.75 0 0 1 1.06 0Z" clipRule="evenodd" />
+          </svg>
+          {backLabel}
+        </button>
+      )}
+      <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-base font-semibold text-slate-900 dark:text-slate-100">{title}</h1>
           {description && <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{description}</p>}
         </div>
+        {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}
       </div>
-      {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
     </div>
   )
 }

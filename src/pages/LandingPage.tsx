@@ -8,10 +8,8 @@ import {
   CheckIcon,
   LightbulbIcon,
   OfflineIcon,
-  PlayIcon,
   SchoolsIcon,
   StudentsIcon,
-  SyncIcon,
   UsersIcon,
 } from '@/components/ui/icons'
 
@@ -157,14 +155,14 @@ export default function LandingPage() {
       </header>
 
       {/* A thin divider in the Tanzanian flag's colors (green/yellow/black/
-          yellow/blue), repeated as a diagonal ribbon -- a decorative color
-          accent, not a rendering of the flag itself. */}
+          yellow/blue) — each color appears exactly once across the full width,
+          proportional to the flag's diagonal stripe. */}
       <div
         aria-hidden="true"
         className="h-1.5 w-full"
         style={{
           backgroundImage:
-            'repeating-linear-gradient(135deg, #1EB53A 0px, #1EB53A 22px, #FCD116 22px, #FCD116 28px, #000000 28px, #000000 34px, #FCD116 34px, #FCD116 40px, #00A3DD 40px, #00A3DD 62px)',
+            'linear-gradient(90deg, #1EB53A 0%, #1EB53A 35%, #FCD116 35%, #FCD116 42%, #000000 42%, #000000 58%, #FCD116 58%, #FCD116 65%, #00A3DD 65%, #00A3DD 100%)',
         }}
       />
 
@@ -211,43 +209,11 @@ export default function LandingPage() {
               no extra network weight, consistent with the app's own
               low-end-device philosophy. */}
           <div className="flex justify-center lg:justify-end">
-            <div
-              aria-hidden="true"
-              className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-4 shadow-lg dark:border-slate-800 dark:bg-slate-900"
-            >
-              <div className="mb-3 flex items-center gap-1.5 rounded-md bg-teal-50 px-3 py-1.5 text-xs font-medium text-teal-700 dark:bg-teal-500/10 dark:text-teal-400">
-                <OfflineIcon className="h-3.5 w-3.5 shrink-0" />
-                You're offline — showing downloaded content.
-              </div>
-
-              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Good morning, Asha 👋</p>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Continue your learning journey.</p>
-
-              <div className="mt-4 rounded-md border border-slate-200 p-3 dark:border-slate-800">
-                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Biology • Form II</p>
-                <p className="mt-0.5 text-sm font-semibold text-slate-900 dark:text-slate-100">Photosynthesis</p>
-                <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                  <span>Progress</span>
-                  <span>60%</span>
-                </div>
-                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
-                  <div className="h-full w-3/5 rounded-full bg-blue-600" />
-                </div>
-                <div className="mt-3 inline-flex items-center gap-1 rounded-md bg-blue-600 px-2.5 py-1 text-[11px] font-medium text-white">
-                  <PlayIcon className="h-3 w-3" />
-                  Continue Learning
-                </div>
-              </div>
-
-              <div className="mt-3 flex items-center gap-3 text-[11px]">
-                <span className="flex items-center gap-1 text-green-700 dark:text-green-400">
-                  <CheckIcon className="h-3 w-3" /> 2 synced
-                </span>
-                <span className="flex items-center gap-1 text-teal-700 dark:text-teal-400">
-                  <SyncIcon className="h-3 w-3" /> 1 pending
-                </span>
-              </div>
-            </div>
+            <img
+              src="/soma-hero.jpeg"
+              alt="SomaSync app preview"
+              className="w-full max-w-lg rounded-2xl border border-slate-200 shadow-lg dark:border-slate-800"
+            />
           </div>
         </section>
 

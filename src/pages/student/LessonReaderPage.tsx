@@ -374,8 +374,8 @@ export default function LessonReaderPage() {
                   {question.question_type === 'MATCHING' ? (
                     <div className="flex flex-col gap-2">
                       {question.pairs.map((pair) => (
-                        <div key={pair.id} className="flex items-center gap-3">
-                          <span className="w-40 shrink-0 text-sm text-slate-700 dark:text-slate-300">{pair.left_text}</span>
+                        <div key={pair.id} className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+                          <span className="text-sm font-medium text-slate-700 sm:w-40 sm:shrink-0 dark:text-slate-300">{pair.left_text}</span>
                           <Select
                             value={matchingResponses[question.id]?.[String(pair.id)] ?? ''}
                             onChange={(event) =>

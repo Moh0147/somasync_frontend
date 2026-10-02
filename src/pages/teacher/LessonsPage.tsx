@@ -141,19 +141,7 @@ export default function LessonsPage() {
       {!error && lessons && lessons.length > 0 && (
         <Table
           columns={[
-            {
-              key: 'title',
-              header: 'Lesson',
-              render: (row: Lesson) => (
-                <button
-                  type="button"
-                  onClick={() => navigate(`/teacher/lessons/${row.id}`)}
-                  className="font-medium text-blue-600 hover:underline"
-                >
-                  {row.title}
-                </button>
-              ),
-            },
+            { key: 'title', header: 'Lesson', render: (row: Lesson) => <span className="font-medium text-slate-900 dark:text-slate-100">{row.title}</span> },
             { key: 'subject', header: 'Subject', render: (row: Lesson) => subjectName(row.subject) },
             { key: 'level', header: 'Level', render: (row: Lesson) => levelName(row.class_level) },
             {
@@ -168,6 +156,7 @@ export default function LessonsPage() {
           ]}
           data={lessons}
           getRowKey={(row) => String(row.id)}
+          onRowClick={(row) => navigate(`/teacher/lessons/${row.id}`)}
         />
       )}
 

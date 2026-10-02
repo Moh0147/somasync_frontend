@@ -18,6 +18,15 @@
   body {
     @apply bg-slate-50 text-slate-900 antialiased transition-colors duration-150 dark:bg-slate-950 dark:text-slate-100;
   }
+
+  button:not(:disabled) {
+    cursor: pointer;
+    transition: filter 150ms ease, background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+  }
+
+  button:not(:disabled):hover {
+    filter: brightness(1.08);
+  }
 }
 
 /* Slow, gentle drift for the landing page's decorative background bubbles

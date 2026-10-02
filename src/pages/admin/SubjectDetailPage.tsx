@@ -154,19 +154,7 @@ export default function SubjectDetailPage() {
           {topics.length > 0 && (
             <Table
               columns={[
-                {
-                  key: 'title',
-                  header: 'Topic',
-                  render: (row: Topic) => (
-                    <button
-                      type="button"
-                      onClick={() => navigate(`/admin/subjects/${id}/topics/${row.id}`)}
-                      className="font-medium text-blue-600 hover:underline dark:text-blue-400"
-                    >
-                      {row.title}
-                    </button>
-                  ),
-                },
+                { key: 'title', header: 'Topic', render: (row: Topic) => <span className="font-medium text-slate-900 dark:text-slate-100">{row.title}</span> },
                 { key: 'level', header: 'Level', render: (row: Topic) => levelName(row.class_level) },
                 {
                   key: 'status',
@@ -178,6 +166,7 @@ export default function SubjectDetailPage() {
               ]}
               data={topics}
               getRowKey={(row) => String(row.id)}
+              onRowClick={(row) => navigate(`/admin/subjects/${id}/topics/${row.id}`)}
             />
           )}
         </CardBody>

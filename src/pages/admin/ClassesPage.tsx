@@ -120,19 +120,7 @@ export default function ClassesPage() {
       {!error && classes && classes.length > 0 && (
         <Table
           columns={[
-            {
-              key: 'name',
-              header: 'Class',
-              render: (row: SchoolClass) => (
-                <button
-                  type="button"
-                  onClick={() => navigate(`/admin/classes/${row.id}`)}
-                  className="font-medium text-blue-600 hover:underline dark:text-blue-400"
-                >
-                  {row.name}
-                </button>
-              ),
-            },
+            { key: 'name', header: 'Class', render: (row: SchoolClass) => <span className="font-medium text-slate-900 dark:text-slate-100">{row.name}</span> },
             { key: 'level', header: 'Level', render: (row: SchoolClass) => levelName(row.class_level) },
             { key: 'year', header: 'Year', render: (row: SchoolClass) => String(row.academic_year) },
             { key: 'code', header: 'Class code', render: (row: SchoolClass) => row.class_code },
@@ -159,6 +147,7 @@ export default function ClassesPage() {
           ]}
           data={classes}
           getRowKey={(row) => String(row.id)}
+          onRowClick={(row) => navigate(`/admin/classes/${row.id}`)}
         />
       )}
 

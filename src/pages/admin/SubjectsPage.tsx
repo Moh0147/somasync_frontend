@@ -80,19 +80,7 @@ export default function SubjectsPage() {
       {!error && subjects && subjects.length > 0 && (
         <Table
           columns={[
-            {
-              key: 'name',
-              header: 'Subject',
-              render: (row: Subject) => (
-                <button
-                  type="button"
-                  onClick={() => navigate(`/admin/subjects/${row.id}`)}
-                  className="font-medium text-blue-600 hover:underline dark:text-blue-400"
-                >
-                  {row.name}
-                </button>
-              ),
-            },
+            { key: 'name', header: 'Subject', render: (row: Subject) => <span className="font-medium text-slate-900 dark:text-slate-100">{row.name}</span> },
             { key: 'code', header: 'Code', render: (row: Subject) => row.code || '—' },
             {
               key: 'status',
@@ -104,6 +92,7 @@ export default function SubjectsPage() {
           ]}
           data={subjects}
           getRowKey={(row) => String(row.id)}
+          onRowClick={(row) => navigate(`/admin/subjects/${row.id}`)}
         />
       )}
 
