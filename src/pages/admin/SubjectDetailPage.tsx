@@ -154,8 +154,13 @@ export default function SubjectDetailPage() {
           {topics.length > 0 && (
             <Table
               columns={[
-                { key: 'title', header: 'Topic', render: (row: Topic) => <span className="font-medium text-slate-900 dark:text-slate-100">{row.title}</span> },
-                { key: 'level', header: 'Level', render: (row: Topic) => levelName(row.class_level) },
+                { key: 'title', header: 'Topic', render: (row: Topic) => (
+                  <div>
+                    <span className="font-medium text-slate-900 dark:text-slate-100">{row.title}</span>
+                    <p className="mt-0.5 text-xs text-slate-500 sm:hidden dark:text-slate-400">{levelName(row.class_level)}</p>
+                  </div>
+                )},
+                { key: 'level', header: 'Level', render: (row: Topic) => levelName(row.class_level), hideOnMobile: true },
                 {
                   key: 'status',
                   header: 'Status',

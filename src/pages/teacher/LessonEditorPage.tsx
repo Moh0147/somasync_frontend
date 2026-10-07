@@ -374,13 +374,13 @@ export default function LessonEditorPage() {
           {sortedSections.length > 0 && (
             <ul className="divide-y divide-slate-100 dark:divide-slate-800">
               {sortedSections.map((section, index) => (
-                <li key={section.id} className="flex items-center justify-between gap-2 py-2.5 text-sm">
+                <li key={section.id} className="flex flex-col gap-2 py-2.5 text-sm sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="font-medium text-slate-900 dark:text-slate-100">
                       Section {index + 1}: {section.title}
                     </p>
                   </div>
-                  <div className="flex shrink-0 items-center gap-1">
+                  <div className="flex flex-wrap items-center gap-1">
                     <Button
                       variant="ghost"
                       size="sm"

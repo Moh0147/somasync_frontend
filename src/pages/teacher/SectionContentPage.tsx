@@ -195,23 +195,26 @@ export default function SectionContentPage() {
             <ul className="divide-y divide-slate-100 dark:divide-slate-800">
               {sortedBlocks.map((block) => (
                 <li key={block.id} className="flex items-start justify-between gap-4 py-3 text-sm">
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1 overflow-x-hidden">
                     <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{block.block_type}</p>
                     {block.block_type === 'IMAGE' ? (
                       block.image_reference ? (
                         <img
                           src={resolveMediaUrl(block.image_reference)}
                           alt=""
-                          className="mt-1 h-24 rounded-md border border-slate-200 object-cover dark:border-slate-800"
+                          className="mt-1 max-w-full rounded-md border border-slate-200 object-cover dark:border-slate-800"
                         />
                       ) : (
                         <p className="text-slate-500 dark:text-slate-400">Image attachment unavailable.</p>
                       )
                     ) : (
-                      <div className="prose prose-sm mt-1 max-w-none text-slate-700 dark:prose-invert dark:text-slate-300" dangerouslySetInnerHTML={{ __html: sanitizeLessonHtml(block.content) }} />
+                      <div
+                        className="prose prose-sm mt-1 max-w-none break-words text-slate-700 dark:prose-invert dark:text-slate-300 [&_img]:max-w-full [&_img]:h-auto [&_pre]:overflow-x-auto [&_table]:w-full [&_*]:max-w-full"
+                        dangerouslySetInnerHTML={{ __html: sanitizeLessonHtml(block.content) }}
+                      />
                     )}
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(block.id)}>
+                  <Button variant="ghost" size="sm" className="shrink-0" onClick={() => handleDelete(block.id)}>
                     Remove
                   </Button>
                 </li>
@@ -249,44 +252,46 @@ export default function SectionContentPage() {
             ) : (
               <div className="flex flex-col gap-1.5">
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Content</span>
-                <div className="flex flex-wrap items-center gap-1 rounded-t-md border border-b-0 border-slate-300 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-800">
+                <div className="flex items-center gap-1 overflow-x-auto rounded-t-md border border-b-0 border-slate-300 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-800">
                   {[
                     ['bold', 'B', 'font-bold'], ['italic', 'I', 'italic'], ['underline', 'U', 'underline'],
                   ].map(([command, label, style]) => (
-                    <button key={command} type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => format(command)} className={`h-8 min-w-8 rounded px-2 text-sm text-slate-700 hover:bg-white dark:text-slate-200 dark:hover:bg-slate-700 ${style}`} aria-label={command}>{label}</button>
+                    <button key={command} type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => format(command)} className={`h-8 shrink-0 min-w-8 rounded px-2 text-sm text-slate-700 hover:bg-white dark:text-slate-200 dark:hover:bg-slate-700 ${style}`} aria-label={command}>{label}</button>
                   ))}
-                  <span className="mx-1 h-5 w-px bg-slate-300 dark:bg-slate-600" />
-                  <select aria-label="Font style" defaultValue="" onMouseDown={saveSelection} onChange={(event) => { format('fontName', event.target.value); event.currentTarget.value = '' }} className="h-8 rounded border border-slate-300 bg-white px-2 text-xs text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">
+                  <span className="mx-1 h-5 w-px shrink-0 bg-slate-300 dark:bg-slate-600" />
+                  <select aria-label="Font style" defaultValue="" onMouseDown={saveSelection} onChange={(event) => { format('fontName', event.target.value); event.currentTarget.value = '' }} className="h-8 w-[80px] shrink-0 rounded border border-slate-300 bg-white px-2 text-xs text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">
                     <option value="" disabled>Font</option>
                     <option value="Arial">Arial</option>
                     <option value="Georgia">Georgia</option>
                     <option value="Tahoma">Tahoma</option>
-                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Times New Roman">Times NR</option>
                     <option value="Verdana">Verdana</option>
                   </select>
-                  <select aria-label="Font size" defaultValue="" onMouseDown={saveSelection} onChange={(event) => { format('fontSize', event.target.value); event.currentTarget.value = '' }} className="h-8 rounded border border-slate-300 bg-white px-2 text-xs text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">
+                  <select aria-label="Font size" defaultValue="" onMouseDown={saveSelection} onChange={(event) => { format('fontSize', event.target.value); event.currentTarget.value = '' }} className="h-8 w-[64px] shrink-0 rounded border border-slate-300 bg-white px-2 text-xs text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">
                     <option value="" disabled>Size</option>
                     <option value="1">Small</option>
                     <option value="3">Normal</option>
                     <option value="5">Large</option>
                     <option value="7">Huge</option>
                   </select>
-                  <label title="Text color" className="flex h-8 cursor-pointer items-center gap-1 rounded border border-slate-300 bg-white px-2 text-xs text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">
+                  <label title="Text color" className="flex h-8 shrink-0 cursor-pointer items-center gap-1 rounded border border-slate-300 bg-white px-2 text-xs text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">
                     <span className="font-semibold">A</span><input aria-label="Text color" type="color" defaultValue="#1e293b" onMouseDown={saveSelection} onChange={(event) => format('foreColor', event.target.value)} className="h-5 w-5 cursor-pointer border-0 bg-transparent p-0" />
                   </label>
-                  <label title="Highlight color" className="flex h-8 cursor-pointer items-center gap-1 rounded border border-slate-300 bg-white px-2 text-xs text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">
+                  <label title="Highlight color" className="flex h-8 shrink-0 cursor-pointer items-center gap-1 rounded border border-slate-300 bg-white px-2 text-xs text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">
                     <span className="rounded bg-yellow-200 px-1 font-semibold">H</span><input aria-label="Highlight color" type="color" defaultValue="#fef08a" onMouseDown={saveSelection} onChange={(event) => format('hiliteColor', event.target.value)} className="h-5 w-5 cursor-pointer border-0 bg-transparent p-0" />
                   </label>
-                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => format('formatBlock', 'h2')} className="h-8 rounded px-2 text-xs font-semibold text-slate-700 hover:bg-white dark:text-slate-200 dark:hover:bg-slate-700">Heading</button>
-                  <button type="button" title="Bulleted list" aria-label="Bulleted list" onMouseDown={(event) => event.preventDefault()} onClick={() => format('insertUnorderedList')} className="flex h-8 items-center gap-1 rounded px-2 text-xs text-slate-700 hover:bg-white dark:text-slate-200 dark:hover:bg-slate-700"><ListIcon aria-hidden="true" className="h-4 w-4" />Bullets</button>
-                  <button type="button" title="Numbered list" aria-label="Numbered list" onMouseDown={(event) => event.preventDefault()} onClick={() => format('insertOrderedList')} className="flex h-8 items-center gap-1 rounded px-2 text-xs text-slate-700 hover:bg-white dark:text-slate-200 dark:hover:bg-slate-700"><ListOrderedIcon aria-hidden="true" className="h-4 w-4" />Numbered</button>
-                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => format('formatBlock', 'blockquote')} className="h-8 rounded px-2 text-xs text-slate-700 hover:bg-white dark:text-slate-200 dark:hover:bg-slate-700">Quote</button>
-                  <span className="mx-1 h-5 w-px bg-slate-300 dark:bg-slate-600" />
+                  <span className="mx-1 h-5 w-px shrink-0 bg-slate-300 dark:bg-slate-600" />
+                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => format('formatBlock', 'h2')} className="h-8 shrink-0 rounded px-2 text-xs font-semibold text-slate-700 hover:bg-white dark:text-slate-200 dark:hover:bg-slate-700">H2</button>
+                  <button type="button" title="Bulleted list" aria-label="Bulleted list" onMouseDown={(event) => event.preventDefault()} onClick={() => format('insertUnorderedList')} className="flex h-8 shrink-0 items-center gap-1 rounded px-2 text-xs text-slate-700 hover:bg-white dark:text-slate-200 dark:hover:bg-slate-700"><ListIcon aria-hidden="true" className="h-4 w-4" /></button>
+                  <button type="button" title="Numbered list" aria-label="Numbered list" onMouseDown={(event) => event.preventDefault()} onClick={() => format('insertOrderedList')} className="flex h-8 shrink-0 items-center gap-1 rounded px-2 text-xs text-slate-700 hover:bg-white dark:text-slate-200 dark:hover:bg-slate-700"><ListOrderedIcon aria-hidden="true" className="h-4 w-4" /></button>
+                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => format('formatBlock', 'blockquote')} className="h-8 shrink-0 rounded px-2 text-xs text-slate-700 hover:bg-white dark:text-slate-200 dark:hover:bg-slate-700">"</button>
+                  <span className="mx-1 h-5 w-px shrink-0 bg-slate-300 dark:bg-slate-600" />
                   <span className="sr-only">Alignment</span>
                   {[[ 'justifyLeft', AlignLeftIcon, 'Align left' ], [ 'justifyCenter', AlignCenterIcon, 'Align center' ], [ 'justifyRight', AlignRightIcon, 'Align right' ], [ 'justifyFull', AlignJustifyIcon, 'Justify' ]].map(([command, Icon, title]) => (
-                    <button key={command as string} type="button" title={title as string} aria-label={title as string} onMouseDown={(event) => event.preventDefault()} onClick={() => format(command as string)} className="flex h-8 min-w-8 items-center justify-center rounded px-2 text-slate-700 hover:bg-white dark:text-slate-200 dark:hover:bg-slate-700"><Icon aria-hidden="true" className="h-4 w-4" /></button>
+                    <button key={command as string} type="button" title={title as string} aria-label={title as string} onMouseDown={(event) => event.preventDefault()} onClick={() => format(command as string)} className="flex h-8 min-w-8 shrink-0 items-center justify-center rounded px-2 text-slate-700 hover:bg-white dark:text-slate-200 dark:hover:bg-slate-700"><Icon aria-hidden="true" className="h-4 w-4" /></button>
                   ))}
-                  <button type="button" onClick={() => imageInputRef.current?.click()} disabled={isUploading} className="h-8 rounded px-2 text-xs text-blue-700 hover:bg-white disabled:opacity-50 dark:text-blue-300 dark:hover:bg-slate-700">{isUploading ? 'Uploading…' : '＋ Image'}</button>
+                  <span className="mx-1 h-5 w-px shrink-0 bg-slate-300 dark:bg-slate-600" />
+                  <button type="button" onClick={() => imageInputRef.current?.click()} disabled={isUploading} className="h-8 shrink-0 rounded px-2 text-xs text-blue-700 hover:bg-white disabled:opacity-50 dark:text-blue-300 dark:hover:bg-slate-700">{isUploading ? '…' : '＋ Img'}</button>
                   <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelected} />
                 </div>
                 <div ref={editorRef} contentEditable role="textbox" aria-multiline="true" suppressContentEditableWarning onInput={(event) => { setTextValue(event.currentTarget.innerHTML); saveSelection() }} onKeyUp={saveSelection} onMouseUp={saveSelection} data-placeholder="Write your lesson notes here…" className="lesson-editor-content min-h-48 rounded-b-md border border-slate-300 bg-white px-3 py-3 text-sm leading-7 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 [&:empty]:before:pointer-events-none [&:empty]:before:text-slate-400 [&:empty]:before:content-[attr(data-placeholder)]" />

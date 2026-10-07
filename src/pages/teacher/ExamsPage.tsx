@@ -109,10 +109,15 @@ export default function ExamsPage() {
       {!error && exams && exams.length > 0 && (
         <Table
           columns={[
-            { key: 'title', header: 'Exam', render: (row: Exam) => <span className="font-medium text-slate-900 dark:text-slate-100">{row.title}</span> },
-            { key: 'subject', header: 'Subject', render: (row: Exam) => subjectName(row.subject) },
-            { key: 'level', header: 'Level', render: (row: Exam) => levelName(row.class_level) },
-            { key: 'year', header: 'Year', render: (row: Exam) => String(row.academic_year) },
+            { key: 'title', header: 'Exam', render: (row: Exam) => (
+              <div>
+                <span className="font-medium text-slate-900 dark:text-slate-100">{row.title}</span>
+                <p className="mt-0.5 text-xs text-slate-500 sm:hidden dark:text-slate-400">{subjectName(row.subject)} · {levelName(row.class_level)} · {row.academic_year}</p>
+              </div>
+            )},
+            { key: 'subject', header: 'Subject', render: (row: Exam) => subjectName(row.subject), hideOnMobile: true },
+            { key: 'level', header: 'Level', render: (row: Exam) => levelName(row.class_level), hideOnMobile: true },
+            { key: 'year', header: 'Year', render: (row: Exam) => String(row.academic_year), hideOnMobile: true },
             {
               key: 'status',
               header: 'Status',

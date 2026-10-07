@@ -32,6 +32,7 @@ import {
   publishExamResults,
   startMarking,
   updateExam,
+  updateSectionSettings,
   uploadMarkingScheme,
   uploadExamPaper,
 } from '@/services/examsService'
@@ -74,6 +75,9 @@ export default function ExamEditorPage() {
   const [isUploadingScheme, setIsUploadingScheme] = useState(false)
   const [isUploadingPaper, setIsUploadingPaper] = useState(false)
 
+  const [sectionRuleForm, setSectionRuleForm] = useState({ section: '', required: '2' })
+  const [isSavingSectionRule, setIsSavingSectionRule] = useState(false)
+
   const [questionForm, setQuestionForm] = useState({
     section: '',
     question_number: '',
@@ -81,6 +85,7 @@ export default function ExamEditorPage() {
     question_type: 'OBJECTIVE' as ExamQuestionType,
     max_marks: '5',
     correct_answer: '',
+    is_compulsory: true,
   })
   const [questionError, setQuestionError] = useState<string | null>(null)
   const [isAddingQuestion, setIsAddingQuestion] = useState(false)
@@ -275,6 +280,7 @@ export default function ExamEditorPage() {
         question_type: questionForm.question_type,
         max_marks: Number(questionForm.max_marks) || 1,
         correct_answer: questionForm.question_type === 'OBJECTIVE' ? questionForm.correct_answer : undefined,
+        is_compulsory: questionForm.is_compulsory,
         order: questions.length + 1,
       })
       setQuestionForm({
@@ -284,6 +290,7 @@ export default function ExamEditorPage() {
         question_type: 'OBJECTIVE',
         max_marks: '5',
         correct_answer: '',
+        is_compulsory: true,
       })
       await refreshQuestions()
       showToast('success', 'Question added.')
@@ -291,6 +298,39 @@ export default function ExamEditorPage() {
       setQuestionError(getApiErrorMessage(err))
     } finally {
       setIsAddingQuestion(false)
+    }
+  }
+
+  async function handleSaveSectionRule(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!exam || !sectionRuleForm.section.trim()) return
+    const requiredCount = Number(sectionRuleForm.required)
+    if (!requiredCount || requiredCount < 1) return
+    setIsSavingSectionRule(true)
+    try {
+      const updated = await updateSectionSettings(id, {
+        ...exam.section_settings,
+        [sectionRuleForm.section.trim()]: requiredCount,
+      })
+      setExam(updated)
+      setSectionRuleForm({ section: '', required: '2' })
+      showToast('success', `Rule saved: ${sectionRuleForm.section.trim()} — answer ${requiredCount}.`)
+    } catch (err) {
+      showToast('error', getApiErrorMessage(err))
+    } finally {
+      setIsSavingSectionRule(false)
+    }
+  }
+
+  async function handleRemoveSectionRule(sectionName: string) {
+    if (!exam) return
+    const updated_settings = { ...exam.section_settings }
+    delete updated_settings[sectionName]
+    try {
+      const updated = await updateSectionSettings(id, updated_settings)
+      setExam(updated)
+    } catch (err) {
+      showToast('error', getApiErrorMessage(err))
     }
   }
 
@@ -305,6 +345,7 @@ export default function ExamEditorPage() {
   const isPublished = exam.status === 'PUBLISHED'
   const isClosed = exam.status === 'CLOSED'
   const isMarking = exam.status === 'MARKING'
+  const isResultsPublished = exam.status === 'RESULTS_PUBLISHED'
 
   return (
     <div className="flex flex-col gap-4">
@@ -333,7 +374,7 @@ export default function ExamEditorPage() {
                 Start Marking
               </Button>
             )}
-            {isMarking && (
+            {(isMarking || isResultsPublished) && (
               <Button size="sm" disabled={isPublishing} onClick={handlePublishResults}>
                 Publish Results
               </Button>
@@ -350,7 +391,7 @@ export default function ExamEditorPage() {
       <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
         <div className="flex min-w-[560px] items-center justify-between text-xs font-medium">
           {['Setup', 'Questions', 'Scheme', 'Publish', 'Marking', 'Results'].map((label, index) => (
-            <div key={label} className={`flex items-center gap-1.5 ${index <= (isDraft ? 2 : isMarking ? 4 : 3) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}`}><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[10px]">{index + 1}</span><span className="whitespace-nowrap">{label}</span></div>
+            <div key={label} className={`flex items-center gap-1.5 ${index <= (isDraft ? 2 : isResultsPublished ? 5 : isMarking ? 4 : 3) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}`}><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[10px]">{index + 1}</span><span className="whitespace-nowrap">{label}</span></div>
           ))}
         </div>
       </div>
@@ -384,6 +425,59 @@ export default function ExamEditorPage() {
           />
         </CardBody>
       </Card>
+
+      {/* Section settings — visible whenever there are sections, not just DRAFT */}
+      {questions.some((q) => q.section) && (
+        <Card>
+          <CardHeader>
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Choice sections (optional answers)</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              For sections where students answer only some questions (e.g. Section C: answer 2 of 3), set the required count here. Unanswered questions in these sections will be scored 0 automatically — no error.
+            </p>
+          </CardHeader>
+          <CardBody className="flex flex-col gap-3">
+            {Object.keys(exam.section_settings).length === 0 && (
+              <p className="text-sm text-slate-500 dark:text-slate-400">No choice sections configured. All sections are treated as compulsory.</p>
+            )}
+            {Object.entries(exam.section_settings).map(([section, required]) => {
+              const total = questions.filter((q) => q.section === section).length
+              return (
+                <div key={section} className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/50">
+                  <p className="text-sm text-slate-900 dark:text-slate-100">
+                    <span className="font-medium">{section}</span>
+                    <span className="ml-2 text-slate-500 dark:text-slate-400">— answer {required} of {total} question{total !== 1 ? 's' : ''}</span>
+                  </p>
+                  <Button size="sm" variant="ghost" onClick={() => handleRemoveSectionRule(section)}>Remove</Button>
+                </div>
+              )
+            })}
+            <form onSubmit={handleSaveSectionRule} className="flex flex-wrap items-end gap-2 border-t border-slate-200 pt-3 dark:border-slate-800">
+              <Select
+                label="Section"
+                value={sectionRuleForm.section}
+                onChange={(e) => setSectionRuleForm({ ...sectionRuleForm, section: e.target.value })}
+                className="w-40"
+              >
+                <option value="">Select section…</option>
+                {[...new Set(questions.map((q) => q.section).filter(Boolean))].map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </Select>
+              <Input
+                label="Questions to answer"
+                type="number"
+                min={1}
+                value={sectionRuleForm.required}
+                onChange={(e) => setSectionRuleForm({ ...sectionRuleForm, required: e.target.value })}
+                className="w-32"
+              />
+              <Button type="submit" size="sm" disabled={isSavingSectionRule || !sectionRuleForm.section}>
+                {isSavingSectionRule ? 'Saving…' : 'Save rule'}
+              </Button>
+            </form>
+          </CardBody>
+        </Card>
+      )}
 
       {questions.length === 0 && isDraft && <EmptyState title="No questions imported yet." description="Upload an exam paper or marking scheme above. SomaSync will build the question structure for you." />}
       {questions
@@ -479,6 +573,15 @@ export default function ExamEditorPage() {
                   onChange={(event) => setQuestionForm({ ...questionForm, correct_answer: event.target.value })}
                 />
               )}
+              <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={questionForm.is_compulsory}
+                  onChange={(event) => setQuestionForm({ ...questionForm, is_compulsory: event.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                Required (uncheck for choice questions, e.g. "answer 2 of 3")
+              </label>
               {questionError && (
                 <p role="alert" className="text-sm text-red-600 dark:text-red-400">
                   {questionError}

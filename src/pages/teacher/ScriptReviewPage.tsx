@@ -136,6 +136,21 @@ export default function ScriptReviewPage() {
   if (error) return <ErrorState description={error} onRetry={load} />
   if (!exam || !script) return <LoadingState message="Loading script…" />
 
+  const sectionSettings = exam?.section_settings ?? {}
+
+  // Compulsory questions whose answer wasn't extracted AND haven't been manually marked yet.
+  // A question is effectively optional if it's in a choice section OR individually non-compulsory.
+  const missingCompulsory = attempt
+    ? attempt.answers.filter((a) => {
+        const q = questions.find((q) => q.id === a.exam_question)
+        if (!q) return false
+        const inChoiceSection = Boolean(q.section && sectionSettings[q.section])
+        const effectivelyOptional = inChoiceSection || !q.is_compulsory
+        return !effectivelyOptional && !(a.recorded_answer || '').trim() && a.teacher_final_marks === null
+      })
+    : []
+  const canFinalize = script.status === 'TEACHER_REVIEW' && missingCompulsory.length === 0
+
   return (
     <div className="flex flex-col gap-4">
       <Breadcrumb items={[{ label: 'Exams', href: '/teacher/exams' }, { label: exam.title, href: `/teacher/exams/${examIdNum}` }, { label: script.file_name }]} />
@@ -163,7 +178,7 @@ export default function ScriptReviewPage() {
             </Button>
           )}
           {script.status === 'TEACHER_REVIEW' && (
-            <Button size="sm" disabled={isFinalizing} onClick={handleFinalize}>
+            <Button size="sm" disabled={isFinalizing || !canFinalize} onClick={handleFinalize}>
               Finalize
             </Button>
           )}
@@ -171,6 +186,17 @@ export default function ScriptReviewPage() {
       </div>
 
       <p className="text-xs text-slate-500 dark:text-slate-400">Extraction: {script.ocr_status === 'READY' ? 'Ready for teacher review' : script.ocr_status === 'FAILED' ? script.ocr_error : script.ocr_status}</p>
+
+      {missingCompulsory.length > 0 && (
+        <div className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 dark:border-amber-500/30 dark:bg-amber-500/10">
+          <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+            {missingCompulsory.length} compulsory question{missingCompulsory.length > 1 ? 's were' : ' was'} not extracted by OCR.
+          </p>
+          <p className="mt-1 text-sm text-amber-700 dark:text-amber-400">
+            Scroll down to the highlighted question{missingCompulsory.length > 1 ? 's' : ''} and transcribe the student's answer manually (or enter 0 if truly blank). Finalize is blocked until all compulsory questions are marked.
+          </p>
+        </div>
+      )}
 
       {script.marking_error && <p className="text-sm text-red-600 dark:text-red-400">{script.marking_error}</p>}
 
@@ -182,7 +208,7 @@ export default function ScriptReviewPage() {
           .map((answer) => {
             const question = questions.find((q) => q.id === answer.exam_question)
             if (!question) return null
-            return <ExamAnswerReviewCard key={answer.id} answer={answer} question={question} onChanged={load} />
+            return <ExamAnswerReviewCard key={answer.id} answer={answer} question={question} sectionSettings={sectionSettings} onChanged={load} />
           })}
     </div>
   )

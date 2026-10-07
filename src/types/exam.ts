@@ -12,6 +12,7 @@ export interface Exam {
   total_marks: number | null
   duration_minutes: number | null
   status: ExamStatus
+  section_settings: Record<string, number>
   created_by: number
   published_at: string | null
   created_at: string
@@ -137,6 +138,7 @@ export interface ExamQuestion {
   question_type: ExamQuestionType
   max_marks: number | string
   correct_answer: string
+  is_compulsory: boolean
   learning_objective: number | null
   order: number
   marking_scheme_items: MarkingSchemeItem[]

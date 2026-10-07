@@ -141,9 +141,14 @@ export default function LessonsPage() {
       {!error && lessons && lessons.length > 0 && (
         <Table
           columns={[
-            { key: 'title', header: 'Lesson', render: (row: Lesson) => <span className="font-medium text-slate-900 dark:text-slate-100">{row.title}</span> },
-            { key: 'subject', header: 'Subject', render: (row: Lesson) => subjectName(row.subject) },
-            { key: 'level', header: 'Level', render: (row: Lesson) => levelName(row.class_level) },
+            { key: 'title', header: 'Lesson', render: (row: Lesson) => (
+              <div>
+                <span className="font-medium text-slate-900 dark:text-slate-100">{row.title}</span>
+                <p className="mt-0.5 text-xs text-slate-500 sm:hidden dark:text-slate-400">{subjectName(row.subject)} · {levelName(row.class_level)}</p>
+              </div>
+            )},
+            { key: 'subject', header: 'Subject', render: (row: Lesson) => subjectName(row.subject), hideOnMobile: true },
+            { key: 'level', header: 'Level', render: (row: Lesson) => levelName(row.class_level), hideOnMobile: true },
             {
               key: 'status',
               header: 'Status',

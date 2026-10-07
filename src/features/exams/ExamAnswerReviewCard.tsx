@@ -15,14 +15,17 @@ import type { ExamQuestion, StudentExamAnswer } from '@/types/exam'
 export function ExamAnswerReviewCard({
   answer,
   question,
+  sectionSettings = {},
   onChanged,
 }: {
   answer: StudentExamAnswer
   question: ExamQuestion
+  sectionSettings?: Record<string, number>
   onChanged: () => void
 }) {
   const { showToast } = useToast()
   const [recordedAnswerInput, setRecordedAnswerInput] = useState(answer.recorded_answer)
+  const [editingTranscription, setEditingTranscription] = useState(!answer.recorded_answer && !effectivelyOptional)
   const [isSavingTranscription, setIsSavingTranscription] = useState(false)
 
   const [editingMark, setEditingMark] = useState(false)
@@ -31,12 +34,18 @@ export function ExamAnswerReviewCard({
   const [isSavingMark, setIsSavingMark] = useState(false)
 
   const isConfirmed = answer.teacher_final_marks !== null
+  const inChoiceSection = Boolean(question.section && sectionSettings[question.section])
+  const effectivelyOptional = inChoiceSection || !question.is_compulsory
+  const isNotAttempted = !(answer.recorded_answer || '').trim() && effectivelyOptional
+  // Needs attention: compulsory section question with no extracted answer, not yet marked.
+  const needsAttention = !effectivelyOptional && !(answer.recorded_answer || '').trim() && !isConfirmed
 
   async function handleSaveTranscription(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setIsSavingTranscription(true)
     try {
       await markAnswer(answer.id, { recorded_answer: recordedAnswerInput })
+      setEditingTranscription(false)
       onChanged()
     } catch (err) {
       showToast('error', getApiErrorMessage(err))
@@ -73,7 +82,7 @@ export function ExamAnswerReviewCard({
   }
 
   return (
-    <Card>
+    <Card className={needsAttention ? 'border-red-400 dark:border-red-500/60' : undefined}>
       <CardHeader className="flex items-center justify-between">
         <div>
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Question {question.question_number}</p>
@@ -90,6 +99,9 @@ export function ExamAnswerReviewCard({
                 : `${answer.teacher_final_marks}/${question.max_marks} confirmed`
             }
           />
+        )}
+        {needsAttention && (
+          <StatusBadge status="failed" label="Needs transcription" />
         )}
       </CardHeader>
       <CardBody className="flex flex-col gap-3">
@@ -109,29 +121,67 @@ export function ExamAnswerReviewCard({
           </div>
         )}
 
-        {!answer.recorded_answer ? (
+        {isNotAttempted ? (
+          <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Not attempted — optional question. Will be scored 0 automatically on finalize.
+            </p>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="shrink-0"
+              onClick={() => setEditingTranscription(true)}
+            >
+              Add answer
+            </Button>
+          </div>
+        ) : editingTranscription ? (
           <form onSubmit={handleSaveTranscription} className="flex flex-col gap-2">
             <Textarea
               label="Student answer (transcribe from the script)"
               value={recordedAnswerInput}
               onChange={(event) => setRecordedAnswerInput(event.target.value)}
+              rows={4}
             />
-            <Button
-              type="submit"
-              size="sm"
-              disabled={isSavingTranscription || !recordedAnswerInput.trim()}
-              className="self-start"
-            >
-              Save transcription
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                type="submit"
+                size="sm"
+                disabled={isSavingTranscription || !recordedAnswerInput.trim()}
+              >
+                Save transcription
+              </Button>
+              {answer.recorded_answer && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => { setRecordedAnswerInput(answer.recorded_answer); setEditingTranscription(false) }}
+                >
+                  Cancel
+                </Button>
+              )}
+            </div>
           </form>
         ) : (
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            Student answer: <span className="font-medium text-slate-900 dark:text-slate-100">{answer.recorded_answer}</span>
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              Student answer: <span className="font-medium text-slate-900 dark:text-slate-100">{answer.recorded_answer}</span>
+            </p>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="shrink-0"
+              onClick={() => setEditingTranscription(true)}
+            >
+              Edit
+            </Button>
+          </div>
         )}
 
-        {question.question_type === 'SUBJECTIVE' && answer.recorded_answer && !isConfirmed && !editingMark && (
+        {question.question_type === 'SUBJECTIVE' && !isConfirmed && !editingMark && !isNotAttempted && (
           <>
             {answer.ai_marks_awarded !== null ? (
               <div className="flex flex-col gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-500/20 dark:bg-amber-500/10">
@@ -167,8 +217,10 @@ export function ExamAnswerReviewCard({
               </div>
             ) : (
               <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
-                <p className="text-sm text-slate-500 dark:text-slate-400">Not yet AI-marked.</p>
-                <Button size="sm" variant="ghost" onClick={() => openEdit('', '')}>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  {answer.recorded_answer ? 'Not yet AI-marked.' : 'No answer recorded — student may have left this blank.'}
+                </p>
+                <Button size="sm" variant="ghost" onClick={() => openEdit('0', '')}>
                   Mark manually
                 </Button>
               </div>

@@ -43,6 +43,11 @@ export async function updateExam(id: number, payload: Partial<ExamPayload>) {
   return response.data.data
 }
 
+export async function updateSectionSettings(id: number, sectionSettings: Record<string, number>) {
+  const response = await apiClient.patch<{ data: Exam }>(`/exams/${id}/section-settings/`, { section_settings: sectionSettings })
+  return response.data.data
+}
+
 export async function deleteExam(id: number) {
   await apiClient.delete(`/exams/${id}/`)
 }
@@ -202,6 +207,11 @@ export async function createExamQuestion(payload: ExamQuestionPayload) {
 
 export async function deleteExamQuestion(id: number) {
   await apiClient.delete(`/exams/questions/${id}/`)
+}
+
+export async function setQuestionCompulsory(id: number, isCompulsory: boolean) {
+  const response = await apiClient.patch<{ data: ExamQuestion }>(`/exams/questions/${id}/compulsory/`, { is_compulsory: isCompulsory })
+  return response.data.data
 }
 
 export interface MarkingSchemeItemPayload {

@@ -135,9 +135,14 @@ export default function QuizzesPage() {
       {!error && quizzes && quizzes.length > 0 && (
         <Table
           columns={[
-            { key: 'title', header: 'Quiz', render: (row: Quiz) => <span className="font-medium text-slate-900 dark:text-slate-100">{row.title}</span> },
-            { key: 'subject', header: 'Subject', render: (row: Quiz) => subjectName(row.subject) },
-            { key: 'level', header: 'Level', render: (row: Quiz) => levelName(row.class_level) },
+            { key: 'title', header: 'Quiz', render: (row: Quiz) => (
+              <div>
+                <span className="font-medium text-slate-900 dark:text-slate-100">{row.title}</span>
+                <p className="mt-0.5 text-xs text-slate-500 sm:hidden dark:text-slate-400">{subjectName(row.subject)} · {levelName(row.class_level)}</p>
+              </div>
+            )},
+            { key: 'subject', header: 'Subject', render: (row: Quiz) => subjectName(row.subject), hideOnMobile: true },
+            { key: 'level', header: 'Level', render: (row: Quiz) => levelName(row.class_level), hideOnMobile: true },
             {
               key: 'status',
               header: 'Status',

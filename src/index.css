@@ -59,6 +59,12 @@
 
 
 /* Formatting produced by the teacher's lesson editor. */
+.lesson-rich-content {
+  overflow-x: hidden;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.lesson-rich-content * { max-width: 100%; }
 .lesson-rich-content h1, .lesson-rich-content h2, .lesson-rich-content h3 {
   margin: 0.75rem 0 0.35rem;
   font-weight: 700;
@@ -92,6 +98,12 @@
 
 
 /* Keep the editor's native formatting visible despite Tailwind preflight. */
+.lesson-editor-content {
+  overflow-x: hidden;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.lesson-editor-content * { max-width: 100%; }
 .lesson-editor-content h1, .lesson-editor-content h2, .lesson-editor-content h3 {
   margin: 0.5rem 0;
   font-weight: 700;

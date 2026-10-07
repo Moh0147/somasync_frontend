@@ -7,7 +7,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { getApiErrorMessage } from '@/services/apiError'
-import { addMarkingSchemeItem, deleteExamQuestion, removeMarkingSchemeItem } from '@/services/examsService'
+import { addMarkingSchemeItem, deleteExamQuestion, removeMarkingSchemeItem, setQuestionCompulsory } from '@/services/examsService'
 import type { ExamQuestion } from '@/types/exam'
 
 export function ExamQuestionCard({
@@ -25,6 +25,8 @@ export function ExamQuestionCard({
   const [criterion, setCriterion] = useState('')
   const [marks, setMarks] = useState('1')
   const [isBusy, setIsBusy] = useState(false)
+  const [isCompulsory, setIsCompulsory] = useState(question.is_compulsory)
+  const [isTogglingCompulsory, setIsTogglingCompulsory] = useState(false)
 
   const maxMarks = Number(question.max_marks)
   const totalMarksCents = question.marking_scheme_items.reduce(
@@ -70,6 +72,19 @@ export function ExamQuestionCard({
     }
   }
 
+  async function handleToggleCompulsory() {
+    setIsTogglingCompulsory(true)
+    try {
+      const updated = await setQuestionCompulsory(question.id, !isCompulsory)
+      setIsCompulsory(updated.is_compulsory)
+      showToast('success', updated.is_compulsory ? 'Marked as required.' : 'Marked as optional (choice question).')
+    } catch (err) {
+      showToast('error', getApiErrorMessage(err))
+    } finally {
+      setIsTogglingCompulsory(false)
+    }
+  }
+
   return (
     <Card>
       <CardHeader className="flex items-center justify-between">
@@ -83,11 +98,23 @@ export function ExamQuestionCard({
             <p className="text-xs text-slate-500 dark:text-slate-400">Correct answer: {question.correct_answer}</p>
           )}
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {!isCompulsory && (
+            <StatusBadge status="pending" label="Optional" />
+          )}
           <StatusBadge
             status={isComplete ? 'completed' : 'pending'}
             label={`${totalMarks.toFixed(2)} / ${maxMarks.toFixed(2)} marks`}
           />
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={isTogglingCompulsory}
+            onClick={handleToggleCompulsory}
+            title={isCompulsory ? 'Mark as optional (choice question)' : 'Mark as required'}
+          >
+            {isCompulsory ? 'Set optional' : 'Set required'}
+          </Button>
           {canEdit && (
             <Button variant="danger" size="sm" onClick={handleDeleteQuestion}>
               Delete

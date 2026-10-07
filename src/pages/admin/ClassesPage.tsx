@@ -120,18 +120,27 @@ export default function ClassesPage() {
       {!error && classes && classes.length > 0 && (
         <Table
           columns={[
-            { key: 'name', header: 'Class', render: (row: SchoolClass) => <span className="font-medium text-slate-900 dark:text-slate-100">{row.name}</span> },
-            { key: 'level', header: 'Level', render: (row: SchoolClass) => levelName(row.class_level) },
-            { key: 'year', header: 'Year', render: (row: SchoolClass) => String(row.academic_year) },
-            { key: 'code', header: 'Class code', render: (row: SchoolClass) => row.class_code },
+            { key: 'name', header: 'Class', render: (row: SchoolClass) => (
+              <div>
+                <span className="font-medium text-slate-900 dark:text-slate-100">{row.name}</span>
+                <p className="mt-0.5 text-xs text-slate-500 sm:hidden dark:text-slate-400">
+                  {levelName(row.class_level)} · {row.academic_year} · {performanceByClassId.get(row.id)?.student_count ?? 0} students
+                </p>
+              </div>
+            )},
+            { key: 'level', header: 'Level', render: (row: SchoolClass) => levelName(row.class_level), hideOnMobile: true },
+            { key: 'year', header: 'Year', render: (row: SchoolClass) => String(row.academic_year), hideOnMobile: true },
+            { key: 'code', header: 'Class code', render: (row: SchoolClass) => row.class_code, hideOnMobile: true },
             {
               key: 'students',
               header: 'Students',
+              hideOnMobile: true,
               render: (row: SchoolClass) => String(performanceByClassId.get(row.id)?.student_count ?? '—'),
             },
             {
               key: 'avgQuiz',
               header: 'Avg quiz %',
+              hideOnMobile: true,
               render: (row: SchoolClass) => {
                 const value = performanceByClassId.get(row.id)?.avg_quiz_percentage
                 return value === null || value === undefined ? '—' : `${value}%`
