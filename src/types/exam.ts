@@ -55,6 +55,12 @@ export type ExamScriptStatus =
   | 'PUBLISHED'
   | 'FAILED'
 
+export interface ExamScriptPage {
+  id: number
+  page_number: number
+  image_url: string
+}
+
 export interface ExamScript {
   id: number
   exam: number
@@ -74,6 +80,7 @@ export interface ExamScript {
   uploaded_by: number
   uploaded_at: string
   updated_at: string
+  pages: ExamScriptPage[]
 }
 
 export interface ExamResultAnswer {

@@ -65,7 +65,10 @@ export default function ExamResultsPage() {
         </Card>
       )}
       {!error && results && results.length === 0 && (
-        <EmptyState title="No published results yet." description="Results appear here once your teacher publishes them." />
+        <EmptyState
+          title="Matokeo hayajachapishwa bado."
+          description="Mwalimu wako atachapisha matokeo baada ya kukagua karatasi zote. Subiri — utapata taarifa moja kwa moja."
+        />
       )}
       {!error && results && results.length > 0 && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

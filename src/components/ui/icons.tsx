@@ -43,4 +43,7 @@ export {
   KeyRound as JoinClassIcon,
   Sun as LightModeIcon,
   Moon as DarkModeIcon,
+  Pencil as PencilIcon,
+  Trash2 as TrashIcon,
+  Inbox as ResultsHubIcon,
 } from 'lucide-react'

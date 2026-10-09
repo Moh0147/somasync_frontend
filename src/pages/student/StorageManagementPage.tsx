@@ -6,6 +6,7 @@ import { LoadingState } from '@/components/feedback/LoadingState'
 import { useToast } from '@/components/feedback/Toast'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/Button'
+import { TrashIcon } from '@/components/ui/icons'
 import { Card, CardBody } from '@/components/ui/Card'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { getLessonStorageBytes, removeLessonOffline } from '@/db/offlineServices/downloadService'
@@ -84,6 +85,7 @@ export default function StorageManagementPage() {
                     <p className="text-xs text-slate-500 dark:text-slate-400">{formatBytes(row.bytes)}</p>
                   </div>
                   <Button size="sm" variant="ghost" onClick={() => setPendingDelete(row)}>
+                    <TrashIcon className="h-3.5 w-3.5" />
                     Delete
                   </Button>
                 </CardBody>

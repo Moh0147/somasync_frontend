@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { EmptyState } from '@/components/feedback/EmptyState'
 import { ErrorState } from '@/components/feedback/ErrorState'
@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { Select } from '@/components/ui/Select'
 import { StatusBadge } from '@/components/ui/StatusBadge'
+import { PencilIcon, TrashIcon } from '@/components/ui/icons'
 import { CandidatesPanel } from '@/features/exams/CandidatesPanel'
 import { ExamQuestionCard } from '@/features/exams/ExamQuestionCard'
 import { ScriptsPanel } from '@/features/exams/ScriptsPanel'
@@ -72,6 +73,8 @@ export default function ExamEditorPage() {
   const [isDeleting, setIsDeleting] = useState(false)
   const schemeInputRef = useRef<HTMLInputElement>(null)
   const paperInputRef = useRef<HTMLInputElement>(null)
+  const headerSentinelRef = useRef<HTMLDivElement>(null)
+  const [headerVisible, setHeaderVisible] = useState(true)
   const [isUploadingScheme, setIsUploadingScheme] = useState(false)
   const [isUploadingPaper, setIsUploadingPaper] = useState(false)
 
@@ -156,6 +159,17 @@ export default function ExamEditorPage() {
   function subjectName(subjectId: number) {
     return subjects.find((subject) => subject.id === subjectId)?.name ?? `#${subjectId}`
   }
+
+  useEffect(() => {
+    const el = headerSentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setHeaderVisible(entry.isIntersecting),
+      { threshold: 0 },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [exam])
 
   async function refreshQuestions() {
     setQuestions(await listExamQuestions(id))
@@ -356,6 +370,7 @@ export default function ExamEditorPage() {
           <>
             {isDraft && (
               <Button variant="ghost" size="sm" onClick={() => setEditOpen(true)}>
+                <PencilIcon className="h-3.5 w-3.5" />
                 Edit
               </Button>
             )}
@@ -375,39 +390,104 @@ export default function ExamEditorPage() {
               </Button>
             )}
             {(isMarking || isResultsPublished) && (
-              <Button size="sm" disabled={isPublishing} onClick={handlePublishResults}>
-                Publish Results
-              </Button>
+              <Link to="/teacher/results">
+                <Button size="sm">Results Hub →</Button>
+              </Link>
             )}
             {isDraft && (
               <Button variant="danger" size="sm" disabled={isDeleting} onClick={handleDelete}>
+                <TrashIcon className="h-3.5 w-3.5" />
                 Delete
               </Button>
             )}
           </>
         }
       />
+      {/* Sentinel: watched by IntersectionObserver to detect when header scrolls away */}
+      <div ref={headerSentinelRef} aria-hidden="true" className="h-px" />
 
-      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex min-w-[560px] items-center justify-between text-xs font-medium">
-          {['Setup', 'Questions', 'Scheme', 'Publish', 'Marking', 'Results'].map((label, index) => (
-            <div key={label} className={`flex items-center gap-1.5 ${index <= (isDraft ? 2 : isResultsPublished ? 5 : isMarking ? 4 : 3) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}`}><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[10px]">{index + 1}</span><span className="whitespace-nowrap">{label}</span></div>
-          ))}
-        </div>
-      </div>
+      {(() => {
+        const steps = ['Setup', 'Questions', 'Scheme', 'Publish', 'Marking', 'Results']
+        const doneUpTo = isDraft ? 2 : isResultsPublished ? 5 : isMarking ? 4 : 3
+        const nextIdx = Math.min(doneUpTo + 1, steps.length - 1)
+        return (
+          <>
+            {/* Mobile: compact step indicator */}
+            <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-2.5 sm:hidden dark:border-slate-800 dark:bg-slate-900">
+              <div className="flex gap-1">
+                {steps.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`h-1.5 rounded-full transition-all ${
+                      i <= doneUpTo ? 'w-4 bg-blue-500' : 'w-1.5 bg-slate-200 dark:bg-slate-700'
+                    }`}
+                  />
+                ))}
+              </div>
+              <p className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                Step {doneUpTo + 1} of {steps.length} — {steps[doneUpTo]}
+              </p>
+              {doneUpTo < steps.length - 1 && (
+                <p className="ml-auto text-xs text-slate-400 dark:text-slate-500">
+                  Next: {steps[nextIdx]}
+                </p>
+              )}
+            </div>
+            {/* Desktop: full stepper */}
+            <div className="hidden rounded-lg border border-slate-200 bg-white p-3 sm:block dark:border-slate-800 dark:bg-slate-900">
+              <div className="flex items-center justify-between text-xs font-medium">
+                {steps.map((label, index) => (
+                  <div
+                    key={label}
+                    className={`flex items-center gap-1.5 ${index <= doneUpTo ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}`}
+                  >
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[10px]">
+                      {index + 1}
+                    </span>
+                    <span className="whitespace-nowrap">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )
+      })()}
 
       <Card>
-          <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <CardHeader className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
             <div>
-              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Marking scheme & distribution</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{!isDraft ? 'Locked after publishing — create a new draft version to change it.' : distributionOk ? '✓ Distribution complete' : `⚠ Questions total ${totalMarks} / ${configuredTotal} marks`}</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Marking scheme &amp; distribution</p>
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                {!isDraft
+                  ? 'Locked after publishing — create a new draft version to change it.'
+                  : distributionOk
+                    ? '✓ Distribution complete'
+                    : `⚠ Questions total ${totalMarks} / ${configuredTotal} marks`}
+              </p>
             </div>
-            <div className="flex flex-wrap gap-2"><Button size="sm" variant="ghost" disabled={isUploadingPaper || !isDraft} onClick={() => paperInputRef.current?.click()}>{isUploadingPaper ? 'Extracting…' : 'Upload exam paper'}</Button><input ref={paperInputRef} type="file" accept=".pdf,.png,.jpg,.jpeg" className="hidden" onChange={handlePaperUpload} /><Button size="sm" variant="secondary" disabled={isUploadingScheme || !isDraft} onClick={() => schemeInputRef.current?.click()}>{isUploadingScheme ? 'Extracting…' : isDraft ? 'Upload marking scheme' : 'Marking scheme locked'}</Button><input ref={schemeInputRef} type="file" accept=".pdf,.png,.jpg,.jpeg" className="hidden" onChange={handleSchemeUpload} /></div>
-          </CardHeader>
-          <CardBody>
-            <div className="flex flex-wrap gap-3 text-sm">{questions.map(q => <span key={q.id} className="rounded-md bg-slate-100 px-2 py-1 dark:bg-slate-800">Q{q.question_number}: {Number(q.max_marks).toFixed(2)}</span>)}</div>
-          </CardBody>
-        </Card>
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-2">
+              <Button size="sm" variant="ghost" disabled={isUploadingPaper || !isDraft} onClick={() => paperInputRef.current?.click()}>
+                {isUploadingPaper ? 'Extracting…' : 'Exam paper'}
+              </Button>
+              <input ref={paperInputRef} type="file" accept=".pdf,.png,.jpg,.jpeg" className="hidden" onChange={handlePaperUpload} />
+              <Button size="sm" variant="secondary" disabled={isUploadingScheme || !isDraft} onClick={() => schemeInputRef.current?.click()}>
+                {isUploadingScheme ? 'Extracting…' : isDraft ? 'Marking scheme' : 'Scheme locked'}
+              </Button>
+              <input ref={schemeInputRef} type="file" accept=".pdf,.png,.jpg,.jpeg" className="hidden" onChange={handleSchemeUpload} />
+            </div>
+          </div>
+        </CardHeader>
+        <CardBody>
+          <div className="flex flex-wrap gap-3 text-sm">
+            {questions.map((q) => (
+              <span key={q.id} className="rounded-md bg-slate-100 px-2 py-1 dark:bg-slate-800">
+                Q{q.question_number}: {Number(q.max_marks).toFixed(2)}
+              </span>
+            ))}
+          </div>
+        </CardBody>
+      </Card>
 
       <Card>
         <CardHeader className="flex items-center justify-between">
@@ -447,7 +527,10 @@ export default function ExamEditorPage() {
                     <span className="font-medium">{section}</span>
                     <span className="ml-2 text-slate-500 dark:text-slate-400">— answer {required} of {total} question{total !== 1 ? 's' : ''}</span>
                   </p>
-                  <Button size="sm" variant="ghost" onClick={() => handleRemoveSectionRule(section)}>Remove</Button>
+                  <Button size="sm" variant="ghost" onClick={() => handleRemoveSectionRule(section)}>
+                    <TrashIcon className="h-3.5 w-3.5" />
+                    Remove
+                  </Button>
                 </div>
               )
             })}
@@ -593,6 +676,52 @@ export default function ExamEditorPage() {
             </form>
           </CardBody>
         </Card>
+      )}
+
+      {/* ── Sticky action bar — appears only when header buttons have scrolled out of view ── */}
+      {!headerVisible && (isDraft || isPublished || isClosed || isMarking || isResultsPublished) && (
+        <div className="sticky bottom-4 z-20 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white/95 shadow-lg shadow-slate-900/10 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95">
+          <div className="flex items-center justify-between gap-4 px-4 py-3">
+            <div className="min-w-0">
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                {isDraft && 'Draft — not visible to students yet'}
+                {isPublished && 'Live — students can see and sit the exam'}
+                {isClosed && 'Closed — ready to begin marking'}
+                {isMarking && 'Marking in progress'}
+                {isResultsPublished && 'Results published to students'}
+              </p>
+              <p className="mt-0.5 truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                {isDraft && 'Publish when ready to share with students'}
+                {isPublished && 'Close exam once all students have finished'}
+                {isClosed && 'Start marking to begin reviewing scripts'}
+                {isMarking && 'Go to Results Hub to publish when all scripts are reviewed'}
+                {isResultsPublished && 'Go to Results Hub to re-publish updated results'}
+              </p>
+            </div>
+            <div className="shrink-0">
+              {isDraft && (
+                <Button size="sm" disabled={isPublishing} onClick={handlePublish}>
+                  {isPublishing ? 'Publishing…' : 'Publish →'}
+                </Button>
+              )}
+              {isPublished && (
+                <Button size="sm" disabled={isPublishing} onClick={handleClose}>
+                  {isPublishing ? 'Closing…' : 'Close Exam →'}
+                </Button>
+              )}
+              {isClosed && (
+                <Button size="sm" disabled={isPublishing} onClick={handleStartMarking}>
+                  {isPublishing ? 'Starting…' : 'Start Marking →'}
+                </Button>
+              )}
+              {(isMarking || isResultsPublished) && (
+                <Link to="/teacher/results">
+                  <Button size="sm">Results Hub →</Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
       <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Edit exam">

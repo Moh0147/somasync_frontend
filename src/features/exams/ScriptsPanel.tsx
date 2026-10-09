@@ -10,6 +10,7 @@ import { ProgressBar } from '@/components/ui/ProgressBar'
 import { Select } from '@/components/ui/Select'
 import type { StatusBadgeStatus } from '@/components/ui/StatusBadge'
 import { StatusBadge } from '@/components/ui/StatusBadge'
+import { CameraScriptScanner } from './CameraScriptScanner'
 import { getApiErrorMessage } from '@/services/apiError'
 import { resolveMediaUrl } from '@/services/mediaUrl'
 import { uploadScript } from '@/services/examsService'
@@ -28,12 +29,44 @@ const scriptStatusMap: Record<ExamScriptStatus, StatusBadgeStatus> = {
 
 const scriptStatusLabel: Record<ExamScriptStatus, string> = {
   UPLOADED: 'Uploaded',
-  PROCESSING: 'Processing',
+  PROCESSING: 'Extracting…',
   MARKED: 'AI-marked',
   TEACHER_REVIEW: 'Awaiting review',
   FINALIZED: 'Finalized',
   PUBLISHED: 'Published',
   FAILED: 'Failed',
+}
+
+interface BreakdownItem {
+  label: string
+  count: number
+  color: string
+}
+
+function buildBreakdown(scripts: ExamScript[]): BreakdownItem[] {
+  let needsExtraction = 0, extracting = 0, readyToMark = 0, aiMarked = 0, inReview = 0, finalized = 0, failed = 0
+  for (const s of scripts) {
+    if (s.status === 'FAILED') { failed++; continue }
+    if (s.status === 'FINALIZED' || s.status === 'PUBLISHED') { finalized++; continue }
+    if (s.status === 'TEACHER_REVIEW') { inReview++; continue }
+    if (s.status === 'MARKED') { aiMarked++; continue }
+    if (s.status === 'PROCESSING') { extracting++; continue }
+    if (s.status === 'UPLOADED') {
+      if (s.ocr_status === 'PROCESSING') extracting++
+      else if (s.ocr_status === 'READY') readyToMark++
+      else needsExtraction++
+    }
+  }
+  const all: BreakdownItem[] = [
+    { label: 'Needs extraction',  count: needsExtraction, color: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200' },
+    { label: 'Extracting',        count: extracting,      color: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300' },
+    { label: 'Ready to mark',     count: readyToMark,     color: 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300' },
+    { label: 'AI-marked',         count: aiMarked,        color: 'bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300' },
+    { label: 'In review',         count: inReview,        color: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300' },
+    { label: 'Finalized',         count: finalized,       color: 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300' },
+    { label: 'Failed',            count: failed,          color: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300' },
+  ]
+  return all.filter((item) => item.count > 0)
 }
 
 export function ScriptsPanel({
@@ -54,16 +87,16 @@ export function ScriptsPanel({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [candidateNumber, setCandidateNumber] = useState('')
   const [isUploading, setIsUploading] = useState(false)
+  const [uploadMode, setUploadMode] = useState<'file' | 'camera'>('file')
 
   function candidateLabel(candidateId: number) {
     return candidates.find((candidate) => candidate.id === candidateId)?.candidate_number ?? `#${candidateId}`
   }
 
-  const markedCount = scripts.filter((s) => s.status === 'MARKED' || s.status === 'TEACHER_REVIEW' || s.status === 'FINALIZED' || s.status === 'PUBLISHED').length
-  const awaitingReviewCount = scripts.filter((s) => s.status === 'TEACHER_REVIEW').length
   const finalizedCount = scripts.filter((s) => s.status === 'FINALIZED' || s.status === 'PUBLISHED').length
   const progressPercentage = scripts.length > 0 ? Math.round((finalizedCount / scripts.length) * 100) : 0
   const canUpload = examStatus === 'CLOSED'
+  const breakdown = buildBreakdown(scripts)
 
   async function handleFileSelected(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -94,16 +127,19 @@ export function ScriptsPanel({
       </CardHeader>
       <CardBody className="flex flex-col gap-4">
         {scripts.length > 0 && (
-          <div className="flex flex-col gap-2 rounded-md border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
+          <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
             <div className="flex items-center justify-between text-sm">
               <p className="font-medium text-slate-700 dark:text-slate-300">Marking progress</p>
               <p className="text-slate-500 dark:text-slate-400">{finalizedCount} of {scripts.length} finalized</p>
             </div>
             <ProgressBar value={progressPercentage} showPercentage={false} />
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
-              <span>{scripts.length} scripts</span>
-              <span>{markedCount} AI-marked</span>
-              <span>{awaitingReviewCount} awaiting your review</span>
+            <div className="flex flex-wrap gap-2">
+              {breakdown.map((item) => (
+                <span key={item.label} className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${item.color}`}>
+                  <span className="tabular-nums font-bold">{item.count}</span>
+                  <span>{item.label}</span>
+                </span>
+              ))}
             </div>
           </div>
         )}
@@ -147,36 +183,70 @@ export function ScriptsPanel({
             Register students as candidates first. Their generated candidate numbers will be used to match each script.
           </p>
         ) : canUpload ? (
-          <div className="flex flex-wrap items-end gap-2">
-            <Select
-              label="Candidate"
-              value={candidateNumber}
-              onChange={(event) => setCandidateNumber(event.target.value)}
-              className="w-48"
-            >
-              <option value="" disabled>
-                Select a candidate
-              </option>
-              {candidates.map((candidate) => (
-                <option key={candidate.id} value={candidate.candidate_number}>
-                  {candidate.candidate_number}
-                </option>
-              ))}
-            </Select>
-            <Button
-              size="sm"
-              disabled={!candidateNumber || isUploading}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {isUploading ? 'Uploading…' : 'Upload script'}
-            </Button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.png,.jpg,.jpeg"
-              className="hidden"
-              onChange={handleFileSelected}
-            />
+          <div className="flex flex-col gap-3">
+            {/* Mode toggle */}
+            <div className="flex gap-2 rounded-lg border border-slate-200 bg-slate-50 p-1 dark:border-slate-800 dark:bg-slate-800/40">
+              <button
+                onClick={() => setUploadMode('camera')}
+                className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                  uploadMode === 'camera'
+                    ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-slate-100'
+                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                }`}
+              >
+                📷 Scan with Camera
+              </button>
+              <button
+                onClick={() => setUploadMode('file')}
+                className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                  uploadMode === 'file'
+                    ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-slate-100'
+                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                }`}
+              >
+                📁 Upload File
+              </button>
+            </div>
+
+            {uploadMode === 'camera' ? (
+              <CameraScriptScanner
+                examId={examId}
+                candidates={candidates}
+                onDone={onChanged}
+              />
+            ) : (
+              <div className="flex flex-wrap items-end gap-2">
+                <Select
+                  label="Candidate"
+                  value={candidateNumber}
+                  onChange={(event) => setCandidateNumber(event.target.value)}
+                  className="w-48"
+                >
+                  <option value="" disabled>
+                    Select a candidate
+                  </option>
+                  {candidates.map((candidate) => (
+                    <option key={candidate.id} value={candidate.candidate_number}>
+                      {candidate.candidate_number}
+                    </option>
+                  ))}
+                </Select>
+                <Button
+                  size="sm"
+                  disabled={!candidateNumber || isUploading}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  {isUploading ? 'Uploading…' : 'Upload script'}
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.png,.jpg,.jpeg"
+                  className="hidden"
+                  onChange={handleFileSelected}
+                />
+              </div>
+            )}
           </div>
         ) : (
           <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-800 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200">

@@ -12,6 +12,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { StatusBadge } from '@/components/ui/StatusBadge'
+import { PencilIcon } from '@/components/ui/icons'
 import { Textarea } from '@/components/ui/Textarea'
 import {
   createLearningObjective,
@@ -142,6 +143,7 @@ export default function TopicDetailPage() {
         actions={
           <>
             <Button variant="ghost" size="sm" onClick={() => setEditOpen(true)}>
+              <PencilIcon className="h-3.5 w-3.5" />
               Edit
             </Button>
             <Button

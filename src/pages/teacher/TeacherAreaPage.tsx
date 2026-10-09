@@ -13,6 +13,7 @@ import MiniQuizEditorPage from './MiniQuizEditorPage'
 import MyClassesPage from './MyClassesPage'
 import QuizEditorPage from './QuizEditorPage'
 import QuizzesPage from './QuizzesPage'
+import ResultsHubPage from './ResultsHubPage'
 import ScriptReviewPage from './ScriptReviewPage'
 import SectionContentPage from './SectionContentPage'
 import StudentsPage from './StudentsPage'
@@ -47,6 +48,7 @@ export default function TeacherAreaPage() {
         <Route path="exams" element={<ExamsPage />} />
         <Route path="exams/:examId" element={<ExamEditorPage />} />
         <Route path="exams/:examId/scripts/:scriptId" element={<ScriptReviewPage />} />
+        <Route path="results" element={<ResultsHubPage />} />
         <Route path="analytics" element={<TeacherAnalyticsPage />} />
         <Route path="*" element={<Navigate to="/teacher" replace />} />
       </Routes>

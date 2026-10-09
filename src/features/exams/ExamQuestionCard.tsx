@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { StatusBadge } from '@/components/ui/StatusBadge'
+import { TrashIcon } from '@/components/ui/icons'
 import { getApiErrorMessage } from '@/services/apiError'
 import { addMarkingSchemeItem, deleteExamQuestion, removeMarkingSchemeItem, setQuestionCompulsory } from '@/services/examsService'
 import type { ExamQuestion } from '@/types/exam'
@@ -117,6 +118,7 @@ export function ExamQuestionCard({
           </Button>
           {canEdit && (
             <Button variant="danger" size="sm" onClick={handleDeleteQuestion}>
+              <TrashIcon className="h-3.5 w-3.5" />
               Delete
             </Button>
           )}
@@ -135,6 +137,7 @@ export function ExamQuestionCard({
                 </span>
                 {canEdit && (
                   <Button variant="ghost" size="sm" onClick={() => handleRemoveItem(item.id)}>
+                    <TrashIcon className="h-3.5 w-3.5" />
                     Remove
                   </Button>
                 )}

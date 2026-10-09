@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
@@ -52,10 +53,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const response = await apiClient.get<{ data: AuthUser }>('/auth/me/')
         if (!cancelled) setUser(response.data.data)
         await updateCachedUser(response.data.data)
-      } catch {
-        // Offline, or the token was already invalidated -- clearSession()/the
-        // logged-out event handles the latter. Either way the cached session
-        // already rendered above stands until proven otherwise.
+      } catch (error) {
+        // A network failure is expected in offline-first mode: keep the
+        // cached session and let the user continue using downloaded content.
+        // Do not treat a server error as an authentication failure either;
+        // the cached profile is still useful while the API recovers.
+        if (!axios.isAxiosError(error) || !error.response) return
+
+        // The Axios client normally refreshes once before this reaches us.
+        // If that refresh failed, it already cleared the session and emitted
+        // AUTH_LOGGED_OUT_EVENT. Keep this explicit as a safety net for an
+        // invalid/revoked session, but never clear credentials for 5xx errors.
+        if (error.response.status === 401) {
+          await clearSession()
+          if (!cancelled) {
+            setUser(null)
+            setStatus('unauthenticated')
+          }
+        }
       }
     }
 

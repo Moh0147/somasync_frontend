@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { Select } from '@/components/ui/Select'
 import { StatusBadge } from '@/components/ui/StatusBadge'
+import { TrashIcon } from '@/components/ui/icons'
 import { listClassLevels } from '@/services/academicsService'
 import { getApiErrorMessage } from '@/services/apiError'
 import {
@@ -59,6 +60,7 @@ function MemberList({
             <p className="text-xs text-slate-500 dark:text-slate-400">{member.username}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={() => onRemove(member.id)}>
+            <TrashIcon className="h-3.5 w-3.5" />
             Remove
           </Button>
         </li>
@@ -249,6 +251,7 @@ export default function ClassDetailPage() {
         actions={
           <>
             <Button variant="ghost" size="sm" onClick={() => setEditOpen(true)}>
+              <PencilIcon className="h-3.5 w-3.5" />
               Edit
             </Button>
             <Button

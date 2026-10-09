@@ -24,6 +24,9 @@ export function ExamAnswerReviewCard({
   onChanged: () => void
 }) {
   const { showToast } = useToast()
+  const inChoiceSection = Boolean(question.section && sectionSettings[question.section])
+  const effectivelyOptional = inChoiceSection || !question.is_compulsory
+
   const [recordedAnswerInput, setRecordedAnswerInput] = useState(answer.recorded_answer)
   const [editingTranscription, setEditingTranscription] = useState(!answer.recorded_answer && !effectivelyOptional)
   const [isSavingTranscription, setIsSavingTranscription] = useState(false)
@@ -34,8 +37,6 @@ export function ExamAnswerReviewCard({
   const [isSavingMark, setIsSavingMark] = useState(false)
 
   const isConfirmed = answer.teacher_final_marks !== null
-  const inChoiceSection = Boolean(question.section && sectionSettings[question.section])
-  const effectivelyOptional = inChoiceSection || !question.is_compulsory
   const isNotAttempted = !(answer.recorded_answer || '').trim() && effectivelyOptional
   // Needs attention: compulsory section question with no extracted answer, not yet marked.
   const needsAttention = !effectivelyOptional && !(answer.recorded_answer || '').trim() && !isConfirmed

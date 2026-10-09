@@ -23,6 +23,16 @@ export interface ExamPayload {
   exam_date?: string | null
 }
 
+export async function downloadCoverPages(examId: number): Promise<void> {
+  const response = await apiClient.get(`/exams/${examId}/cover-pages/`, { responseType: 'blob' })
+  const url = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `exam_${examId}_cover_pages.pdf`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 export async function listExams() {
   const response = await apiClient.get<{ data: PaginatedResult<Exam> }>('/exams/')
   return response.data.data.results
@@ -151,6 +161,13 @@ export async function publishExamResults(examId: number) {
   return response.data.data
 }
 
+export async function bulkPublishExamResults(examIds: number[]) {
+  const response = await apiClient.post<{
+    data: { published_exams: { exam_id: number; title: string; published_count: number }[]; total_published: number }
+  }>('/exams/bulk-publish-results/', { exam_ids: examIds })
+  return response.data.data
+}
+
 // --- student-facing results ---
 
 export async function listMyCandidateNumbers() {
@@ -190,6 +207,7 @@ export interface ExamQuestionPayload {
   max_marks: number
   correct_answer?: string
   learning_objective?: number | null
+  is_compulsory?: boolean
   order: number
 }
 

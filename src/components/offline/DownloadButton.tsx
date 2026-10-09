@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/Button'
+import { TrashIcon } from '@/components/ui/icons'
 
 interface DownloadButtonProps {
   isDownloaded: boolean
@@ -20,6 +21,7 @@ export function DownloadButton({ isDownloaded, isDownloading, disabled, onDownlo
   if (isDownloaded) {
     return (
       <Button size="sm" variant="ghost" onClick={onRemove}>
+        <TrashIcon className="h-3.5 w-3.5" />
         Remove download
       </Button>
     )

@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { Select } from '@/components/ui/Select'
 import { StatusBadge } from '@/components/ui/StatusBadge'
+import { PencilIcon } from '@/components/ui/icons'
 import { Table } from '@/components/ui/Table'
 import { createTopic, getSubject, listClassLevels, listTopics, updateSubject } from '@/services/academicsService'
 import { getApiErrorMessage } from '@/services/apiError'
@@ -128,6 +129,7 @@ export default function SubjectDetailPage() {
         actions={
           <>
             <Button variant="ghost" size="sm" onClick={() => setEditOpen(true)}>
+              <PencilIcon className="h-3.5 w-3.5" />
               Edit
             </Button>
             <Button

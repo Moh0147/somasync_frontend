@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { Select } from '@/components/ui/Select'
 import { StatusBadge } from '@/components/ui/StatusBadge'
+import { PencilIcon, TrashIcon } from '@/components/ui/icons'
 import { QuestionCard } from '@/features/quizzes/QuestionEditor'
 import { QuickQuestionBuilder } from '@/features/quizzes/QuickQuestionBuilder'
 import { useAuth } from '@/features/auth/AuthContext'
@@ -243,6 +244,7 @@ export default function QuizEditorPage() {
         actions={
           <>
             <Button variant="ghost" size="sm" onClick={() => setEditOpen(true)}>
+              <PencilIcon className="h-3.5 w-3.5" />
               Edit
             </Button>
             {quiz.status === 'DRAFT' && (
@@ -257,6 +259,7 @@ export default function QuizEditorPage() {
             )}
             {quiz.status === 'DRAFT' && (
               <Button variant="danger" size="sm" disabled={isDeleting} onClick={handleDelete}>
+                <TrashIcon className="h-3.5 w-3.5" />
                 Delete
               </Button>
             )}

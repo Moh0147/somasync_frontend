@@ -14,6 +14,7 @@ import { DescriptionList } from '@/components/ui/DescriptionList'
 import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { StatusBadge } from '@/components/ui/StatusBadge'
+import { PencilIcon } from '@/components/ui/icons'
 import { getApiErrorMessage } from '@/services/apiError'
 import {
   activateSchool,
@@ -132,6 +133,7 @@ export default function SchoolDetailPage() {
         actions={
           <>
             <Button variant="ghost" size="sm" onClick={() => setEditOpen(true)}>
+              <PencilIcon className="h-3.5 w-3.5" />
               Edit
             </Button>
             <Button

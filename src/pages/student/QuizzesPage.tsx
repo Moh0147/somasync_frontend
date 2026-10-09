@@ -56,7 +56,10 @@ export default function QuizzesPage() {
       {error && <ErrorState description={error} onRetry={load} />}
       {!error && !quizzes && <LoadingState message="Loading quizzes…" />}
       {!error && quizzes && quizzes.length === 0 && (
-        <EmptyState title="No quizzes available yet." description="Check back once your teacher publishes one." />
+        <EmptyState
+          title="Hakuna maswali ya kujaribu bado."
+          description="Mwalimu wako hajachapisha jaribio bado. Rudi tena baadaye — data itasasishwa moja kwa moja ukiwa mtandaoni."
+        />
       )}
       {!error && quizzes && quizzes.length > 0 && (
         <div className="flex flex-col gap-2">

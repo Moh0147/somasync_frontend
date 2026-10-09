@@ -4,7 +4,7 @@ import type { FormEvent } from 'react'
 import { useToast } from '@/components/feedback/Toast'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
-import { CheckIcon } from '@/components/ui/icons'
+import { CheckIcon, TrashIcon } from '@/components/ui/icons'
 import { Input } from '@/components/ui/Input'
 import { getApiErrorMessage } from '@/services/apiError'
 import { addOption, addPair, deleteQuestion, removeOption, removePair } from '@/services/quizzesService'
@@ -109,6 +109,7 @@ export function QuestionCard({
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{question.text}</p>
         </div>
         <Button variant="danger" size="sm" onClick={handleDeleteQuestion}>
+          <TrashIcon className="h-3.5 w-3.5" />
           Delete question
         </Button>
       </CardHeader>
@@ -134,7 +135,10 @@ export function QuestionCard({
                       <span className="min-w-0 break-words font-medium text-slate-800 dark:text-slate-200"><span className="mr-2 text-xs text-slate-400">{index + 1}.</span>{pair.left_text}</span>
                       <span className="text-slate-400">→</span>
                       <span className="min-w-0 break-words text-slate-700 dark:text-slate-300">{pair.right_text}</span>
-                      <Button type="button" variant="ghost" size="sm" onClick={() => handleRemovePair(pair.id)}>Remove</Button>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => handleRemovePair(pair.id)}>
+                        <TrashIcon className="h-3.5 w-3.5" />
+                        Remove
+                      </Button>
                     </li>
                   ))}
                 </ul>
@@ -171,6 +175,7 @@ export function QuestionCard({
                       {option.text}
                     </span>
                     <Button variant="ghost" size="sm" onClick={() => handleRemoveOption(option.id)}>
+                      <TrashIcon className="h-3.5 w-3.5" />
                       Remove
                     </Button>
                   </li>

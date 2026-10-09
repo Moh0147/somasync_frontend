@@ -12,6 +12,7 @@ import { WelcomeBanner } from '@/components/layout/WelcomeBanner'
 import { EmptyState } from '@/components/feedback/EmptyState'
 import { ErrorState } from '@/components/feedback/ErrorState'
 import { LoadingState } from '@/components/feedback/LoadingState'
+import { StudentDashboardSkeleton } from '@/components/ui/Skeleton'
 import { CheckIcon, DownloadIcon, JoinClassIcon, CalculatorIcon, BiologyIcon, ChemistryIcon, PhysicsIcon, LessonsIcon, LanguagesIcon, GeographyIcon, HistoryIcon, CivicsIcon, ComputerIcon } from '@/components/ui/icons'
 import { useAuth } from '@/features/auth/AuthContext'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
@@ -124,7 +125,7 @@ export default function StudentDashboardPage() {
 
 
   if (error) return <ErrorState description={error} onRetry={load} />
-  if (!rows) return <LoadingState message="Loading your lessons…" />
+  if (!rows) return <StudentDashboardSkeleton />
 
   const withPercentage = rows.map((row) => ({
     ...row,
@@ -188,8 +189,61 @@ export default function StudentDashboardPage() {
         action={<Link to="/student/join-class" className="inline-flex items-center gap-2 rounded-lg border border-white/70 bg-white px-4 py-2.5 text-sm font-semibold text-blue-800 shadow-sm transition hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"><JoinClassIcon className="h-4 w-4" />Join a class</Link>}
       />
       <SyncStatus />
-      {rows.length === 0 ? <EmptyState title={isOnline ? 'No lessons available yet.' : 'No downloaded lessons.'} description={isOnline ? 'Check back once your teacher publishes a lesson.' : "You're offline — download a lesson while online to study it later."} /> : <>
-        {featured && <section><h2 className="mb-3 text-lg font-semibold text-slate-900 dark:text-slate-100">Continue Learning</h2><div className="flex flex-col gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-5 sm:flex-row sm:items-center sm:justify-between dark:border-blue-500/20 dark:bg-blue-500/10"><div><p className="text-xs font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-400">{subjectName(featured.subjectId)}</p><p className="mt-1 text-xl font-semibold text-slate-900 dark:text-slate-100">{featured.title}</p>{featured.percentage !== null && <p className="mt-1 text-sm text-slate-500">Section {featured.completedSections + 1} of {featured.totalSections}</p>}</div><button type="button" onClick={() => navigate(`/student/lessons/${featured.lessonServerId}`)} className="self-start rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 sm:self-auto">Continue →</button></div></section>}
+      {rows.length === 0 ? (
+        <EmptyState
+          title={isOnline ? 'Masomo hayajapatikana bado.' : 'Hakuna masomo yaliyopakuliwa.'}
+          description={
+            isOnline
+              ? 'Mwalimu wako hajachapisha somo bado. Ukipata internet, data itasasishwa moja kwa moja.'
+              : 'Hujapakua somo lolote bado. Pata mtandao kisha pakua masomo ili uweze kusoma bila internet.'
+          }
+        />
+      ) : <>
+        {featured && (
+          <section>
+            <h2 className="mb-3 text-lg font-semibold text-slate-900 dark:text-slate-100">Continue Learning</h2>
+            <div className="overflow-hidden rounded-2xl border border-blue-200 bg-blue-50 dark:border-blue-500/20 dark:bg-blue-500/10">
+              <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-400">
+                    {subjectName(featured.subjectId)}
+                  </p>
+                  <p className="mt-1 truncate text-xl font-semibold text-slate-900 dark:text-slate-100">
+                    {featured.title}
+                  </p>
+                  {featured.percentage !== null && (
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                      Section {featured.completedSections + 1} of {featured.totalSections}
+                      {' · '}{featured.percentage}% complete
+                    </p>
+                  )}
+                  {/* Progress bar */}
+                  {featured.percentage !== null && (
+                    <div className="mt-3">
+                      <div className="h-2 overflow-hidden rounded-full bg-blue-200 dark:bg-blue-900/50">
+                        <div
+                          className="h-full rounded-full bg-blue-600 transition-all dark:bg-blue-400"
+                          style={{ width: `${Math.max(featured.percentage, 3)}%` }}
+                        />
+                      </div>
+                      <div className="mt-1.5 flex justify-between text-xs text-blue-600/70 dark:text-blue-400/70">
+                        <span>{featured.completedSections} done</span>
+                        <span>{featured.totalSections - featured.completedSections} remaining</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/student/lessons/${featured.lessonServerId}`)}
+                  className="shrink-0 self-start rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95 sm:self-center"
+                >
+                  Continue →
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
         <section><div className="mb-3 flex items-end justify-between"><div><h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">My Subjects</h2><p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Choose a subject to see its lessons.</p></div></div><div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{subjectRows.map(({ subject, lessons, total, completed, percentage, style }) => { const Icon = style.icon; return <Link key={subject.id} to={`/student/subjects/${subject.id}`} className={`group min-h-[205px] rounded-3xl p-5 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-lg ${style.className}`}><div className="flex items-start justify-between"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15"><Icon className="h-6 w-6" /></span><span className="text-sm font-semibold opacity-90">{lessons.length} {lessons.length === 1 ? 'lesson' : 'lessons'}</span></div><h3 className="mt-8 text-2xl font-bold">{subject.name}</h3><p className="mt-1 text-sm opacity-80">{completed} of {total} sections completed</p><div className="mt-4"><div className="mb-1 flex justify-between text-xs font-medium"><span>Progress</span><span>{percentage}%</span></div><div className="h-2 overflow-hidden rounded-full bg-black/20"><div className="h-full rounded-full bg-white/90" style={{ width: `${percentage}%` }} /></div></div><p className="mt-4 text-sm font-semibold">Continue {subject.name} <span className="inline-block transition-transform group-hover:translate-x-1">→</span></p></Link> })}</div></section>
         {activity.length > 0 && <section><h2 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">Recent Activity</h2><ul className="flex flex-col gap-2 rounded-md border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">{activity.map((item) => <li key={item.key} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400"><item.icon className="h-4 w-4 shrink-0 text-green-600" />{item.text}</li>)}</ul></section>}
         <StorageUsage />

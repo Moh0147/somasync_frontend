@@ -4,6 +4,7 @@ import {
   ExamsIcon,
   LessonsIcon,
   QuizzesIcon,
+  ResultsHubIcon,
   StudentsIcon,
   UsersIcon,
 } from '@/components/ui/icons'
@@ -17,6 +18,7 @@ export const teacherNavItems: NavItem[] = [
   { label: 'Lessons', to: '/teacher/lessons', icon: LessonsIcon },
   { label: 'Quizzes', to: '/teacher/quizzes', icon: QuizzesIcon },
   { label: 'Exams', to: '/teacher/exams', icon: ExamsIcon },
+  { label: 'Results Hub', to: '/teacher/results', icon: ResultsHubIcon },
   { label: 'Students', to: '/teacher/students', icon: StudentsIcon },
   { label: 'Analytics', to: '/teacher/analytics', icon: AnalyticsIcon },
 ]

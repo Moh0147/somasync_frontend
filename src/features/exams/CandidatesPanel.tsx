@@ -8,10 +8,11 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { getApiErrorMessage } from '@/services/apiError'
-import { addCandidate, removeCandidate } from '@/services/examsService'
+import { addCandidate, removeCandidate, downloadCoverPages } from '@/services/examsService'
 import type { ExamCandidate } from '@/types/exam'
 import type { AuthUser } from '@/types/auth'
 import type { SchoolClass } from '@/types/class'
+import { TrashIcon } from '@/components/ui/icons'
 
 export function CandidatesPanel({
   examId,
@@ -41,6 +42,18 @@ export function CandidatesPanel({
   const [search, setSearch] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isPrintingCoverPages, setIsPrintingCoverPages] = useState(false)
+
+  async function handlePrintCoverPages() {
+    setIsPrintingCoverPages(true)
+    try {
+      await downloadCoverPages(examId)
+    } catch (err) {
+      showToast('error', getApiErrorMessage(err))
+    } finally {
+      setIsPrintingCoverPages(false)
+    }
+  }
 
   async function handleAdd(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -108,8 +121,18 @@ export function CandidatesPanel({
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex items-center justify-between">
         <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Candidates</p>
+        {candidates.length > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={isPrintingCoverPages}
+            onClick={handlePrintCoverPages}
+          >
+            {isPrintingCoverPages ? 'Generating…' : '🖨 Print Cover Pages'}
+          </Button>
+        )}
       </CardHeader>
       <CardBody className="flex flex-col gap-4">
         {candidates.length === 0 && (
@@ -129,6 +152,7 @@ export function CandidatesPanel({
                   </div>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => handleRemove(candidate.candidate_number)}>
+                  <TrashIcon className="h-3.5 w-3.5" />
                   Remove
                 </Button>
               </li>

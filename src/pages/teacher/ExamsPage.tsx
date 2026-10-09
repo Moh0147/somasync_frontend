@@ -16,6 +16,7 @@ import { Table } from '@/components/ui/Table'
 import { listClassLevels, listSubjects } from '@/services/academicsService'
 import { getApiErrorMessage } from '@/services/apiError'
 import { createExam, listExams } from '@/services/examsService'
+import { ExamsTableSkeleton } from '@/components/ui/Skeleton'
 import type { ClassLevel, Subject } from '@/types/academics'
 import type { Exam } from '@/types/exam'
 
@@ -102,7 +103,7 @@ export default function ExamsPage() {
       />
 
       {error && <ErrorState description={error} onRetry={load} />}
-      {!error && !exams && <LoadingState message="Loading exams…" />}
+      {!error && !exams && <ExamsTableSkeleton />}
       {!error && exams && exams.length === 0 && (
         <EmptyState title="No exams yet." description="Create your first exam to get started." />
       )}

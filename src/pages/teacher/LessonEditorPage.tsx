@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { Textarea } from '@/components/ui/Textarea'
-import { UploadIcon } from '@/components/ui/icons'
+import { PencilIcon, TrashIcon, UploadIcon } from '@/components/ui/icons'
 import { listClassLevels, listSubjects, listTopics } from '@/services/academicsService'
 import { getApiErrorMessage } from '@/services/apiError'
 import { resolveMediaUrl } from '@/services/mediaUrl'
@@ -244,6 +244,7 @@ export default function LessonEditorPage() {
         actions={
           <>
             <Button variant="ghost" size="sm" onClick={() => setEditOpen(true)}>
+              <PencilIcon className="h-3.5 w-3.5" />
               Edit
             </Button>
             {lesson.status === 'DRAFT' && (
@@ -258,6 +259,7 @@ export default function LessonEditorPage() {
             )}
             {lesson.status === 'DRAFT' && (
               <Button variant="danger" size="sm" onClick={() => setDeleteConfirmOpen(true)}>
+                <TrashIcon className="h-3.5 w-3.5" />
                 Delete
               </Button>
             )}
@@ -412,6 +414,7 @@ export default function LessonEditorPage() {
                       Mini-Quiz
                     </Button>
                     <Button variant="danger" size="sm" onClick={() => handleDeleteSection(section.id)}>
+                      <TrashIcon className="h-3.5 w-3.5" />
                       Remove
                     </Button>
                   </div>
