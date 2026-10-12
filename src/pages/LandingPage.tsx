@@ -54,13 +54,6 @@ const audiences = [
   },
 ]
 
-// `position`/size go on the outer wrapper (the one the mouse-parallax
-// transform is applied to); `appearance` goes on an inner `inset-0` div so
-// its own CSS float animation drives its own `transform` independently --
-// two elements, two separate `transform`s, so the hover-parallax and the
-// ambient drift never fight over the same CSS property. `depth` is how far
-// (in px) each bubble shifts at the pointer's extremes -- varying it gives
-// a slight sense of layered depth rather than everything moving in lockstep.
 const bubbleConfigs = [
   { position: '-top-10 left-[8%] h-72 w-72', appearance: 'animate-float-a bg-blue-400/25 blur-3xl dark:bg-blue-500/20', depth: 24 },
   {
@@ -84,9 +77,9 @@ function FloatingBubbles() {
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
-    // Skip entirely for reduced-motion and touch-primary devices -- there's
-    // no meaningful "hover" to react to on a phone, and this app never
-    // trades a low-end Android device's performance for a decorative touch.
+    
+    
+    
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     if (window.matchMedia('(pointer: coarse)').matches) return
 
@@ -138,7 +131,7 @@ function FloatingBubbles() {
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-slate-950">
-      {/* Top bar */}
+      {}
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2">
@@ -154,9 +147,9 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* A thin divider in the Tanzanian flag's colors (green/yellow/black/
-          yellow/blue) — each color appears exactly once across the full width,
-          proportional to the flag's diagonal stripe. */}
+      {
+
+}
       <div
         aria-hidden="true"
         className="h-1.5 w-full"
@@ -167,19 +160,11 @@ export default function LandingPage() {
       />
 
       <main className="flex-1">
-        {/* Hero */}
+        {}
         <section className="relative isolate mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 overflow-hidden px-4 py-20 sm:px-6 sm:py-28 lg:grid-cols-2 lg:gap-16">
-          {/* Decorative floating bubbles -- ambient drift plus a subtle
-              mouse-parallax shift (see FloatingBubbles above). Disabled
-              entirely under prefers-reduced-motion and on touch devices.
-              Never interactive, never on top of content.
+          {
 
-              `isolate` on the section above is load-bearing: a
-              `position:relative` element with no z-index of its own does
-              NOT create a stacking context, so these `-z-10` children would
-              otherwise escape to the page root and render behind the outer
-              wrapper's own opaque background -- invisible -- instead of
-              just behind this section's text. `isolate` traps them here. */}
+}
           <FloatingBubbles />
 
           <div className="flex flex-col items-center gap-6 text-center lg:items-start lg:text-left">
@@ -204,10 +189,9 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Hero image -- a hand-built preview of the real product (not a
-              stock photo or an external asset), so it's authentic and adds
-              no extra network weight, consistent with the app's own
-              low-end-device philosophy. */}
+          {
+
+}
           <div className="flex justify-center lg:justify-end">
             <img
               src="/soma-hero.jpeg"
@@ -217,7 +201,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Features */}
+        {}
         <section id="features" className="border-t border-slate-200 bg-slate-50 px-4 py-16 sm:px-6 dark:border-slate-800 dark:bg-slate-900/40">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-center text-2xl font-semibold text-slate-900 dark:text-slate-100">
@@ -240,7 +224,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Audiences */}
+        {}
         <section className="px-4 py-16 sm:px-6">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-center text-2xl font-semibold text-slate-900 dark:text-slate-100">One platform, every role</h2>
@@ -258,7 +242,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* CTA band */}
+        {}
         <section className="border-t border-slate-200 bg-slate-900 px-4 py-14 text-center sm:px-6 dark:border-slate-800">
           <h2 className="text-2xl font-semibold text-white">Ready to get started?</h2>
           <p className="mt-2 text-sm text-slate-300">Sign in with the account provided by your school.</p>
@@ -268,7 +252,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      {/* Footer */}
+      {}
       <footer className="border-t border-slate-200 px-4 py-8 sm:px-6 dark:border-slate-800">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 sm:flex-row">
           <div className="flex items-center gap-2">

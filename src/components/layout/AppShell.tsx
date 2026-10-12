@@ -17,8 +17,8 @@ interface AppShellProps {
 export function AppShell({ title, navItems, children, topBarActions }: AppShellProps) {
   return (
     <div className="flex min-h-screen bg-slate-100 dark:bg-slate-950">
-      {/* Lets a keyboard user jump past the sidebar's nav items straight to
-          the page content, instead of tabbing through them on every page. */}
+      {
+}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded-md focus:bg-blue-600 focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-white"

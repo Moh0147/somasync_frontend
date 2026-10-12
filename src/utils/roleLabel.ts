@@ -11,7 +11,6 @@ export function roleLabel(role: UserRole, adminScope?: string | null): string {
   return ROLE_LABELS[role] ?? role
 }
 
-// Roles that require a school FK (mirrors backend _SCHOOL_REQUIRED_ROLES).
 export const SCHOOL_REQUIRED_ROLES: UserRole[] = ['TEACHER', 'STUDENT']
 
 export const SCHOOL_OPTIONAL_ROLES: UserRole[] = []

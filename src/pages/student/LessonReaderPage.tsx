@@ -29,8 +29,8 @@ function ContentBlockView({ block }: { block: SectionContentBlock }) {
     case 'HEADING':
       return <div className="lesson-rich-content mt-2 text-lg font-semibold text-slate-900 dark:text-slate-100" dangerouslySetInnerHTML={{ __html: sanitizeLessonHtml(block.content) }} />
     case 'KEY_POINT':
-      // Blue, not amber -- amber is reserved for AI-related content in this
-      // app's color system, and a key-point callout isn't that.
+      
+      
       return (
         <div className="lesson-rich-content rounded-md border-l-4 border-blue-500 bg-blue-50 px-4 py-3 text-sm text-blue-900 dark:border-blue-400 dark:bg-blue-500/10 dark:text-blue-200" dangerouslySetInnerHTML={{ __html: sanitizeLessonHtml(block.content) }} />
       )
@@ -119,10 +119,10 @@ export default function LessonReaderPage() {
     loadContent()
   }, [sectionIdNum, isOnline])
 
-  // Offline section content resolves each IMAGE block to a blob: URL (see
-  // offlineReaderService.getOfflineSectionContent) -- those are never
-  // freed by the browser on their own, so they're revoked here whenever
-  // this section's content is replaced or the reader unmounts.
+  
+  
+  
+  
   useEffect(() => {
     return () => {
       content?.content_blocks.forEach((block) => {
@@ -162,8 +162,8 @@ export default function LessonReaderPage() {
 
   const sortedSections = [...structure.sections].sort((a, b) => a.order - b.order)
 
-  // No section chosen yet -- land on the first non-completed one, or the
-  // last one if everything is already done.
+  
+  
   if (!sectionIdNum) {
     const target = sortedSections.find((section) => section.status !== 'COMPLETED') ?? sortedSections[sortedSections.length - 1]
     return <Navigate to={`/student/lessons/${lessonIdNum}/sections/${target.id}`} replace />
@@ -176,8 +176,8 @@ export default function LessonReaderPage() {
     return <ErrorState title="Section not found." />
   }
 
-  // The backend has no IN_PROGRESS status (only LOCKED/AVAILABLE/COMPLETED) --
-  // this is a purely client-side signal for "started answering, not submitted".
+  
+  
   const hasStartedAnswering = Object.keys(selectedOptions).length > 0 || Object.keys(matchingResponses).length > 0
   const completedCount = sortedSections.filter((section) => section.status === 'COMPLETED').length
   const progressPercentage = Math.round((completedCount / sortedSections.length) * 100)
@@ -278,11 +278,11 @@ export default function LessonReaderPage() {
         }
         if (!apiResult.passed) {
           // submit-quiz's response doesn't include each StudentQuizAnswer's
-          // own id (needed for "Explain My Mistake"), so resolve it via the
-          // attempt we just created -- it's always the most recent one for
-          // this student (StudentQuizAttempt's default ordering is
-          // -started_at), since section mini-quiz attempts are real rows in
-          // the same table normal quiz attempts use.
+          
+          
+          
+          
+          
           try {
             const attempts = await listMyAttempts()
             const latest = attempts[0]
@@ -292,15 +292,15 @@ export default function LessonReaderPage() {
             }
             setWrongAnswerIds(map)
           } catch {
-            // Best-effort -- Explain My Mistake just won't be offered for
-            // this attempt if this lookup fails.
+            
+            
           }
         }
       } else if (user) {
-        // No answer key ever reaches the device (see Phase 9/12 notes), so
-        // an offline submission can only be recorded and queued -- never
-        // marked pass/fail locally, and the section can't unlock until a
-        // real online sync resolves it.
+        
+        
+        
+        
         await queueOfflineSectionQuizSubmission(sectionIdNum!, user.id, answers)
         setQueuedOffline(true)
       }

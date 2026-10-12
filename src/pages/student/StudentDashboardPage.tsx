@@ -48,7 +48,6 @@ export default function StudentDashboardPage() {
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [error, setError] = useState<string | null>(null)
 
-
   async function load() {
     setError(null)
     setRows(null)
@@ -60,8 +59,8 @@ export default function StudentDashboardPage() {
           listClassLevels(),
         ])
         setSubjects(subjectsData)
-        // Opportunistic cache so the offline path below can still show
-        // subject/level names, not just raw ids.
+        
+        
         await db.metadata.put({ key: 'cache.subjects', value: subjectsData })
         await db.metadata.put({ key: 'cache.classLevels', value: levelsData })
 
@@ -123,7 +122,6 @@ export default function StudentDashboardPage() {
     return subjects.find((subject) => subject.id === subjectId)?.name ?? `#${subjectId}`
   }
 
-
   if (error) return <ErrorState description={error} onRetry={load} />
   if (!rows) return <StudentDashboardSkeleton />
 
@@ -132,13 +130,13 @@ export default function StudentDashboardPage() {
     percentage: row.totalSections > 0 ? (row.completedSections / row.totalSections) * 100 : null,
   }))
 
-  // The lesson to feature at the top: prefer one already started but not
-  // finished, otherwise fall back to the first available lesson.
+  
+  
   const inProgress = withPercentage.find((row) => row.percentage !== null && row.percentage > 0 && row.percentage < 100)
   const featured = inProgress ?? withPercentage[0]
 
-  // A small, honest activity list built from real fetched state -- no
-  // fabricated timestamps, since none are tracked client-side.
+  
+  
   const activity = [
     ...withPercentage
       .filter((row) => row.completedSections > 0)
@@ -217,7 +215,7 @@ export default function StudentDashboardPage() {
                       {' · '}{featured.percentage.toFixed(1)}% complete
                     </p>
                   )}
-                  {/* Progress bar */}
+                  {}
                   {featured.percentage !== null && (
                     <div className="mt-3">
                       <div className="h-2 overflow-hidden rounded-full bg-blue-200 dark:bg-blue-900/50">

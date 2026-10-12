@@ -40,10 +40,10 @@ class SomaSyncDB extends Dexie {
       metadata: 'key',
     })
 
-    // Additive only -- existing installs already have `metadata` (it holds
-    // the active login session), and Dexie carries version-1 stores forward
-    // automatically. Never recreate `metadata` here or a schema upgrade
-    // would silently log everyone out.
+    
+    
+    
+    
     this.version(2).stores({
       lessons: '++id, serverId',
       lessonSections: '++id, serverId, lessonId',

@@ -2,20 +2,15 @@ import { useRegisterSW } from 'virtual:pwa-register/react'
 
 import { Button } from '@/components/ui/Button'
 
-// A waiting service worker never activates on its own (see src/sw.ts) --
-// this is the only thing that ever calls updateServiceWorker(true), which
-// posts SKIP_WAITING to it and reloads once it takes control. IndexedDB
-// (all lesson/quiz/sync data) is untouched by any of this -- it's a
-// separate storage system the service worker update never reaches.
 export function UpdatePrompt() {
   const {
     needRefresh: [needRefresh],
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(_url, registration) {
-      // The browser only checks for a new service worker on navigation by
-      // default -- a tab left open for hours would otherwise never notice
-      // a new deploy. Poll explicitly so the prompt actually appears.
+      
+      
+      
       if (!registration) return
       setInterval(() => registration.update(), 60 * 60 * 1000)
     },

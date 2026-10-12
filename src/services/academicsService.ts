@@ -43,8 +43,6 @@ export interface TopicPayload {
   order?: number
 }
 
-// No backend filter by subject exists on this endpoint -- callers filter the
-// full (school-scoped) list client-side.
 export async function listTopics() {
   const response = await apiClient.get<{ data: PaginatedResult<Topic> }>('/academics/topics/')
   return response.data.data.results
@@ -68,7 +66,6 @@ export interface LearningObjectivePayload {
   order?: number
 }
 
-// Same as topics -- no backend filter by topic, filtered client-side.
 export async function listLearningObjectives() {
   const response = await apiClient.get<{ data: PaginatedResult<LearningObjective> }>('/academics/learning-objectives/')
   return response.data.data.results

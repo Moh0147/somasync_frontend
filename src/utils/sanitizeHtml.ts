@@ -1,4 +1,4 @@
-/** Keep lesson formatting rich while stripping scripts, event handlers, and unsafe URLs. */
+
 export function sanitizeLessonHtml(value: string): string {
   if (typeof window === 'undefined') return value
   const doc = new DOMParser().parseFromString(value, 'text/html')

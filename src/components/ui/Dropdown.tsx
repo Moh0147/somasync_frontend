@@ -36,8 +36,8 @@ export function Dropdown({ trigger, items }: DropdownProps) {
       }
     }
 
-    // Focus the first item once the menu mounts, so arrow keys work
-    // immediately without an extra Tab press.
+    
+    
     menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus()
 
     document.addEventListener('mousedown', handleClickOutside)

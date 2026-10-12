@@ -25,11 +25,6 @@ interface StaffAccountsPageProps {
   createFn: (schoolId: number, payload: TeacherPayload) => Promise<AuthUser>
 }
 
-// Shared by the admin "Teachers" and "Students" pages -- identical shape,
-// only the copy and the two service calls differ. A School Admin creates
-// accounts for their own school directly here (see
-// apps/schools/views.py's teachers()/students() actions on the backend) --
-// there is still no public self-signup, by design.
 export function StaffAccountsPage({ pageTitle, roleLabelLower, emptyTitle, listFn, createFn }: StaffAccountsPageProps) {
   const { user } = useAuth()
   const { showToast } = useToast()

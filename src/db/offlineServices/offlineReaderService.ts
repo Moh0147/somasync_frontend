@@ -99,10 +99,6 @@ export async function getOfflineSectionContent(sectionServerId: number): Promise
   }
 }
 
-// No local answer key exists (see Phase 9/12 notes), so an offline
-// submission can only be recorded and queued -- never marked pass/fail on
-// the device. Phase 13's sync engine replays it against the real
-// submit-quiz endpoint once back online.
 export async function queueOfflineSectionQuizSubmission(
   sectionServerId: number,
   studentId: number,

@@ -126,7 +126,7 @@ export function CandidatesPanel({
       </CardHeader>
       <CardBody className="flex flex-col gap-4">
 
-        {/* Enrolled list */}
+        {}
         {candidates.length === 0 ? (
           <EmptyState title="Hakuna wagombea bado." description="Chagua wanafunzi hapa chini." />
         ) : (
@@ -150,7 +150,7 @@ export function CandidatesPanel({
           </ul>
         )}
 
-        {/* Enroll section */}
+        {}
         <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
           <div className="flex flex-wrap items-end gap-3">
             <Input
@@ -178,7 +178,7 @@ export function CandidatesPanel({
           {students !== null && available.length > 0 && (
             <>
               <div className="rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
-                {/* Select-all row */}
+                {}
                 <label className="flex cursor-pointer items-center gap-3 border-b border-slate-200 px-3 py-2 dark:border-slate-700">
                   <input
                     ref={selectAllRef}

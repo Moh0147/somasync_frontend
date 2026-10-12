@@ -54,16 +54,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!cancelled) setUser(response.data.data)
         await updateCachedUser(response.data.data)
       } catch (error) {
-        // A network failure is expected in offline-first mode: keep the
-        // cached session and let the user continue using downloaded content.
-        // Do not treat a server error as an authentication failure either;
-        // the cached profile is still useful while the API recovers.
+        
+        
+        
+        
         if (!axios.isAxiosError(error) || !error.response) return
 
-        // The Axios client normally refreshes once before this reaches us.
-        // If that refresh failed, it already cleared the session and emitted
-        // AUTH_LOGGED_OUT_EVENT. Keep this explicit as a safety net for an
-        // invalid/revoked session, but never clear credentials for 5xx errors.
+        
+        
+        
+        
         if (error.response.status === 401) {
           await clearSession()
           if (!cancelled) {
@@ -105,8 +105,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await apiClient.post('/auth/logout/', { refresh: refreshToken })
       }
     } catch {
-      // Refresh token may already be invalid/expired -- clearing it locally
-      // still logs the user out either way.
+      
+      
     } finally {
       await clearSession()
       setUser(null)

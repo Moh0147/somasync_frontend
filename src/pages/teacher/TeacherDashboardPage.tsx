@@ -103,7 +103,7 @@ function PendingWorkSection({ exams }: { exams: ExamPerformance[] }) {
         )}
       </div>
 
-      {/* loading */}
+      {}
       {items === null && (
         <div className="flex flex-col gap-2">
           {[1, 2].map((i) => (
@@ -112,7 +112,7 @@ function PendingWorkSection({ exams }: { exams: ExamPerformance[] }) {
         </div>
       )}
 
-      {/* all clear */}
+      {}
       {items !== null && totalPending === 0 && (
         <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 dark:border-green-500/20 dark:bg-green-500/10">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400">
@@ -126,7 +126,7 @@ function PendingWorkSection({ exams }: { exams: ExamPerformance[] }) {
         </div>
       )}
 
-      {/* pending items */}
+      {}
       {items !== null && totalPending > 0 && (
         <div className="flex flex-col gap-2">
           {items.map((item) => (
@@ -224,10 +224,10 @@ export default function TeacherDashboardPage() {
         description="Here's what's happening in your classes. Pick up where you left off."
       />
 
-      {/* Pending work — only shown when there are active exams */}
+      {}
       {activeExams.length > 0 && <PendingWorkSection exams={exams} />}
 
-      {/* Classes */}
+      {}
       <div>
         <div className="mb-4 flex items-end justify-between gap-3">
           <div>
@@ -290,7 +290,7 @@ export default function TeacherDashboardPage() {
         )}
       </div>
 
-      {/* Quick actions */}
+      {}
       <div>
         <div className="mb-4">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-600 dark:text-blue-400">
@@ -317,7 +317,7 @@ export default function TeacherDashboardPage() {
         </div>
       </div>
 
-      {/* Exams summary */}
+      {}
       {exams.length > 0 && (
         <Link
           to="/teacher/exams"

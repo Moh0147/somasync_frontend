@@ -401,7 +401,7 @@ export default function ExamEditorPage() {
           </>
         }
       />
-      {/* Sentinel: watched by IntersectionObserver to detect when header scrolls away */}
+      {}
       <div ref={headerSentinelRef} aria-hidden="true" className="h-px" />
 
       {(() => {
@@ -410,7 +410,7 @@ export default function ExamEditorPage() {
         const nextIdx = Math.min(doneUpTo + 1, steps.length - 1)
         return (
           <>
-            {/* Mobile: compact step indicator */}
+            {}
             <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-2.5 sm:hidden dark:border-slate-800 dark:bg-slate-900">
               <div className="flex gap-1">
                 {steps.map((_, i) => (
@@ -431,7 +431,7 @@ export default function ExamEditorPage() {
                 </p>
               )}
             </div>
-            {/* Desktop: full stepper */}
+            {}
             <div className="hidden rounded-lg border border-slate-200 bg-white p-3 sm:block dark:border-slate-800 dark:bg-slate-900">
               <div className="flex items-center justify-between text-xs font-medium">
                 {steps.map((label, index) => (
@@ -504,7 +504,7 @@ export default function ExamEditorPage() {
         </CardBody>
       </Card>
 
-      {/* Section settings — visible whenever there are sections, not just DRAFT */}
+      {}
       {questions.some((q) => q.section) && (
         <Card>
           <CardHeader>
@@ -670,7 +670,7 @@ export default function ExamEditorPage() {
         </Card>
       )}
 
-      {/* ── Sticky action bar — appears only when header buttons have scrolled out of view ── */}
+      {}
       {!headerVisible && (isDraft || isPublished || isClosed || isMarking || isResultsPublished) && (
         <div className="sticky bottom-4 z-20 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white/95 shadow-lg shadow-slate-900/10 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95">
           <div className="flex items-center justify-between gap-4 px-4 py-3">

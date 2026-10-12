@@ -157,7 +157,7 @@ export async function listAuditLog(params?: {
     next: string | null
     previous: string | null
   }>('/exams/audit/', { params })
-  // DRF pagination wraps results; handle both paginated and list responses
+  
   const raw = res.data as unknown as {
     results?: AuditEntry[]
     data?: AuditEntry[]

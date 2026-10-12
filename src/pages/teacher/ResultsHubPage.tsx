@@ -119,7 +119,7 @@ export default function ResultsHubPage() {
 
       {!error && readyExams !== null && readyExams.length > 0 && (
         <>
-          {/* Select all + summary bar */}
+          {}
           <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
             <label className="flex cursor-pointer items-center gap-3 text-sm font-medium text-slate-700 dark:text-slate-300">
               <input
@@ -135,7 +135,7 @@ export default function ResultsHubPage() {
             </span>
           </div>
 
-          {/* Exam list */}
+          {}
           <div className="flex flex-col gap-3">
             {readyExams.map(({ exam, finalizedCount, totalScripts }) => (
               <label
@@ -181,7 +181,7 @@ export default function ResultsHubPage() {
             ))}
           </div>
 
-          {/* Sticky publish bar */}
+          {}
           {selected.size > 0 && (
             <div className="sticky bottom-4 z-20 overflow-hidden rounded-xl border border-blue-200 bg-white/95 shadow-lg backdrop-blur dark:border-blue-500/30 dark:bg-slate-900/95">
               <div className="flex items-center justify-between gap-4 px-4 py-3">

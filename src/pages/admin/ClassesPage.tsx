@@ -53,8 +53,8 @@ export default function ClassesPage() {
       const performance = await getSchoolClassPerformance()
       setPerformanceByClassId(new Map(performance.map((row) => [row.class_id, row])))
     } catch {
-      // Best-effort enrichment -- the table still works with just the base
-      // class list if the analytics endpoint has a hiccup.
+      
+      
     }
   }
 

@@ -96,8 +96,8 @@ export default function SectionContentPage() {
 
   function format(command: string, value?: string) {
     restoreSelection()
-    // execCommand is still the most compatible native editing API for a
-    // contenteditable editor. Browsers differ on formatBlock's value shape.
+    
+    
     const commandValue = command === 'formatBlock' && value ? `<${value}>` : value
     const applied = document.execCommand(command, false, commandValue)
     if (!applied && command === 'formatBlock' && value) document.execCommand(command, false, value)

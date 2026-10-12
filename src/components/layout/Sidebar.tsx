@@ -31,7 +31,7 @@ export function Sidebar({ navItems, roleLabel }: SidebarProps) {
             <span className="mt-1.5 text-[9px] font-bold uppercase tracking-[0.16em] text-teal-200">{roleLabel}</span>
           </div>
         </Link>
-        {/* <p className="text-[11px] text-slate-500 dark:text-slate-400">Learn anywhere. Sync when connected.</p> */}
+        {}
       </div>
       <nav className="flex flex-1 flex-col gap-0.5 p-2">
         {navItems.map((item) => {

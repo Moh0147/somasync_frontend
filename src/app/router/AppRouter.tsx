@@ -8,8 +8,6 @@ import LoginPage from '@/pages/LoginPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import UnauthorizedPage from '@/pages/UnauthorizedPage'
 
-// Each role's area is its own chunk -- a student's bundle never pulls in
-// the teacher's quiz/exam editors or the admin console, and vice versa.
 const AdminAreaPage = lazy(() => import('@/pages/admin/AdminAreaPage'))
 const TeacherAreaPage = lazy(() => import('@/pages/teacher/TeacherAreaPage'))
 const StudentAreaPage = lazy(() => import('@/pages/student/StudentAreaPage'))

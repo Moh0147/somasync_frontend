@@ -1,18 +1,4 @@
-/**
- * CameraScriptScanner — continuous batch-scan workflow for NECTA marking.
- *
- * New flow (replaces the old review-then-upload batch):
- *   1. Point camera at QR code on cover page → candidate auto-identified instantly.
- *   2. Capture pages for that candidate (camera or gallery).
- *   3. Press "Next Candidate" (or scan a new QR) → current candidate's pages are
- *      merged into a PDF and uploaded IMMEDIATELY in the background.
- *      The examiner never waits — they move straight to the next script.
- *   4. Repeat for all 50+ scripts. Each entry appears in ScriptsPanel as it uploads.
- *   5. When all candidates are done, a summary screen shows upload results.
- *
- * Upload state is tracked per-candidate so partial failures are visible without
- * blocking the rest of the session.
- */
+
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -22,8 +8,6 @@ import { Button } from '@/components/ui/Button'
 import { getApiErrorMessage } from '@/services/apiError'
 import { uploadScript } from '@/services/examsService'
 import type { ExamCandidate } from '@/types/exam'
-
-// ─── types ────────────────────────────────────────────────────────────────────
 
 interface CapturedPage {
   dataUrl: string
@@ -41,8 +25,6 @@ interface UploadStatus {
   state: UploadState
   error?: string
 }
-
-// ─── PDF builder (unchanged from previous version) ───────────────────────────
 
 async function mergeToPdf(pages: CapturedPage[]): Promise<Blob> {
   const jpegDataUrls: string[] = []
@@ -128,8 +110,6 @@ function scanQRFromFrame(imageData: ImageData): string | null {
   return result ? result.data : null
 }
 
-// ─── component ────────────────────────────────────────────────────────────────
-
 export function CameraScriptScanner({
   examId,
   candidates,
@@ -151,7 +131,7 @@ export function CameraScriptScanner({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const qrScanInterval = useRef<ReturnType<typeof setInterval> | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
-  // Keeps commitCandidate (called from effects) always reading fresh groups.
+  
   const groupsRef = useRef<CandidateGroup[]>([])
 
   groupsRef.current = groups
@@ -161,7 +141,7 @@ export function CameraScriptScanner({
   const activeGroup = groups.find((g) => g.candidate.id === activeCandidateId)
   const pagesCaptured = activeGroup?.pages.length ?? 0
 
-  // ── camera ──────────────────────────────────────────────────────────────
+  
 
   const startCamera = useCallback(async () => {
     try {
@@ -170,7 +150,7 @@ export function CameraScriptScanner({
       })
       streamRef.current = stream
       if (videoRef.current) { videoRef.current.srcObject = stream; await videoRef.current.play() }
-    } catch { /* fall back to gallery */ }
+    } catch {  }
   }, [])
 
   const stopCamera = useCallback(() => {
@@ -184,7 +164,7 @@ export function CameraScriptScanner({
     return () => stopCamera()
   }, [isDone, startCamera, stopCamera])
 
-  // ── QR loop ─────────────────────────────────────────────────────────────
+  
 
   useEffect(() => {
     if (isDone || qrConfirmed) return
@@ -200,13 +180,13 @@ export function CameraScriptScanner({
     return () => { if (qrScanInterval.current) clearInterval(qrScanInterval.current) }
   }, [isDone, qrConfirmed, detectedQR])
 
-  // ── auto-match QR ────────────────────────────────────────────────────────
+  
 
   useEffect(() => {
     if (!detectedQR || qrConfirmed) return
     const matched = candidates.find((c) => c.candidate_number === detectedQR)
     if (!matched) return
-    // If there's an active candidate with pages not yet committed, commit them first
+    
     if (activeCandidateId && activeCandidateId !== matched.id) {
       commitCandidate(activeCandidateId)
     }
@@ -215,7 +195,7 @@ export function CameraScriptScanner({
     if (qrScanInterval.current) clearInterval(qrScanInterval.current)
   }, [detectedQR, candidates, qrConfirmed, activeCandidateId])
 
-  // ── upload a candidate's pages immediately in background ─────────────────
+  
 
   function commitCandidate(candidateId: number) {
     const group = groupsRef.current.find((g) => g.candidate.id === candidateId)
@@ -229,13 +209,12 @@ export function CameraScriptScanner({
       return uploadScript(examId, candidateNumber, file)
     }).then(() => {
       setUploadStatuses((prev) => ({ ...prev, [candidateId]: { state: 'done' } }))
-      onDone() // refresh the scripts list in the parent
     }).catch((err) => {
       setUploadStatuses((prev) => ({ ...prev, [candidateId]: { state: 'failed', error: getApiErrorMessage(err) } }))
     })
   }
 
-  // ── "Next Candidate" — commit current and clear for next QR ─────────────
+  
 
   function handleNextCandidate() {
     if (!activeCandidateId) return
@@ -251,7 +230,7 @@ export function CameraScriptScanner({
     stopCamera()
   }
 
-  // ── page capture ─────────────────────────────────────────────────────────
+  
 
   function capturePageFromVideo() {
     const video = videoRef.current; const canvas = canvasRef.current
@@ -293,7 +272,7 @@ export function CameraScriptScanner({
     setQrConfirmed(true)
   }
 
-  // ── done summary ──────────────────────────────────────────────────────────
+  
 
   if (isDone) {
     const uploading = Object.values(uploadStatuses).filter((s) => s.state === 'uploading').length
@@ -323,7 +302,7 @@ export function CameraScriptScanner({
     )
   }
 
-  // ── scan step (full-screen portal) ────────────────────────────────────────
+  
 
   const uploadingCount = Object.values(uploadStatuses).filter((s) => s.state === 'uploading').length
   const doneCount = Object.values(uploadStatuses).filter((s) => s.state === 'done').length
@@ -334,14 +313,14 @@ export function CameraScriptScanner({
       <canvas ref={canvasRef} className="hidden" />
       <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 h-full w-full object-cover" />
 
-      {/* QR target box */}
+      {}
       {!qrConfirmed && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="h-56 w-56 rounded-xl border-2 border-white/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]" />
         </div>
       )}
 
-      {/* Page thumbnails */}
+      {}
       {qrConfirmed && pagesCaptured > 0 && (
         <div className="absolute bottom-36 left-3 flex gap-1.5">
           {activeGroup!.pages.map((p, i) => (
@@ -350,7 +329,7 @@ export function CameraScriptScanner({
         </div>
       )}
 
-      {/* ── Top bar ── */}
+      {}
       <div className="absolute inset-x-0 top-0 flex flex-col gap-1 bg-gradient-to-b from-black/80 to-transparent px-4 pb-6 pt-4">
         <div className="flex items-center justify-between">
           <p className="text-xs font-semibold text-white">
@@ -363,7 +342,7 @@ export function CameraScriptScanner({
             Finish →
           </button>
         </div>
-        {/* Upload status strip */}
+        {}
         {(uploadingCount > 0 || doneCount > 0 || failedCount > 0) && (
           <div className="flex gap-3 text-xs">
             {doneCount > 0 && <span className="text-green-400">✓ {doneCount} uploaded</span>}
@@ -373,11 +352,11 @@ export function CameraScriptScanner({
         )}
       </div>
 
-      {/* ── Bottom panel ── */}
+      {}
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 bg-gradient-to-t from-black/90 via-black/70 to-transparent px-4 pb-8 pt-16">
 
         {!qrConfirmed ? (
-          /* Waiting for QR */
+          
           <>
             <p className="text-center text-sm font-medium text-white">
               {detectedQR
@@ -405,7 +384,7 @@ export function CameraScriptScanner({
             )}
           </>
         ) : (
-          /* Candidate confirmed — capture controls */
+          
           <>
             <div className="flex items-center justify-between">
               <div>

@@ -14,14 +14,13 @@ export function StatTileSkeleton() {
   )
 }
 
-/* ── Teacher Dashboard skeleton ─────────────────────────────── */
 export function TeacherDashboardSkeleton() {
   return (
     <div className="flex flex-col gap-8">
-      {/* Welcome banner */}
+      {}
       <Skeleton className="h-28 w-full rounded-2xl" />
 
-      {/* Pending work */}
+      {}
       <div className="flex flex-col gap-3">
         <div className="flex gap-3">
           <Skeleton className="h-4 w-28" />
@@ -31,7 +30,7 @@ export function TeacherDashboardSkeleton() {
         <Skeleton className="h-16 w-full rounded-xl" />
       </div>
 
-      {/* Classes */}
+      {}
       <div className="flex flex-col gap-3">
         <Skeleton className="h-4 w-24" />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -57,7 +56,7 @@ export function TeacherDashboardSkeleton() {
         </div>
       </div>
 
-      {/* Quick actions */}
+      {}
       <div className="flex flex-col gap-3">
         <Skeleton className="h-4 w-24" />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -73,14 +72,13 @@ export function TeacherDashboardSkeleton() {
   )
 }
 
-/* ── Student Dashboard skeleton ─────────────────────────────── */
 export function StudentDashboardSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      {/* Welcome banner */}
+      {}
       <Skeleton className="h-28 w-full rounded-2xl" />
 
-      {/* Continue Learning */}
+      {}
       <div className="flex flex-col gap-2">
         <Skeleton className="h-5 w-36" />
         <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
@@ -96,7 +94,7 @@ export function StudentDashboardSkeleton() {
         </div>
       </div>
 
-      {/* My Subjects */}
+      {}
       <div className="flex flex-col gap-3">
         <Skeleton className="h-7 w-32" />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -109,17 +107,16 @@ export function StudentDashboardSkeleton() {
   )
 }
 
-/* ── Exams table skeleton ────────────────────────────────────── */
 export function ExamsTableSkeleton() {
   return (
     <div className="overflow-hidden rounded-md border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-      {/* Header row */}
+      {}
       <div className="flex gap-4 border-b border-slate-200 px-4 py-3 dark:border-slate-800">
         {['w-48', 'w-24', 'w-20', 'w-16', 'w-20'].map((w, i) => (
           <Skeleton key={i} className={`h-3 ${w}`} />
         ))}
       </div>
-      {/* Data rows */}
+      {}
       {[1, 2, 3, 4, 5].map((i) => (
         <div key={i} className="flex items-center gap-4 border-b border-slate-100 px-4 py-3.5 last:border-0 dark:border-slate-800/60">
           <div className="flex flex-col gap-1.5 flex-1">
@@ -136,7 +133,6 @@ export function ExamsTableSkeleton() {
   )
 }
 
-/* ── Script list skeleton (inside ScriptsPanel) ─────────────── */
 export function ScriptListSkeleton() {
   return (
     <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">

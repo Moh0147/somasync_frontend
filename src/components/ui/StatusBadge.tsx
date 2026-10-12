@@ -19,9 +19,6 @@ interface StatusConfig {
   className: string
 }
 
-// Color carries meaning, not decoration: blue = available/neutral, teal =
-// offline/sync/downloads, amber = AI/needs-attention only, green =
-// success, red = failure. A status never gets a color outside this table.
 const statusConfig: Record<StatusBadgeStatus, StatusConfig> = {
   completed: { label: 'Completed', icon: CheckIcon, className: 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400' },
   synced: { label: 'Synced', icon: CheckIcon, className: 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400' },

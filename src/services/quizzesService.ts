@@ -52,8 +52,6 @@ export async function archiveQuiz(id: number) {
   return response.data.data
 }
 
-// --- class assignment ---
-
 export async function listQuizAssignments(quizId: number) {
   const response = await apiClient.get<{ data: QuizAssignment[] }>(`/quizzes/${quizId}/assign/`)
   return response.data.data
@@ -121,14 +119,6 @@ export async function addPair(questionId: number, payload: PairPayload) {
 export async function removePair(questionId: number, pairId: number) {
   await apiClient.delete(`/quizzes/questions/${questionId}/pairs/`, { data: { pair_id: pairId } })
 }
-
-// --- student-facing: attempts ---
-// No endpoint exists yet for a student to safely fetch a normal quiz's
-// questions (unlike the lesson mini-quiz's `content` action) -- see
-// apps/quizzes/serializers.py's own SafeQuestionSerializer docstring:
-// "nothing else in the base quiz system serves questions to a student
-// before they've answered." start() below is real; there is nothing after
-// it a student can call to actually take the quiz today.
 
 export async function listMyAttempts() {
   const response = await apiClient.get<{ data: PaginatedResult<StudentQuizAttempt> }>('/quizzes/attempts/')

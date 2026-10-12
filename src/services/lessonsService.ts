@@ -57,8 +57,6 @@ export async function deleteLesson(id: number) {
   await apiClient.delete(`/lessons/${id}/`)
 }
 
-// --- sections ---
-
 export interface SectionPayload {
   lesson: number
   title: string
@@ -86,17 +84,12 @@ export async function deleteSection(id: number) {
   await apiClient.delete(`/lessons/sections/${id}/`)
 }
 
-// The `(lesson, order)` DB constraint is strict, so a direct A<->B swap
-// collides mid-flight. Parking B on an order no section will ever reach
-// first makes the swap safe in three requests.
 export async function swapSectionOrder(sectionA: LessonSection, sectionB: LessonSection) {
   const parkingOrder = 100000 + sectionB.order
   await updateSection(sectionB.id, { order: parkingOrder })
   await updateSection(sectionA.id, { order: sectionB.order })
   await updateSection(sectionB.id, { order: sectionA.order })
 }
-
-// --- content blocks ---
 
 export interface ContentBlockPayload {
   block_type: ContentBlockType
@@ -122,8 +115,6 @@ export async function deleteContentBlock(sectionId: number, blockId: number) {
   await apiClient.delete(`/lessons/sections/${sectionId}/content-blocks/`, { data: { block_id: blockId } })
 }
 
-// --- attachments ---
-
 export async function listAttachments(lessonId: number) {
   const response = await apiClient.get<{ data: LessonAttachment[] }>(`/lessons/${lessonId}/attachments/`)
   return response.data.data
@@ -141,8 +132,6 @@ export async function uploadAttachment(lessonId: number, file: File) {
 export async function deleteAttachment(lessonId: number, attachmentId: number) {
   await apiClient.delete(`/lessons/${lessonId}/attachments/`, { data: { attachment_id: attachmentId } })
 }
-
-// --- student-facing: reading + mini-quiz ---
 
 export async function getLessonStructure(lessonId: number) {
   const response = await apiClient.get<{ data: LessonStructure }>(`/lessons/${lessonId}/structure/`)
@@ -162,10 +151,6 @@ export async function submitSectionQuiz(sectionId: number, answers: SectionQuizA
   return response.data.data
 }
 
-// --- teacher-facing: mini-quiz authoring ---
-
-// GET 400s with "no mini-quiz yet" rather than 404 when none exists --
-// callers treat any rejection here as "not created yet."
 export async function getMiniQuiz(sectionId: number) {
   const response = await apiClient.get<{ data: SectionMiniQuiz }>(`/lessons/sections/${sectionId}/mini-quiz/`)
   return response.data.data

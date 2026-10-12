@@ -17,8 +17,8 @@ function getInitialTheme(): Theme {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored === 'light' || stored === 'dark') return stored
   } catch {
-    // localStorage unavailable (private mode, etc.) -- fall through to
-    // system preference for this session only.
+    
+    
   }
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
@@ -31,8 +31,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     try {
       localStorage.setItem(STORAGE_KEY, theme)
     } catch {
-      // Preference just won't persist across sessions in this browser --
-      // not worth surfacing an error for a cosmetic setting.
+      
+      
     }
   }, [theme])
 

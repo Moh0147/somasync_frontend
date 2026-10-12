@@ -21,10 +21,10 @@ export function Modal({ open, onClose, title, children, footer }: ModalProps) {
   const onCloseRef = useRef(onClose)
   onCloseRef.current = onClose
 
-  // Move focus into the dialog on open (so a keyboard user isn't left
-  // tabbing through the page behind the overlay), trap Tab inside it while
-  // open, and restore focus to whatever opened it on close -- the standard
-  // WAI-ARIA dialog pattern.
+  
+  
+  
+  
   useEffect(() => {
     if (!open) return
 

@@ -140,8 +140,8 @@ export default function ScriptReviewPage() {
 
   const sectionSettings = exam?.section_settings ?? {}
 
-  // Compulsory questions whose answer wasn't extracted AND haven't been manually marked yet.
-  // A question is effectively optional if it's in a choice section OR individually non-compulsory.
+  
+  
   const isFinishedStatuses = script.status === 'FINALIZED' || script.status === 'PUBLISHED'
 
   const missingCompulsory = attempt
@@ -165,16 +165,16 @@ export default function ScriptReviewPage() {
           : 'Not yet extracted'
   const showExtractBtn  = !isFinishedStatuses
   const showAiMarkBtn   = !isFinishedStatuses
-  const showReviewBtn   = false  // Teacher finalizes directly — no separate submit-for-review step
+  const showReviewBtn   = false  
   const showFinalizeBtn = !isFinishedStatuses
 
   return (
     <div className="flex flex-col gap-4">
       <Breadcrumb items={[{ label: 'Exams', href: '/teacher/exams' }, { label: exam.title, href: `/teacher/exams/${examIdNum}` }, { label: script.file_name }]} />
 
-      {/* ── Header ─────────────────────────────────────────────── */}
+      {}
       <div className="flex flex-col gap-2">
-        {/* Title row */}
+        {}
         <div className="flex min-w-0 items-start gap-2">
           <h1 className="min-w-0 flex-1 truncate text-xl font-semibold text-slate-900 dark:text-slate-100">
             {script.file_name}
@@ -184,12 +184,12 @@ export default function ScriptReviewPage() {
           </div>
         </div>
 
-        {/* Sub-line: version + extraction state */}
+        {}
         <p className="text-xs text-slate-500 dark:text-slate-400">
           v{script.version} · {extractionStatus}
         </p>
 
-        {/* Action buttons — wrap into two rows on small screens */}
+        {}
         {(showExtractBtn || showAiMarkBtn || showReviewBtn || showFinalizeBtn) && (
           <div className="flex flex-wrap gap-2 pt-1">
             {showExtractBtn && (
@@ -225,7 +225,7 @@ export default function ScriptReviewPage() {
         )}
       </div>
 
-      {/* ── Finalized banner ───────────────────────────────────── */}
+      {}
       {isFinishedStatuses && (
         <div className="flex items-center justify-between rounded-xl border border-green-200 bg-green-50 px-4 py-3 dark:border-green-500/30 dark:bg-green-500/10">
           <div>
@@ -244,7 +244,7 @@ export default function ScriptReviewPage() {
         </div>
       )}
 
-      {/* ── Alerts ─────────────────────────────────────────────── */}
+      {}
       {missingCompulsory.length > 0 && (
         <div className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 dark:border-amber-500/30 dark:bg-amber-500/10">
           <p className="text-sm font-medium text-amber-800 dark:text-amber-300">

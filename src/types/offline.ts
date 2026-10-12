@@ -6,9 +6,9 @@ export interface OfflineLesson {
   formId: number
   topicId?: number
   description: string
-  // A sectionless ("flat") lesson is read straight from this field --
-  // must be captured at download time or offline reading of that lesson
-  // type silently loses its body.
+  
+  
+  
   content: string
   version: number
   downloadedAt: string
@@ -65,18 +65,18 @@ export interface OfflineQuestion {
   quizId: number
   type: OfflineQuestionType
   questionText: string
-  // MCQ/TRUE_FALSE: options. MATCHING: pairs (left side only) + the
-  // shuffled pool of right-side texts to choose from -- mirrors the
-  // backend's own SafeQuestionSerializer shape, since that's the only
-  // shape ever legitimately downloadable (see correctAnswer below).
+  
+  
+  
+  
   options: OfflineQuestionOption[]
   pairs?: OfflineMatchingPair[]
   rightOptions?: string[]
-  // Answer key -- there is currently no backend endpoint that gives a
-  // student this data (see Phase 9's finding: SafeQuestionSerializer is
-  // the only thing ever served to a student, and it has no answer key).
-  // Always null until that changes; kept as a field so the schema is
-  // ready the day it does, without implying local marking works today.
+  
+  
+  
+  
+  
   correctAnswer: unknown
   order: number
 }
@@ -107,20 +107,13 @@ export interface OfflineSectionProgress {
 
 export type OfflineSyncStatus = 'PENDING' | 'SYNCING' | 'SYNCED' | 'FAILED'
 
-// Unlike the read-cache tables above (whose *Id fields are local Dexie ids,
-// for internal relational queries), these two are sync-bound: they'll be
-// replayed against the real API once online, so their *Id fields hold
-// SERVER ids directly -- one less translation step for the sync engine
-// (Phase 13). For a section mini-quiz attempt specifically, `quizId` holds
-// the SECTION's server id, since POST /lessons/sections/{id}/submit-quiz/
-// is keyed by section, not by a separately-addressable quiz id.
 export interface OfflineQuizAttempt {
   id?: number
   serverId?: number
   quizId: number
   studentId: number
-  // Null until the backend marks it -- an offline submission can only be
-  // recorded, never locally scored (no answer key on the device).
+  
+  
   score: number | null
   percentage: number | null
   passed: boolean | null
@@ -138,9 +131,6 @@ export interface OfflineQuizAnswer {
   marks?: number
 }
 
-// Referenced by contentBlocks.localAssetKey -- downloaded binary assets
-// (currently just lesson images) live here, never in Cache Storage, since
-// they're user-specific downloaded learning content, not static app shell.
 export interface OfflineAsset {
   id?: number
   key: string

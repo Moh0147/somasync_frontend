@@ -41,13 +41,13 @@ export default function AdminAreaPage() {
         </Button>
       }
     >
-      {/* One merged route tree for both admin scopes -- see AdminScopeGuard
-          for why a scope-mismatched path is guarded per-route instead of
-          the whole tree being duplicated behind an isSystemAdmin branch. */}
+      {
+
+}
       <Routes>
         <Route index element={isSystemAdmin ? <SystemAdminDashboardPage /> : <SchoolAdminDashboardPage />} />
 
-        {/* System admin only */}
+        {}
         <Route
           path="schools"
           element={
@@ -81,7 +81,7 @@ export default function AdminAreaPage() {
           }
         />
 
-        {/* School admin only */}
+        {}
         <Route
           path="classes"
           element={
@@ -162,8 +162,8 @@ export default function AdminAreaPage() {
             </RequireSchoolAdmin>
           }
         />
-        {/* Same path, different content per scope -- no guard needed, each
-            scope only ever sees its own component. */}
+        {
+}
         <Route path="analytics" element={isSystemAdmin ? <SystemAnalyticsPage /> : <SchoolAnalyticsPage />} />
         <Route
           path="settings"

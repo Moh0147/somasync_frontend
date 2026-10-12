@@ -58,7 +58,7 @@ export default function MarkingSessionDetailPage() {
   const [finalizing, setFinalizing] = useState<number | null>(null)
   const [showScanner, setShowScanner] = useState(false)
 
-  // Upload form state (EXAMINER)
+  
   const [candidateNumber, setCandidateNumber] = useState('')
   const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)

@@ -45,8 +45,8 @@ export default function SchoolsPage() {
       const rows = await getSystemSchools()
       setCountsBySchoolId(new Map(rows.map((row) => [row.school_id, row])))
     } catch {
-      // Best-effort enrichment -- the page still works with just the base
-      // school list if the analytics endpoint has a hiccup.
+      
+      
     }
   }
 

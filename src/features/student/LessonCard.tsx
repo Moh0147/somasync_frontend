@@ -17,7 +17,7 @@ interface LessonCardProps {
   onOpen: () => void
   onDownload: () => void
   onRemove: () => void
-  /** 'featured' is the single "continue learning" hero card; 'default' is used in the grid. */
+  
   variant?: 'default' | 'featured'
 }
 

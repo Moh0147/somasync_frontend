@@ -9,9 +9,6 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: ButtonSize
 }
 
-// Hierarchy is deliberate: primary is the one loud, solid-fill action per
-// screen; secondary is a soft tint, one step down; ghost is text-only, the
-// quietest. Never make two actions on the same screen equally loud.
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
     'border border-blue-700 bg-blue-600 text-white shadow-sm shadow-blue-900/10 hover:border-blue-800 hover:bg-blue-700 hover:shadow active:bg-blue-800 focus-visible:ring-blue-500 disabled:border-blue-300 disabled:bg-blue-300 disabled:shadow-none dark:border-blue-500 dark:bg-blue-600 dark:hover:border-blue-400 dark:hover:bg-blue-500',

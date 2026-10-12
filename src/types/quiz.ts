@@ -51,8 +51,6 @@ export interface SectionQuizResult {
   wrong_answers: WrongAnswer[]
 }
 
-// --- authoring shapes (answer key visible; teacher/admin only) ---
-
 export type QuizStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
 
 export interface Quiz {

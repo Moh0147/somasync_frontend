@@ -28,13 +28,13 @@ export default function UserDetailPage() {
   const [schools, setSchools] = useState<School[]>([])
   const [error, setError] = useState<string | null>(null)
 
-  // Role form state
+  
   const [newRole, setNewRole] = useState<UserRole>('TEACHER')
   const [newSchool, setNewSchool] = useState<string>('')
   const [roleError, setRoleError] = useState<string | null>(null)
   const [isSavingRole, setIsSavingRole] = useState(false)
 
-  // Deactivate/activate
+  
   const [confirmToggle, setConfirmToggle] = useState(false)
   const [isToggling, setIsToggling] = useState(false)
 
@@ -109,7 +109,7 @@ export default function UserDetailPage() {
         }
       />
 
-      {/* Account info */}
+      {}
       <Card>
         <CardHeader>
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Account details</p>
@@ -133,7 +133,7 @@ export default function UserDetailPage() {
         </CardBody>
       </Card>
 
-      {/* Role management */}
+      {}
       <Card>
         <CardHeader>
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Change role</p>

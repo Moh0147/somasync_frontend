@@ -149,7 +149,7 @@ export default function SchoolDetailPage() {
       />
 
       <Card className="overflow-hidden">
-        {/* ── Hero image ── */}
+        {}
         {(() => {
           const imageSrc = getSchoolImage(school)
           return (

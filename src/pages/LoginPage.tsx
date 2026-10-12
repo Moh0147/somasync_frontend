@@ -15,7 +15,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-slate-950">
-      {/* Same header as landing page — "Sign In" replaced with back link */}
+      {}
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2">
@@ -31,7 +31,7 @@ export default function LoginPage() {
         </div>
       </header>
 
-      {/* Same Tanzania flag strip as landing page */}
+      {}
       <div
         aria-hidden="true"
         className="h-1.5 w-full"
@@ -41,9 +41,9 @@ export default function LoginPage() {
         }}
       />
 
-      {/* Centered card */}
+      {}
       <div className="relative flex flex-1 items-center justify-center overflow-hidden px-4 py-10">
-        {/* Faint watermark */}
+        {}
         <img
           src="/soma-icon.png"
           alt=""
@@ -53,7 +53,7 @@ export default function LoginPage() {
 
         <div className="relative z-10 w-full max-w-sm rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex flex-col gap-5 px-6 py-6">
-            {/* Logo + tagline */}
+            {}
             <div className="flex flex-col items-center gap-2 text-center">
               <img src="/soma-icon.png" alt="SomaSync" className="h-14" />
               <div>

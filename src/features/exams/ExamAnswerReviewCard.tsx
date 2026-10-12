@@ -38,7 +38,7 @@ export function ExamAnswerReviewCard({
 
   const isConfirmed = answer.teacher_final_marks !== null
   const isNotAttempted = !(answer.recorded_answer || '').trim() && effectivelyOptional
-  // Needs attention: compulsory section question with no extracted answer, not yet marked.
+  
   const needsAttention = !effectivelyOptional && !(answer.recorded_answer || '').trim() && !isConfirmed
 
   async function handleSaveTranscription(event: FormEvent<HTMLFormElement>) {

@@ -4,7 +4,16 @@ if (!apiBaseUrl) {
   throw new Error('VITE_API_BASE_URL is not set')
 }
 
+function resolveApiOrigin(url: string): string {
+  try {
+    return new URL(url).origin
+  } catch {
+    
+    return window.location.origin
+  }
+}
+
 export const env = {
   apiBaseUrl,
-  apiOrigin: new URL(apiBaseUrl).origin,
+  apiOrigin: resolveApiOrigin(apiBaseUrl),
 } as const

@@ -1,12 +1,6 @@
 const MAX_DIMENSION = 1280
 const JPEG_QUALITY = 0.8
 
-// Downloaded lesson images are re-encoded to a capped resolution/quality
-// before being stored in IndexedDB, since a low-end Android device pays
-// for every stored byte twice: once in disk quota, once in decode memory
-// when the image is later rendered. SVGs and GIFs are left untouched --
-// SVG is already vector/small, and re-encoding a GIF as JPEG would destroy
-// any animation.
 export async function compressImageBlob(blob: Blob): Promise<Blob> {
   if (!blob.type.startsWith('image/') || blob.type === 'image/svg+xml' || blob.type === 'image/gif') {
     return blob
@@ -36,8 +30,8 @@ export async function compressImageBlob(blob: Blob): Promise<Blob> {
     )
     return compressed && compressed.size < blob.size ? compressed : blob
   } catch {
-    // Decoding can fail for formats the browser doesn't support -- keep
-    // the original rather than lose the image.
+    
+    
     return blob
   }
 }

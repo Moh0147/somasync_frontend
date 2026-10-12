@@ -10,8 +10,6 @@ import {
 } from '@/components/ui/icons'
 import type { NavItem } from '@/components/layout/Sidebar'
 
-// Order matters beyond the first 4 -- BottomNav shows those as tabs and
-// folds the rest into "More" on small screens.
 export const teacherNavItems: NavItem[] = [
   { label: 'Dashboard', to: '/teacher', icon: DashboardIcon },
   { label: 'My Classes', to: '/teacher/classes', icon: UsersIcon },

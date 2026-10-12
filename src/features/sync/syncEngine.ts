@@ -15,14 +15,6 @@ import { getApiErrorMessage } from '@/services/apiError'
 import { submitSectionQuiz } from '@/services/lessonsService'
 import type { SectionQuizAnswerInput, SectionQuizResult } from '@/types/quiz'
 
-// Guards against two sync runs (e.g. the auto-reconnect trigger and a
-// manual "Sync Now" click) processing the same queue entries concurrently
-// -- the one piece of duplicate protection the frontend can actually
-// guarantee. Real end-to-end idempotency would need the submit-quiz
-// endpoint to accept a client-generated attempt id (it doesn't -- see the
-// note in runSync below), so a request that fails with no response at all
-// carries a small, disclosed residual risk of a duplicate server-side
-// attempt if it actually succeeded before the response was lost.
 let isSyncing = false
 
 export interface SyncSummary {
@@ -86,11 +78,6 @@ async function processAiExplanationRequest(payload: unknown) {
   await db.metadata.put({ key: `ai.explanation.${studentAnswerId}`, value: result })
 }
 
-// `includeFailedRetries`: automatic reconnect-triggered sync only retries
-// PENDING entries (network-failure retries); a manual "Sync Now" click
-// also retries FAILED ones, since a FAILED entry means the server gave a
-// real answer (not just a dropped connection) and only a deliberate user
-// action should ask it again.
 export async function runSync(studentId: number, includeFailedRetries = false): Promise<SyncSummary> {
   if (isSyncing) return { synced: 0, failed: 0 }
   isSyncing = true
@@ -116,10 +103,10 @@ export async function runSync(studentId: number, includeFailedRetries = false): 
         await markSyncEntry(entry.id!, 'SYNCED')
         synced += 1
       } catch (err) {
-        // A response came back at all (even an error) means the server
-        // definitely already decided what happened -- retrying won't
-        // change that, so stop retrying automatically. Only a genuine
-        // network failure (no response reached us) stays PENDING.
+        
+        
+        
+        
         const isNetworkFailure = axios.isAxiosError(err) && !err.response
         if (isNetworkFailure) {
           await incrementRetryCount(entry.id!, entry.retryCount)

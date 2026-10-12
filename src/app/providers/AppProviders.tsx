@@ -8,10 +8,6 @@ import { runSync } from '@/features/sync/syncEngine'
 import { ThemeProvider } from '@/features/theme/ThemeContext'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 
-// Runs whenever the app is online with an authenticated student -- both on
-// initial load (pending items left over from a previous offline session)
-// and on the offline->online transition (reconnect). Only PENDING entries
-// are retried automatically; FAILED ones wait for an explicit "Sync Now".
 function AutoSync() {
   const { user, status } = useAuth()
   const isOnline = useOnlineStatus()

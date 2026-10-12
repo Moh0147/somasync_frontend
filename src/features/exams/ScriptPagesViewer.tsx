@@ -13,12 +13,12 @@ export function ScriptPagesViewer({ pages }: { pages: ExamScriptPage[] }) {
   const [zoom, setZoom] = useState(0.5)
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  // Reset zoom when page changes or lightbox opens
+  
   useEffect(() => {
     setZoom(0.5)
   }, [selected, lightboxOpen])
 
-  // Close lightbox on Escape
+  
   useEffect(() => {
     if (!lightboxOpen) return
     function onKey(e: KeyboardEvent) {
@@ -56,7 +56,7 @@ export function ScriptPagesViewer({ pages }: { pages: ExamScriptPage[] }) {
         Script pages ({pages.length})
       </p>
 
-      {/* Thumbnails — click to open */}
+      {}
       <div className="flex flex-wrap gap-2">
         {pages.map((page, i) => (
           <button
@@ -81,20 +81,20 @@ export function ScriptPagesViewer({ pages }: { pages: ExamScriptPage[] }) {
         ))}
       </div>
 
-      {/* Lightbox */}
+      {}
       {lightboxOpen && (
         <div
           className="fixed inset-0 z-50 flex flex-col bg-black/90"
           role="dialog"
           aria-modal="true"
         >
-          {/* Top toolbar */}
+          {}
           <div className="flex shrink-0 items-center justify-between gap-3 bg-black/60 px-4 py-2" onClick={(e) => e.stopPropagation()}>
             <p className="text-sm font-medium text-white/80">
               Page {current.page_number} of {pages.length}
             </p>
 
-            {/* Zoom controls */}
+            {}
             <div className="flex items-center gap-1 rounded-lg bg-white/10 p-1">
               <button
                 type="button"
@@ -133,7 +133,7 @@ export function ScriptPagesViewer({ pages }: { pages: ExamScriptPage[] }) {
             </button>
           </div>
 
-          {/* Scrollable image area */}
+          {}
           <div
             ref={scrollRef}
             className="flex flex-1 items-start justify-center overflow-auto p-4"
@@ -148,7 +148,7 @@ export function ScriptPagesViewer({ pages }: { pages: ExamScriptPage[] }) {
             />
           </div>
 
-          {/* Page navigation dots */}
+          {}
           {pages.length > 1 && (
             <div className="flex shrink-0 justify-center gap-2 pb-4 pt-2" onClick={(e) => e.stopPropagation()}>
               {pages.map((page, i) => (

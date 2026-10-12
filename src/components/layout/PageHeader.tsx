@@ -5,7 +5,7 @@ interface PageHeaderProps {
   title: string
   description?: string
   actions?: ReactNode
-  /** Override the automatic parent navigation for detail pages. */
+  
   backHref?: string
   backLabel?: string
   hideBack?: boolean

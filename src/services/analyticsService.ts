@@ -15,8 +15,6 @@ import type {
 
 import { apiClient } from './apiClient'
 
-// --- teacher ---
-
 export async function getTeacherClassPerformance() {
   const response = await apiClient.get<{ data: ClassPerformance[] }>('/analytics/teacher/classes/')
   return response.data.data
@@ -51,8 +49,6 @@ export async function getTeacherExamPerformance() {
   return response.data.data
 }
 
-// --- school admin ---
-
 export async function getSchoolOverview() {
   const response = await apiClient.get<{ data: SchoolOverview }>('/analytics/school/overview/')
   return response.data.data
@@ -67,8 +63,6 @@ export async function getSchoolSubjectPerformance() {
   const response = await apiClient.get<{ data: SubjectPerformance[] }>('/analytics/school/subjects/')
   return response.data.data
 }
-
-// --- system admin ---
 
 export async function getSystemSchools() {
   const response = await apiClient.get<{ data: SystemSchoolRow[] }>('/analytics/system/schools/')

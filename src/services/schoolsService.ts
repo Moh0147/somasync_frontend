@@ -21,9 +21,6 @@ export interface SchoolAdminPayload {
   password: string
 }
 
-// Same shape as SchoolAdminPayload -- kept as a separate alias so callers
-// read clearly (a TeacherPayload isn't accidentally interchangeable with a
-// StudentPayload just because the fields match).
 export type TeacherPayload = SchoolAdminPayload
 export type StudentPayload = SchoolAdminPayload
 

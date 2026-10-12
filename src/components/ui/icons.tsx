@@ -1,5 +1,5 @@
-// One consistent icon library (Lucide) across the whole app, re-exported
-// under stable names so every consuming file keeps working unchanged.
+
+
 export {
   X as CloseIcon,
   ChevronDown as ChevronDownIcon,

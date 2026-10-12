@@ -21,12 +21,6 @@ export interface DownloadProgressUpdate {
   total: number
 }
 
-// Downloads everything currently accessible to this student for a lesson --
-// content, images, and mini-quiz *questions* (never the answer key: there
-// is no backend endpoint that legitimately gives a student one -- see
-// Phase 9's finding). A LOCKED section's content is never revealed by the
-// backend in the first place, so it's simply skipped here; re-downloading
-// after unlocking more of the lesson picks up the rest.
 export async function downloadLessonForOffline(
   lessonServerId: number,
   onProgress?: (update: DownloadProgressUpdate) => void,

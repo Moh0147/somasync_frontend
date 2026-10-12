@@ -21,8 +21,6 @@ export const systemAdminNavItems: NavItem[] = [
   { label: 'Settings', to: '/admin/settings', icon: SettingsIcon },
 ]
 
-// Order matters beyond the first 4 -- BottomNav shows those as tabs and
-// folds the rest into "More" on small screens.
 export const schoolAdminNavItems: NavItem[] = [
   { label: 'Dashboard', to: '/admin', icon: DashboardIcon },
   { label: 'Classes', to: '/admin/classes', icon: ClassesIcon },

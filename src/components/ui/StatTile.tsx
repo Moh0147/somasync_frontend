@@ -9,7 +9,6 @@ interface StatTileProps {
   tone?: StatTileTone
 }
 
-/** A compact, colour-coded KPI tile with a subtle hover lift. */
 const toneConfig: Record<StatTileTone, { icon: string; accent: string; hover: string }> = {
   primary: {
     icon: 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400',

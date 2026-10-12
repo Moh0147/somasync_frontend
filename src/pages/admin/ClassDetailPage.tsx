@@ -78,9 +78,9 @@ export default function ClassDetailPage() {
   const [classLevels, setClassLevels] = useState<ClassLevel[]>([])
   const [teachers, setTeachers] = useState<AuthUser[]>([])
   const [students, setStudents] = useState<AuthUser[]>([])
-  // Every teacher/student account in the school -- used to build the
-  // "assign by name" pickers below, since asking an admin to type a raw
-  // numeric user ID (with no way to look one up) was a real dead end.
+  
+  
+  
   const [schoolTeachers, setSchoolTeachers] = useState<AuthUser[]>([])
   const [schoolStudents, setSchoolStudents] = useState<AuthUser[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -104,8 +104,8 @@ export default function ClassDetailPage() {
   async function load() {
     setError(null)
     try {
-      // getClass() first -- everything else that's school-scoped needs the
-      // school id it returns, so it can't all run in one Promise.all.
+      
+      
       const classData = await getClass(id)
       const [levelsData, teachersData, studentsData, schoolTeachersData, schoolStudentsData] = await Promise.all([
         listClassLevels(),

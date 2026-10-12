@@ -113,8 +113,6 @@ export async function listAttempts(examId: number) {
   return response.data.data
 }
 
-// --- candidates ---
-
 export async function listCandidates(examId: number) {
   const response = await apiClient.get<{ data: ExamCandidate[] }>(`/exams/${examId}/candidates/`)
   return response.data.data
@@ -153,8 +151,6 @@ export async function uploadMarkingScheme(examId: number, file: File) {
   const response = await apiClient.post<{ data: { id: number; file_name: string; extracted_text: string; created_item_ids: number[] } }>(`/exams/${examId}/marking-scheme/upload/`, formData)
   return response.data.data
 }
-
-// --- scripts ---
 
 export async function listScripts(examId: number) {
   const response = await apiClient.get<{ data: ExamScript[] }>(`/exams/${examId}/scripts/`)
@@ -210,8 +206,6 @@ export async function bulkPublishExamResults(examIds: number[]) {
   return response.data.data
 }
 
-// --- student-facing results ---
-
 export async function listMyCandidateNumbers() {
   const response = await apiClient.get<{ data: StudentCandidateNumber[] }>('/exams/results/candidate-numbers/')
   return response.data.data
@@ -226,8 +220,6 @@ export async function getExamResult(id: number) {
   const response = await apiClient.get<{ data: ExamResult }>(`/exams/results/${id}/`)
   return response.data.data
 }
-
-// --- per-answer marking ---
 
 export interface MarkAnswerPayload {
   recorded_answer?: string

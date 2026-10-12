@@ -180,7 +180,7 @@ export default function MarkingScriptPage() {
     try {
       setAssignments(await getScriptAssignments(id))
     } catch {
-      // non-critical
+      
     }
   }
 
@@ -345,7 +345,7 @@ export default function MarkingScriptPage() {
         }
       />
 
-      {/* Assignment panel */}
+      {}
       {canAssign && showAssignPanel && (
         <Card>
           <CardHeader>
@@ -424,7 +424,7 @@ export default function MarkingScriptPage() {
         </Card>
       )}
 
-      {/* Script page images */}
+      {}
       {script.pages.length > 0 && (
         <Card>
           <CardHeader>
@@ -449,7 +449,7 @@ export default function MarkingScriptPage() {
         </Card>
       )}
 
-      {/* OCR text */}
+      {}
       {script.extracted_text && (
         <Card>
           <CardHeader>
@@ -463,7 +463,7 @@ export default function MarkingScriptPage() {
         </Card>
       )}
 
-      {/* Answer marking */}
+      {}
       <Card>
         <CardHeader className="flex items-center justify-between">
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">

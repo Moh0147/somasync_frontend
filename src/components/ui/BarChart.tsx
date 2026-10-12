@@ -8,9 +8,6 @@ interface BarChartProps {
   valueFormatter?: (value: number) => string
 }
 
-// Dependency-free "lightweight chart" -- a horizontal bar list built from
-// plain divs, matching ProgressBar's visual language. No charting library
-// needed for this, and it keeps the low-end-Android bundle budget intact.
 export function BarChart({ items, valueFormatter = (value) => String(value) }: BarChartProps) {
   const maxValue = Math.max(...items.map((item) => item.value), 1)
 
