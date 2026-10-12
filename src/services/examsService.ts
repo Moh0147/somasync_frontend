@@ -23,12 +23,22 @@ export interface ExamPayload {
   exam_date?: string | null
 }
 
-export async function downloadCoverPages(examId: number): Promise<void> {
+export async function downloadMarkSheet(examId: number, title?: string): Promise<void> {
+  const response = await apiClient.get(`/exams/${examId}/mark-sheet/`, { responseType: 'blob' })
+  const url = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+  const a = document.createElement('a')
+  a.href = url
+  a.download = title ? `${title}_mark_sheet.pdf` : `exam_${examId}_mark_sheet.pdf`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+export async function downloadCoverPages(examId: number, title?: string): Promise<void> {
   const response = await apiClient.get(`/exams/${examId}/cover-pages/`, { responseType: 'blob' })
   const url = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
   const a = document.createElement('a')
   a.href = url
-  a.download = `exam_${examId}_cover_pages.pdf`
+  a.download = title ? `${title}_cover_pages.pdf` : `exam_${examId}_cover_pages.pdf`
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -77,6 +87,27 @@ export async function startMarking(id: number) {
   return response.data.data
 }
 
+export interface SchoolTeacher {
+  id: number
+  username: string
+  full_name: string
+}
+
+export async function listSchoolTeachers(): Promise<SchoolTeacher[]> {
+  const res = await apiClient.get<{ data: SchoolTeacher[] }>('/auth/school-teachers/')
+  return res.data.data
+}
+
+export async function assignExaminerRole(userId: number): Promise<SchoolTeacher> {
+  const res = await apiClient.post<{ data: SchoolTeacher }>(`/auth/school-teachers/${userId}/examiner/`)
+  return res.data.data
+}
+
+export async function unassignExaminerRole(userId: number): Promise<SchoolTeacher> {
+  const res = await apiClient.delete<{ data: SchoolTeacher }>(`/auth/school-teachers/${userId}/examiner/`)
+  return res.data.data
+}
+
 export async function listAttempts(examId: number) {
   const response = await apiClient.get<{ data: StudentExamAttempt[] }>(`/exams/${examId}/attempts/`)
   return response.data.data
@@ -96,6 +127,17 @@ export async function addCandidate(examId: number, payload: { student: number; c
 
 export async function removeCandidate(examId: number, candidateNumber: string) {
   await apiClient.delete(`/exams/${examId}/candidates/`, { data: { candidate_number: candidateNumber } })
+}
+
+export async function bulkAddCandidates(
+  examId: number,
+  candidates: { student: number; candidate_number: string }[],
+): Promise<{ enrolled: string[]; skipped: string[]; errors: string[] }> {
+  const res = await apiClient.post<{ data: { enrolled: string[]; skipped: string[]; errors: string[] } }>(
+    `/exams/${examId}/bulk-candidates/`,
+    { candidates },
+  )
+  return res.data.data
 }
 
 export async function uploadExamPaper(examId: number, file: File) {
@@ -249,4 +291,15 @@ export async function addMarkingSchemeItem(questionId: number, payload: MarkingS
 
 export async function removeMarkingSchemeItem(questionId: number, itemId: number) {
   await apiClient.delete(`/exams/questions/${questionId}/marking-scheme/`, { data: { item_id: itemId } })
+}
+
+export async function updateMarkingSchemeItemCriterion(
+  questionId: number,
+  itemId: number,
+  newCriterion: string,
+  marks: number,
+  order: number,
+) {
+  await removeMarkingSchemeItem(questionId, itemId)
+  return addMarkingSchemeItem(questionId, { criterion: newCriterion, marks, order })
 }

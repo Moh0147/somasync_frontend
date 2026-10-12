@@ -129,7 +129,7 @@ export default function StudentDashboardPage() {
 
   const withPercentage = rows.map((row) => ({
     ...row,
-    percentage: row.totalSections > 0 ? Math.round((row.completedSections / row.totalSections) * 100) : null,
+    percentage: row.totalSections > 0 ? (row.completedSections / row.totalSections) * 100 : null,
   }))
 
   // The lesson to feature at the top: prefer one already started but not
@@ -157,27 +157,27 @@ export default function StudentDashboardPage() {
   ].slice(0, 4)
 
   const subjectStyles = [
-    { match: ['math'], className: 'bg-[#0057FF] text-white', icon: CalculatorIcon },
-    { match: ['bio'], className: 'bg-[#064E3B] text-white', icon: BiologyIcon },
-    { match: ['chem'], className: 'bg-[#3A0CA3] text-white', icon: ChemistryIcon },
-    { match: ['phys'], className: 'bg-[#5B3DF5] text-white', icon: PhysicsIcon },
-    { match: ['english'], className: 'bg-[#E8DEFF] text-[#1E1033]', icon: LessonsIcon },
-    { match: ['kiswahili', 'swahili'], className: 'bg-[#F8E7C9] text-[#1E1033]', icon: LanguagesIcon },
-    { match: ['geograph'], className: 'bg-[#FFD6A5] text-[#1E1033]', icon: GeographyIcon },
-    { match: ['history'], className: 'bg-[#FFF4D6] text-[#1E1033]', icon: HistoryIcon },
-    { match: ['civic'], className: 'bg-[#1E1033] text-white', icon: CivicsIcon },
-    { match: ['computer', 'ict'], className: 'bg-[#5B3DF5] text-white', icon: ComputerIcon },
+    { match: ['math'], className: 'bg-[#1e3d6b] text-white', icon: CalculatorIcon },
+    { match: ['bio'], className: 'bg-[#1a3d2e] text-white', icon: BiologyIcon },
+    { match: ['chem'], className: 'bg-[#2a1860] text-white', icon: ChemistryIcon },
+    { match: ['phys'], className: 'bg-[#28206e] text-white', icon: PhysicsIcon },
+    { match: ['english'], className: 'bg-[#ddd6f0] text-[#1E1033]', icon: LessonsIcon },
+    { match: ['kiswahili', 'swahili'], className: 'bg-[#eedfc8] text-[#3d2a0a]', icon: LanguagesIcon },
+    { match: ['geograph'], className: 'bg-[#e6d4a8] text-[#3d2a0a]', icon: GeographyIcon },
+    { match: ['history'], className: 'bg-[#e6e0ca] text-[#3d2a0a]', icon: HistoryIcon },
+    { match: ['civic'], className: 'bg-[#1c1628] text-white', icon: CivicsIcon },
+    { match: ['computer', 'ict'], className: 'bg-[#20206a] text-white', icon: ComputerIcon },
   ]
   function subjectStyle(subject: Subject, index: number) {
     const found = subjectStyles.find((style) => style.match.some((word) => subject.name.toLowerCase().includes(word)))
-    return found ?? { className: index % 2 ? 'bg-slate-800 text-white' : 'bg-blue-700 text-white', icon: LessonsIcon }
+    return found ?? { className: index % 2 ? 'bg-[#2d3748] text-white' : 'bg-[#1e3a5f] text-white', icon: LessonsIcon }
   }
   const subjectRows = subjects.map((subject, index) => {
     const subjectLessons = withPercentage.filter((row) => row.subjectId === subject.id)
     if (!subjectLessons.length) return null
     const total = subjectLessons.reduce((sum, row) => sum + row.totalSections, 0)
     const completed = subjectLessons.reduce((sum, row) => sum + row.completedSections, 0)
-    return { subject, lessons: subjectLessons, total, completed, percentage: total ? Math.round(completed / total * 100) : 0, style: subjectStyle(subject, index) }
+    return { subject, lessons: subjectLessons, total, completed, percentage: total ? (completed / total * 100) : 0, style: subjectStyle(subject, index) }
   }).filter(Boolean) as Array<{ subject: Subject; lessons: typeof withPercentage; total: number; completed: number; percentage: number; style: { className: string; icon: typeof LessonsIcon } }>
 
   return (
@@ -214,7 +214,7 @@ export default function StudentDashboardPage() {
                   {featured.percentage !== null && (
                     <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                       Section {featured.completedSections + 1} of {featured.totalSections}
-                      {' · '}{featured.percentage}% complete
+                      {' · '}{featured.percentage.toFixed(1)}% complete
                     </p>
                   )}
                   {/* Progress bar */}
@@ -244,7 +244,7 @@ export default function StudentDashboardPage() {
             </div>
           </section>
         )}
-        <section><div className="mb-3 flex items-end justify-between"><div><h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">My Subjects</h2><p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Choose a subject to see its lessons.</p></div></div><div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{subjectRows.map(({ subject, lessons, total, completed, percentage, style }) => { const Icon = style.icon; return <Link key={subject.id} to={`/student/subjects/${subject.id}`} className={`group min-h-[205px] rounded-3xl p-5 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-lg ${style.className}`}><div className="flex items-start justify-between"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15"><Icon className="h-6 w-6" /></span><span className="text-sm font-semibold opacity-90">{lessons.length} {lessons.length === 1 ? 'lesson' : 'lessons'}</span></div><h3 className="mt-8 text-2xl font-bold">{subject.name}</h3><p className="mt-1 text-sm opacity-80">{completed} of {total} sections completed</p><div className="mt-4"><div className="mb-1 flex justify-between text-xs font-medium"><span>Progress</span><span>{percentage}%</span></div><div className="h-2 overflow-hidden rounded-full bg-black/20"><div className="h-full rounded-full bg-white/90" style={{ width: `${percentage}%` }} /></div></div><p className="mt-4 text-sm font-semibold">Continue {subject.name} <span className="inline-block transition-transform group-hover:translate-x-1">→</span></p></Link> })}</div></section>
+        <section><div className="mb-3 flex items-end justify-between"><div><h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">My Subjects</h2><p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Choose a subject to see its lessons.</p></div></div><div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{subjectRows.map(({ subject, lessons, total, completed, percentage, style }) => { const Icon = style.icon; return <Link key={subject.id} to={`/student/subjects/${subject.id}`} className={`group min-h-[205px] rounded-3xl p-5 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-lg ${style.className}`}><div className="flex items-start justify-between"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15"><Icon className="h-6 w-6" /></span><span className="text-sm font-semibold opacity-90">{lessons.length} {lessons.length === 1 ? 'lesson' : 'lessons'}</span></div><h3 className="mt-8 text-2xl font-bold">{subject.name}</h3><p className="mt-1 text-sm opacity-80">{completed} of {total} sections completed</p><div className="mt-4"><div className="mb-1 flex justify-between text-xs font-medium"><span>Progress</span><span>{percentage.toFixed(1)}%</span></div><div className="h-2 overflow-hidden rounded-full bg-black/20"><div className="h-full rounded-full bg-white/90" style={{ width: `${percentage}%` }} /></div></div><p className="mt-4 text-sm font-semibold">Continue {subject.name} <span className="inline-block transition-transform group-hover:translate-x-1">→</span></p></Link> })}</div></section>
         {activity.length > 0 && <section><h2 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">Recent Activity</h2><ul className="flex flex-col gap-2 rounded-md border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">{activity.map((item) => <li key={item.key} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400"><item.icon className="h-4 w-4 shrink-0 text-green-600" />{item.text}</li>)}</ul></section>}
         <StorageUsage />
       </>}

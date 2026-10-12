@@ -27,6 +27,7 @@ export interface MarkingSchemeItem {
   description: string
   marks: number | string
   order: number
+  marks_source?: 'confirmed' | 'inferred'
 }
 
 export interface ExamCandidate {
@@ -65,6 +66,7 @@ export interface ExamScript {
   id: number
   exam: number
   candidate: number
+  candidate_number: string
   student: number
   file_reference: string
   file_name: string
@@ -108,12 +110,16 @@ export interface StudentExamAnswer {
   id: number
   attempt: number
   exam_question: number
+  question_number: string
+  question_text: string
+  max_marks: string
+  question_type: 'OBJECTIVE' | 'SUBJECTIVE'
   recorded_answer: string
   is_correct: boolean | null
-  ai_marks_awarded: number | null
+  ai_marks_awarded: string | null
   ai_feedback: string
   ocr_confidence: string
-  teacher_final_marks: number | null
+  teacher_final_marks: string | null
   teacher_comment: string
   marked_at: string | null
   created_at: string

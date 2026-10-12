@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener(AUTH_LOGGED_OUT_EVENT, handleLoggedOut)
   }, [])
 
-  const login = useCallback(async (username: string, password: string) => {
+  const login = useCallback(async (username: string, password: string): Promise<AuthUser> => {
     const response = await apiClient.post<{ data: LoginResponseData }>('/auth/login/', { username, password })
     const { access, refresh, user: loggedInUser } = response.data.data
     await saveSession({ accessToken: access, refreshToken: refresh, user: loggedInUser })

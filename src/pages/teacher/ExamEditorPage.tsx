@@ -19,12 +19,13 @@ import { CandidatesPanel } from '@/features/exams/CandidatesPanel'
 import { ExamQuestionCard } from '@/features/exams/ExamQuestionCard'
 import { ScriptsPanel } from '@/features/exams/ScriptsPanel'
 import { listSubjects } from '@/services/academicsService'
-import { listClasses, listClassStudents } from '@/services/classesService'
 import { getApiErrorMessage } from '@/services/apiError'
 import {
   closeExam,
   createExamQuestion,
   deleteExam,
+  downloadCoverPages,
+  downloadMarkSheet,
   getExam,
   listCandidates,
   listExamQuestions,
@@ -38,8 +39,6 @@ import {
   uploadExamPaper,
 } from '@/services/examsService'
 import type { Subject } from '@/types/academics'
-import type { AuthUser } from '@/types/auth'
-import type { SchoolClass } from '@/types/class'
 import type { Exam, ExamCandidate, ExamQuestion, ExamQuestionType, ExamScript } from '@/types/exam'
 
 const questionTypeOptions: { value: ExamQuestionType; label: string }[] = [
@@ -58,11 +57,6 @@ export default function ExamEditorPage() {
   const [candidates, setCandidates] = useState<ExamCandidate[]>([])
   const [scripts, setScripts] = useState<ExamScript[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
-  const [candidateClasses, setCandidateClasses] = useState<SchoolClass[]>([])
-  const [selectedCandidateClassId, setSelectedCandidateClassId] = useState<number | null>(null)
-  const [classStudents, setClassStudents] = useState<AuthUser[]>([])
-  const [isLoadingClassStudents, setIsLoadingClassStudents] = useState(false)
-  const [classStudentsError, setClassStudentsError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const [editOpen, setEditOpen] = useState(false)
@@ -71,6 +65,8 @@ export default function ExamEditorPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isDownloadingMarkSheet, setIsDownloadingMarkSheet] = useState(false)
+  const [isDownloadingCoverPages, setIsDownloadingCoverPages] = useState(false)
   const schemeInputRef = useRef<HTMLInputElement>(null)
   const paperInputRef = useRef<HTMLInputElement>(null)
   const headerSentinelRef = useRef<HTMLDivElement>(null)
@@ -96,22 +92,18 @@ export default function ExamEditorPage() {
   async function load() {
     setError(null)
     try {
-      const [examData, questionsData, candidatesData, scriptsData, subjectsData, classesData] = await Promise.all([
+      const [examData, questionsData, candidatesData, scriptsData, subjectsData] = await Promise.all([
         getExam(id),
         listExamQuestions(id),
         listCandidates(id),
         listScripts(id),
         listSubjects(),
-        listClasses(),
       ])
       setExam(examData)
       setQuestions(questionsData)
       setCandidates(candidatesData)
       setScripts(scriptsData)
       setSubjects(subjectsData)
-      const matchingClasses = classesData.filter((schoolClass) => schoolClass.class_level === examData.class_level && schoolClass.academic_year === examData.academic_year)
-      setCandidateClasses(matchingClasses)
-      setSelectedCandidateClassId(matchingClasses.length === 1 ? matchingClasses[0].id : null)
       setEditForm({ title: examData.title, description: examData.description, exam_date: examData.exam_date ?? '' })
     } catch (err) {
       setError(getApiErrorMessage(err))
@@ -129,32 +121,6 @@ export default function ExamEditorPage() {
   useEffect(() => {
     load()
   }, [id])
-
-  useEffect(() => {
-    if (selectedCandidateClassId === null) {
-      setClassStudents([])
-      setClassStudentsError(null)
-      setIsLoadingClassStudents(false)
-      return
-    }
-
-    let cancelled = false
-    setClassStudents([])
-    setClassStudentsError(null)
-    setIsLoadingClassStudents(true)
-    listClassStudents(selectedCandidateClassId)
-      .then((students) => {
-        if (!cancelled) setClassStudents(students)
-      })
-      .catch((err) => {
-        if (!cancelled) setClassStudentsError(getApiErrorMessage(err))
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoadingClassStudents(false)
-      })
-
-    return () => { cancelled = true }
-  }, [selectedCandidateClassId])
 
   function subjectName(subjectId: number) {
     return subjects.find((subject) => subject.id === subjectId)?.name ?? `#${subjectId}`
@@ -240,6 +206,28 @@ export default function ExamEditorPage() {
       showToast('error', getApiErrorMessage(err))
     } finally {
       setIsPublishing(false)
+    }
+  }
+
+  async function handleDownloadMarkSheet() {
+    setIsDownloadingMarkSheet(true)
+    try {
+      await downloadMarkSheet(id, exam?.title)
+    } catch (err) {
+      showToast('error', getApiErrorMessage(err))
+    } finally {
+      setIsDownloadingMarkSheet(false)
+    }
+  }
+
+  async function handleDownloadCoverPages() {
+    setIsDownloadingCoverPages(true)
+    try {
+      await downloadCoverPages(id, exam?.title)
+    } catch (err) {
+      showToast('error', getApiErrorMessage(err))
+    } finally {
+      setIsDownloadingCoverPages(false)
     }
   }
 
@@ -393,6 +381,16 @@ export default function ExamEditorPage() {
               <Link to="/teacher/results">
                 <Button size="sm">Results Hub →</Button>
               </Link>
+            )}
+            {candidates.length > 0 && (isPublished || isClosed || isMarking || isResultsPublished || exam.status === 'FINALIZED' || exam.status === 'REVIEW') && (
+              <Button variant="ghost" size="sm" disabled={isDownloadingCoverPages} onClick={handleDownloadCoverPages}>
+                {isDownloadingCoverPages ? 'Generating…' : 'Cover Pages PDF'}
+              </Button>
+            )}
+            {(isMarking || isResultsPublished || exam.status === 'FINALIZED' || exam.status === 'REVIEW') && (
+              <Button variant="ghost" size="sm" disabled={isDownloadingMarkSheet} onClick={handleDownloadMarkSheet}>
+                {isDownloadingMarkSheet ? 'Generating…' : 'Mark Sheet PDF'}
+              </Button>
             )}
             {isDraft && (
               <Button variant="danger" size="sm" disabled={isDeleting} onClick={handleDelete}>
@@ -570,7 +568,7 @@ export default function ExamEditorPage() {
           <ExamQuestionCard
             key={question.id}
             question={question}
-            canEdit={isDraft}
+            canEdit={isDraft || isMarking}
             onChanged={refreshQuestions}
             onDeleted={refreshQuestions}
           />
@@ -578,15 +576,11 @@ export default function ExamEditorPage() {
 
       <CandidatesPanel
         examId={id}
+        examClassLevel={exam.class_level}
         candidates={candidates}
-        classes={candidateClasses}
-        selectedClassId={selectedCandidateClassId}
-        onClassChange={setSelectedCandidateClassId}
-        students={classStudents}
-        isLoadingStudents={isLoadingClassStudents}
-        studentsError={classStudentsError}
         onChanged={refreshCandidates}
       />
+
       <ScriptsPanel
         examId={id}
         candidates={candidates}
@@ -594,8 +588,6 @@ export default function ExamEditorPage() {
         examStatus={exam.status}
         onChanged={refreshScripts}
       />
-
-
 
       {isDraft && (
         <Card>

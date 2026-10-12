@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { Select } from '@/components/ui/Select'
 import { StatusBadge } from '@/components/ui/StatusBadge'
-import { TrashIcon } from '@/components/ui/icons'
+import { PencilIcon, TrashIcon } from '@/components/ui/icons'
 import { listClassLevels } from '@/services/academicsService'
 import { getApiErrorMessage } from '@/services/apiError'
 import {

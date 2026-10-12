@@ -21,6 +21,7 @@ import SystemAdminDashboardPage from './SystemAdminDashboardPage'
 import SystemAnalyticsPage from './SystemAnalyticsPage'
 import SystemUsersPage from './SystemUsersPage'
 import TeachersPage from './TeachersPage'
+import UserDetailPage from './UserDetailPage'
 import TopicDetailPage from './TopicDetailPage'
 
 export default function AdminAreaPage() {
@@ -68,6 +69,14 @@ export default function AdminAreaPage() {
           element={
             <RequireSystemAdmin>
               <SystemUsersPage />
+            </RequireSystemAdmin>
+          }
+        />
+        <Route
+          path="users/:userId"
+          element={
+            <RequireSystemAdmin>
+              <UserDetailPage />
             </RequireSystemAdmin>
           }
         />
@@ -153,7 +162,6 @@ export default function AdminAreaPage() {
             </RequireSchoolAdmin>
           }
         />
-
         {/* Same path, different content per scope -- no guard needed, each
             scope only ever sees its own component. */}
         <Route path="analytics" element={isSystemAdmin ? <SystemAnalyticsPage /> : <SchoolAnalyticsPage />} />

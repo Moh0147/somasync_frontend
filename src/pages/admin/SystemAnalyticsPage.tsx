@@ -11,6 +11,9 @@ import { Table } from '@/components/ui/Table'
 import { getApiErrorMessage } from '@/services/apiError'
 import { getSystemSchools, getSystemUsage, getSystemUsers } from '@/services/analyticsService'
 import type { SystemSchoolRow, SystemUsage, SystemUsers } from '@/types/analytics'
+import { roleLabel } from '@/utils/roleLabel'
+
+const KNOWN_ROLES = ['ADMIN', 'TEACHER', 'STUDENT'] as const
 
 export default function SystemAnalyticsPage() {
   const [schools, setSchools] = useState<SystemSchoolRow[] | null>(null)
@@ -60,7 +63,9 @@ export default function SystemAnalyticsPage() {
       <div>
         <h2 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">Users by role</h2>
         <BarChart
-          items={Object.entries(users.by_role).map(([role, count]) => ({ label: role, value: count }))}
+          items={KNOWN_ROLES
+            .filter((role) => role in users.by_role)
+            .map((role) => ({ label: roleLabel(role), value: users.by_role[role] ?? 0 }))}
         />
       </div>
 

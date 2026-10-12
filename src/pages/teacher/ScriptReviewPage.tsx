@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 
 import { EmptyState } from '@/components/feedback/EmptyState'
 import { ErrorState } from '@/components/feedback/ErrorState'
@@ -142,6 +142,8 @@ export default function ScriptReviewPage() {
 
   // Compulsory questions whose answer wasn't extracted AND haven't been manually marked yet.
   // A question is effectively optional if it's in a choice section OR individually non-compulsory.
+  const isFinishedStatuses = script.status === 'FINALIZED' || script.status === 'PUBLISHED'
+
   const missingCompulsory = attempt
     ? attempt.answers.filter((a) => {
         const q = questions.find((q) => q.id === a.exam_question)
@@ -151,7 +153,7 @@ export default function ScriptReviewPage() {
         return !effectivelyOptional && !(a.recorded_answer || '').trim() && a.teacher_final_marks === null
       })
     : []
-  const canFinalize = script.status === 'TEACHER_REVIEW' && missingCompulsory.length === 0
+  const canFinalize = !isFinishedStatuses && missingCompulsory.length === 0
 
   const extractionStatus =
     script.ocr_status === 'READY'
@@ -161,11 +163,10 @@ export default function ScriptReviewPage() {
         : script.ocr_status === 'PROCESSING'
           ? 'Extracting…'
           : 'Not yet extracted'
-
-  const showExtractBtn = script.status === 'UPLOADED' || script.status === 'FAILED'
-  const showAiMarkBtn  = script.status === 'UPLOADED' || script.status === 'FAILED'
-  const showReviewBtn  = script.status === 'UPLOADED' || script.status === 'MARKED' || script.status === 'FAILED'
-  const showFinalizeBtn = script.status === 'TEACHER_REVIEW'
+  const showExtractBtn  = !isFinishedStatuses
+  const showAiMarkBtn   = !isFinishedStatuses
+  const showReviewBtn   = false  // Teacher finalizes directly — no separate submit-for-review step
+  const showFinalizeBtn = !isFinishedStatuses
 
   return (
     <div className="flex flex-col gap-4">
@@ -192,8 +193,17 @@ export default function ScriptReviewPage() {
         {(showExtractBtn || showAiMarkBtn || showReviewBtn || showFinalizeBtn) && (
           <div className="flex flex-wrap gap-2 pt-1">
             {showExtractBtn && (
-              <Button size="sm" variant="ghost" disabled={isRunningOcr || script.ocr_status === 'PROCESSING'} onClick={handleRunOcr}>
-                {isRunningOcr ? 'Extracting…' : 'Extract answers'}
+              <Button
+                size="sm"
+                variant={script.ocr_status === 'PROCESSING' && !isRunningOcr ? 'secondary' : 'ghost'}
+                disabled={isRunningOcr}
+                onClick={handleRunOcr}
+              >
+                {isRunningOcr
+                  ? 'Extracting…'
+                  : script.ocr_status === 'PROCESSING'
+                    ? 'Stuck — Reset & retry'
+                    : 'Extract answers'}
               </Button>
             )}
             {showAiMarkBtn && (
@@ -214,6 +224,25 @@ export default function ScriptReviewPage() {
           </div>
         )}
       </div>
+
+      {/* ── Finalized banner ───────────────────────────────────── */}
+      {isFinishedStatuses && (
+        <div className="flex items-center justify-between rounded-xl border border-green-200 bg-green-50 px-4 py-3 dark:border-green-500/30 dark:bg-green-500/10">
+          <div>
+            <p className="text-sm font-semibold text-green-800 dark:text-green-300">
+              Script {script.status === 'PUBLISHED' ? 'published' : 'finalized'} ✓
+            </p>
+            <p className="mt-0.5 text-xs text-green-700 dark:text-green-400">
+              When all scripts are ready, publish results to students from Results Hub.
+            </p>
+          </div>
+          <Link to="/teacher/results">
+            <Button size="sm">
+              Results Hub →
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* ── Alerts ─────────────────────────────────────────────── */}
       {missingCompulsory.length > 0 && (
@@ -259,15 +288,65 @@ export default function ScriptReviewPage() {
         {/* Answer cards — hidden on mobile when script tab is active */}
         <div className={['flex flex-col gap-4', mobileTab === 'script' ? 'lg:flex hidden' : ''].join(' ')}>
           {!attempt && <EmptyState title="No attempt found for this script yet." />}
-          {attempt &&
-            attempt.answers
+          {attempt && (() => {
+            const sorted = attempt.answers
               .slice()
-              .sort((a, b) => a.exam_question - b.exam_question)
-              .map((answer) => {
+              .sort((a, b) => {
+                const qa = questions.find((q) => q.id === a.exam_question)
+                const qb = questions.find((q) => q.id === b.exam_question)
+                if (qa?.section && qb?.section && qa.section !== qb.section)
+                  return qa.section.localeCompare(qb.section)
+                return a.exam_question - b.exam_question
+              })
+
+            // Group by section when sections are defined
+            const hasSections = sorted.some((a) => {
+              const q = questions.find((qq) => qq.id === a.exam_question)
+              return Boolean(q?.section)
+            })
+
+            if (!hasSections) {
+              return sorted.map((answer) => {
                 const question = questions.find((q) => q.id === answer.exam_question)
                 if (!question) return null
                 return <ExamAnswerReviewCard key={answer.id} answer={answer} question={question} sectionSettings={sectionSettings} onChanged={load} />
-              })}
+              })
+            }
+
+            // Build ordered section groups
+            const sections: string[] = []
+            const groups: Record<string, typeof sorted> = {}
+            for (const answer of sorted) {
+              const q = questions.find((qq) => qq.id === answer.exam_question)
+              const sec = q?.section || 'Other'
+              if (!groups[sec]) { groups[sec] = []; sections.push(sec) }
+              groups[sec].push(answer)
+            }
+
+            return sections.map((sec) => {
+              const secAnswers = groups[sec]
+              const secMarks = secAnswers.reduce((sum, a) => {
+                const q = questions.find((qq) => qq.id === a.exam_question)
+                return sum + (q ? Number(q.max_marks) : 0)
+              }, 0)
+              return (
+                <div key={sec} className="flex flex-col gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+                    <span className="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                      {sec} · {secMarks} marks
+                    </span>
+                    <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+                  </div>
+                  {secAnswers.map((answer) => {
+                    const question = questions.find((q) => q.id === answer.exam_question)
+                    if (!question) return null
+                    return <ExamAnswerReviewCard key={answer.id} answer={answer} question={question} sectionSettings={sectionSettings} onChanged={load} />
+                  })}
+                </div>
+              )
+            })
+          })()}
         </div>
       </div>
     </div>

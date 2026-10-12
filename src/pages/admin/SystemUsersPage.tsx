@@ -1,29 +1,42 @@
 import { useEffect, useMemo, useState } from 'react'
+import type { FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 
 import { EmptyState } from '@/components/feedback/EmptyState'
 import { ErrorState } from '@/components/feedback/ErrorState'
 import { LoadingState } from '@/components/feedback/LoadingState'
+import { useToast } from '@/components/feedback/Toast'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
+import { Modal } from '@/components/ui/Modal'
 import { Select } from '@/components/ui/Select'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { Table } from '@/components/ui/Table'
 import { getApiErrorMessage } from '@/services/apiError'
-import { getSystemUserDirectory } from '@/services/analyticsService'
+import { createAdminUser, listAdminUsers } from '@/services/adminUsersService'
 import { listSchools } from '@/services/schoolsService'
-import type { SystemDirectoryUser } from '@/types/analytics'
+import type { SystemDirectoryUser, UserRole } from '@/types/analytics'
 import type { School } from '@/types/school'
+import { ASSIGNABLE_ROLES, SCHOOL_OPTIONAL_ROLES, SCHOOL_REQUIRED_ROLES, roleLabel } from '@/utils/roleLabel'
 
-type RoleFilter = 'ALL' | 'SCHOOL_ADMIN' | 'TEACHER' | 'STUDENT'
+type RoleFilter = 'ALL' | UserRole
 
-function roleLabel(user: SystemDirectoryUser) {
-  if (user.role === 'ADMIN' && user.admin_scope === 'SCHOOL') return 'School Admin'
-  if (user.role === 'TEACHER') return 'Teacher'
-  return 'Student'
+const emptyForm = {
+  username: '',
+  email: '',
+  first_name: '',
+  last_name: '',
+  phone_number: '',
+  password: '',
+  role: 'TEACHER' as UserRole,
+  school: '' as string | number,
 }
 
 export default function SystemUsersPage() {
+  const { showToast } = useToast()
+
   const [users, setUsers] = useState<SystemDirectoryUser[] | null>(null)
   const [schools, setSchools] = useState<School[] | null>(null)
   const [search, setSearch] = useState('')
@@ -31,42 +44,67 @@ export default function SystemUsersPage() {
   const [schoolFilter, setSchoolFilter] = useState('ALL')
   const [error, setError] = useState<string | null>(null)
 
+  const [createOpen, setCreateOpen] = useState(false)
+  const [form, setForm] = useState(emptyForm)
+  const [formError, setFormError] = useState<string | null>(null)
+  const [isCreating, setIsCreating] = useState(false)
+
   async function load() {
     setError(null)
-    setUsers(null)
-    setSchools(null)
     try {
-      const [directory, schoolList] = await Promise.all([getSystemUserDirectory(), listSchools()])
-      setUsers(directory)
+      const [userList, schoolList] = await Promise.all([listAdminUsers(), listSchools()])
+      setUsers(userList)
       setSchools(schoolList)
     } catch (err) {
       setError(getApiErrorMessage(err))
     }
   }
 
-  useEffect(() => {
-    load()
-  }, [])
+  useEffect(() => { load() }, [])
 
   const filteredUsers = useMemo(() => {
     if (!users) return []
     const query = search.trim().toLowerCase()
     return users.filter((user) => {
-      const matchesRole = roleFilter === 'ALL'
-        || (roleFilter === 'SCHOOL_ADMIN' && user.role === 'ADMIN' && user.admin_scope === 'SCHOOL')
-        || user.role === roleFilter
+      const matchesRole = roleFilter === 'ALL' || user.role === roleFilter
       const matchesSchool = schoolFilter === 'ALL' || String(user.school) === schoolFilter
       const matchesSearch = !query || [
-        user.first_name,
-        user.last_name,
+        user.first_name, user.last_name,
         `${user.first_name} ${user.last_name}`,
-        user.username,
-        user.email,
-        user.phone_number,
-      ].some((value) => value.toLowerCase().includes(query))
+        user.username, user.email, user.phone_number,
+      ].some((v) => v.toLowerCase().includes(query))
       return matchesRole && matchesSchool && matchesSearch
     })
   }, [users, roleFilter, schoolFilter, search])
+
+  async function handleCreate(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setFormError(null)
+    setIsCreating(true)
+    try {
+      const newUser = await createAdminUser({
+        username: form.username,
+        email: form.email || undefined,
+        first_name: form.first_name || undefined,
+        last_name: form.last_name || undefined,
+        phone_number: form.phone_number || undefined,
+        password: form.password,
+        role: form.role,
+        school: form.school !== '' ? Number(form.school) : null,
+      })
+      setUsers((prev) => prev ? [newUser, ...prev] : [newUser])
+      setCreateOpen(false)
+      setForm(emptyForm)
+      showToast('success', 'User created.')
+    } catch (err) {
+      setFormError(getApiErrorMessage(err))
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
+  const needsSchool = SCHOOL_REQUIRED_ROLES.includes(form.role)
+  const schoolOptional = SCHOOL_OPTIONAL_ROLES.includes(form.role)
 
   if (error) return <ErrorState description={error} onRetry={load} />
   if (!users || !schools) return <LoadingState message="Loading users…" />
@@ -77,9 +115,12 @@ export default function SystemUsersPage() {
       header: 'User',
       render: (user: SystemDirectoryUser) => (
         <div>
-          <p className="font-semibold text-slate-900 dark:text-slate-100">
+          <Link
+            to={`/admin/users/${user.id}`}
+            className="font-semibold text-slate-900 hover:text-blue-600 dark:text-slate-100 dark:hover:text-blue-400"
+          >
             {[user.first_name, user.last_name].filter(Boolean).join(' ') || user.username}
-          </p>
+          </Link>
           <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">@{user.username}</p>
         </div>
       ),
@@ -87,7 +128,9 @@ export default function SystemUsersPage() {
     {
       key: 'role',
       header: 'Role',
-      render: (user: SystemDirectoryUser) => <span className="font-medium">{roleLabel(user)}</span>,
+      render: (user: SystemDirectoryUser) => (
+        <span className="font-medium">{roleLabel(user.role, user.admin_scope)}</span>
+      ),
     },
     {
       key: 'school',
@@ -100,7 +143,9 @@ export default function SystemUsersPage() {
       render: (user: SystemDirectoryUser) => (
         <div>
           <p>{user.email || '—'}</p>
-          {user.phone_number && <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{user.phone_number}</p>}
+          {user.phone_number && (
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{user.phone_number}</p>
+          )}
         </div>
       ),
     },
@@ -108,7 +153,10 @@ export default function SystemUsersPage() {
       key: 'status',
       header: 'Status',
       render: (user: SystemDirectoryUser) => (
-        <StatusBadge status={user.is_active ? 'available' : 'locked'} label={user.is_active ? 'Active' : 'Inactive'} />
+        <StatusBadge
+          status={user.is_active ? 'available' : 'locked'}
+          label={user.is_active ? 'Active' : 'Inactive'}
+        />
       ),
     },
     {
@@ -122,7 +170,12 @@ export default function SystemUsersPage() {
     <div className="flex flex-col gap-4">
       <PageHeader
         title="Users"
-        description="School admins, teachers, and students across all schools."
+        description="All platform accounts across every school."
+        actions={
+          <Button size="sm" onClick={() => setCreateOpen(true)}>
+            Create user
+          </Button>
+        }
       />
 
       <Card>
@@ -133,30 +186,44 @@ export default function SystemUsersPage() {
           </p>
         </CardHeader>
         <CardBody className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(16rem,1fr)_12rem_16rem]">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(16rem,1fr)_14rem_16rem]">
             <Input
               label="Search users"
               type="search"
               placeholder="Name, username, email, or phone"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
             />
-            <Select label="Role" value={roleFilter} onChange={(event) => setRoleFilter(event.target.value as RoleFilter)}>
+            <Select
+              label="Role"
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value as RoleFilter)}
+            >
               <option value="ALL">All roles</option>
-              <option value="SCHOOL_ADMIN">School Admin</option>
+              <option value="ADMIN">School Admin</option>
               <option value="TEACHER">Teacher</option>
               <option value="STUDENT">Student</option>
             </Select>
-            <Select label="School" value={schoolFilter} onChange={(event) => setSchoolFilter(event.target.value)}>
+            <Select
+              label="School"
+              value={schoolFilter}
+              onChange={(e) => setSchoolFilter(e.target.value)}
+            >
               <option value="ALL">All schools</option>
-              {schools.map((school) => <option key={school.id} value={school.id}>{school.name}</option>)}
+              {schools.map((school) => (
+                <option key={school.id} value={school.id}>{school.name}</option>
+              ))}
             </Select>
           </div>
 
           {filteredUsers.length === 0 ? (
             <EmptyState
-              title={users.length === 0 ? 'No school users yet.' : 'No users match these filters.'}
-              description={users.length === 0 ? 'School admins, teachers, and students will appear here.' : 'Try another role, school, or search term.'}
+              title={users.length === 0 ? 'No users yet.' : 'No users match these filters.'}
+              description={
+                users.length === 0
+                  ? 'Create the first user with the button above.'
+                  : 'Try another role, school, or search term.'
+              }
             />
           ) : (
             <Table
@@ -167,6 +234,77 @@ export default function SystemUsersPage() {
           )}
         </CardBody>
       </Card>
+
+      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Create user">
+        <form onSubmit={handleCreate} className="flex flex-col gap-4" noValidate>
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="First name"
+              value={form.first_name}
+              onChange={(e) => setForm({ ...form, first_name: e.target.value })}
+            />
+            <Input
+              label="Last name"
+              value={form.last_name}
+              onChange={(e) => setForm({ ...form, last_name: e.target.value })}
+            />
+          </div>
+          <Input
+            label="Username"
+            required
+            value={form.username}
+            onChange={(e) => setForm({ ...form, username: e.target.value })}
+          />
+          <Input
+            label="Email"
+            type="email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+          <Input
+            label="Phone number"
+            value={form.phone_number}
+            onChange={(e) => setForm({ ...form, phone_number: e.target.value })}
+          />
+          <Input
+            label="Password"
+            type="password"
+            required
+            helperText="At least 8 characters."
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+          />
+          <Select
+            label="Role"
+            required
+            value={form.role}
+            onChange={(e) => setForm({ ...form, role: e.target.value as UserRole, school: '' })}
+          >
+            {ASSIGNABLE_ROLES.map(({ value, label }) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </Select>
+          {(needsSchool || schoolOptional) && (
+            <Select
+              label={schoolOptional ? 'School (optional)' : 'School'}
+              required={needsSchool}
+              value={String(form.school)}
+              onChange={(e) => setForm({ ...form, school: e.target.value })}
+            >
+              <option value="">{schoolOptional ? 'No school (cross-school oversight)' : 'Select a school…'}</option>
+              {schools.map((school) => (
+                <option key={school.id} value={school.id}>{school.name}</option>
+              ))}
+            </Select>
+          )}
+          {formError && (
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">{formError}</p>
+          )}
+          <Button type="submit" disabled={isCreating}>
+            {isCreating ? 'Creating…' : 'Create user'}
+          </Button>
+        </form>
+      </Modal>
     </div>
   )
 }

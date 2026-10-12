@@ -24,6 +24,7 @@ import {
   listSchoolAdmins,
   updateSchool,
 } from '@/services/schoolsService'
+import { getSchoolImage } from '@/utils/schoolImage'
 import type { AuthUser } from '@/types/auth'
 import type { School } from '@/types/school'
 
@@ -147,10 +148,39 @@ export default function SchoolDetailPage() {
         }
       />
 
-      <Card>
+      <Card className="overflow-hidden">
+        {/* ── Hero image ── */}
+        {(() => {
+          const imageSrc = getSchoolImage(school)
+          return (
+            <div className="relative h-44 w-full overflow-hidden bg-slate-100 dark:bg-slate-800 sm:h-56">
+              {imageSrc ? (
+                <img
+                  src={imageSrc}
+                  alt={school.name}
+                  className="h-full w-full object-cover"
+                  draggable={false}
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-500/20 via-indigo-400/20 to-purple-500/20 dark:from-blue-500/30 dark:via-indigo-400/20 dark:to-purple-500/30">
+                  <span className="text-5xl font-bold tracking-tight text-slate-400/50 dark:text-slate-500/50 select-none">
+                    {school.code}
+                  </span>
+                </div>
+              )}
+              <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/40 to-transparent" />
+              <div className="absolute bottom-3 left-4">
+                <p className="text-base font-bold text-white drop-shadow">{school.name}</p>
+                <p className="text-xs text-white/80 drop-shadow">{school.code}</p>
+              </div>
+              <div className="absolute right-3 top-3">
+                <StatusBadge status={school.is_active ? 'available' : 'locked'} label={school.is_active ? 'Active' : 'Inactive'} />
+              </div>
+            </div>
+          )
+        })()}
         <CardHeader className="flex items-center justify-between">
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">School details</p>
-          <StatusBadge status={school.is_active ? 'available' : 'locked'} label={school.is_active ? 'Active' : 'Inactive'} />
         </CardHeader>
         <CardBody>
           <DescriptionList

@@ -1,11 +1,15 @@
 @import "tailwindcss";
-@import "@fontsource-variable/plus-jakarta-sans";
+@import "@fontsource-variable/dm-sans";
+@import "@fontsource-variable/manrope";
 
 /* Self-hosted (not a Google Fonts CDN link) so the font ships in the build
    and gets precached by the service worker like any other static asset --
-   an offline-first app shouldn't depend on an external font request. */
+   an offline-first app shouldn't depend on an external font request.
+   DM Sans → UI body text (font-sans).
+   Manrope → headings and display text (font-display). */
 @theme {
-  --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'DM Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Manrope Variable', ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Class-based dark mode (a manual toggle, not just OS preference) -- the
@@ -17,6 +21,12 @@
 @layer base {
   body {
     @apply bg-slate-50 text-slate-900 antialiased transition-colors duration-150 dark:bg-slate-950 dark:text-slate-100;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
   button:not(:disabled) {

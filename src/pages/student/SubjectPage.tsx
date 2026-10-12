@@ -13,7 +13,8 @@ import { listClassLevels, listSubjects } from '@/services/academicsService'
 import { getApiErrorMessage } from '@/services/apiError'
 import { getLessonStructure, listLessons } from '@/services/lessonsService'
 import type { ClassLevel, Subject } from '@/types/academics'
-import { isLessonDownloaded } from '@/db/offlineServices/downloadService'
+import { downloadLessonForOffline, isLessonDownloaded, removeLessonOffline } from '@/db/offlineServices/downloadService'
+import { getLessonByServerId } from '@/db/repositories/lessonsRepository'
 import { useToast } from '@/components/feedback/Toast'
 
 export default function SubjectPage() {
@@ -26,6 +27,8 @@ export default function SubjectPage() {
   const [levels, setLevels] = useState<ClassLevel[]>([])
   const [lessons, setLessons] = useState<Array<{ id: number; title: string; description: string; class_level: number; total: number; completed: number; downloaded: boolean }>>([])
   const [error, setError] = useState<string | null>(null)
+  const [downloadingId, setDownloadingId] = useState<number | null>(null)
+  const [downloadProgress, setDownloadProgress] = useState<{ completed: number; total: number } | null>(null)
 
   async function load() {
     try {
@@ -42,7 +45,35 @@ export default function SubjectPage() {
   }
   useEffect(() => { load() }, [id])
 
-  const progress = useMemo(() => { const total = lessons.reduce((sum, item) => sum + item.total, 0); const completed = lessons.reduce((sum, item) => sum + item.completed, 0); return { total, completed, percentage: total ? Math.round(completed / total * 100) : 0 } }, [lessons])
+  async function handleDownload(lessonId: number) {
+    if (downloadingId !== null) return
+    setDownloadingId(lessonId)
+    setDownloadProgress(null)
+    try {
+      await downloadLessonForOffline(lessonId, (update) => setDownloadProgress(update))
+      setLessons((prev) => prev.map((l) => l.id === lessonId ? { ...l, downloaded: true } : l))
+      showToast('success', 'Lesson downloaded for offline use.')
+    } catch (err) {
+      showToast('error', getApiErrorMessage(err))
+    } finally {
+      setDownloadingId(null)
+      setDownloadProgress(null)
+    }
+  }
+
+  async function handleRemove(lessonId: number) {
+    try {
+      const localLesson = await getLessonByServerId(lessonId)
+      if (!localLesson?.id) return
+      await removeLessonOffline(localLesson.id)
+      setLessons((prev) => prev.map((l) => l.id === lessonId ? { ...l, downloaded: false } : l))
+      showToast('success', 'Lesson removed from offline storage.')
+    } catch (err) {
+      showToast('error', getApiErrorMessage(err))
+    }
+  }
+
+  const progress = useMemo(() => { const total = lessons.reduce((sum, item) => sum + item.total, 0); const completed = lessons.reduce((sum, item) => sum + item.completed, 0); return { total, completed, percentage: total ? (completed / total * 100) : 0 } }, [lessons])
   if (error) return <ErrorState description={error} onRetry={load} />
   if (!subject) return <LoadingState message="Loading subject…" />
   const levelName = (level: number) => levels.find((item) => item.id === level)?.name ?? `Form ${level}`
@@ -55,6 +86,6 @@ export default function SubjectPage() {
       <div className="mt-6 grid gap-5 sm:grid-cols-[1fr_180px] sm:items-end"><div><ProgressBar value={progress.percentage} label="Overall progress" /><p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{progress.completed} of {progress.total} sections completed</p></div><Button onClick={() => { const next = lessons.find((item) => item.completed < item.total) ?? lessons[0]; if (next) navigate(`/student/lessons/${next.id}`) }} disabled={!lessons.length}>Continue learning <ArrowRightIcon className="h-4 w-4" /></Button></div>
     </section>
     <div><h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Your {subject.name} lessons</h2><p className="mt-1 text-sm text-slate-500">Only lessons from this subject are shown here.</p></div>
-    {lessons.length === 0 ? <Card><CardBody><p className="text-sm text-slate-500">No lessons are available for this subject yet.</p></CardBody></Card> : <div className="grid grid-cols-1 gap-4 md:grid-cols-2">{lessons.map((lesson) => { const percentage = lesson.total ? Math.round(lesson.completed / lesson.total * 100) : null; return <LessonCard key={lesson.id} title={lesson.title} subjectLabel={levelName(lesson.class_level)} percentage={percentage} isDownloaded={lesson.downloaded} isDownloading={false} downloadProgress={null} canOpen={lesson.downloaded || isOnline} isOnline={isOnline} onOpen={() => navigate(`/student/lessons/${lesson.id}`)} onDownload={() => showToast('info', 'Download from the dashboard.')} onRemove={() => undefined} /> })}</div>}
+    {lessons.length === 0 ? <Card><CardBody><p className="text-sm text-slate-500">No lessons are available for this subject yet.</p></CardBody></Card> : <div className="grid grid-cols-1 gap-4 md:grid-cols-2">{lessons.map((lesson) => { const percentage = lesson.total ? (lesson.completed / lesson.total * 100) : null; const isThis = downloadingId === lesson.id; return <LessonCard key={lesson.id} title={lesson.title} subjectLabel={levelName(lesson.class_level)} percentage={percentage} isDownloaded={lesson.downloaded} isDownloading={isThis} downloadProgress={isThis ? downloadProgress : null} canOpen={lesson.downloaded || isOnline} isOnline={isOnline} onOpen={() => navigate(`/student/lessons/${lesson.id}`)} onDownload={() => handleDownload(lesson.id)} onRemove={() => handleRemove(lesson.id)} /> })}</div>}
   </div>
 }

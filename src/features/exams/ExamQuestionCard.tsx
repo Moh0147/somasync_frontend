@@ -8,8 +8,84 @@ import { Input } from '@/components/ui/Input'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { TrashIcon } from '@/components/ui/icons'
 import { getApiErrorMessage } from '@/services/apiError'
-import { addMarkingSchemeItem, deleteExamQuestion, removeMarkingSchemeItem, setQuestionCompulsory } from '@/services/examsService'
-import type { ExamQuestion } from '@/types/exam'
+import { addMarkingSchemeItem, deleteExamQuestion, removeMarkingSchemeItem, setQuestionCompulsory, updateMarkingSchemeItemCriterion } from '@/services/examsService'
+import type { ExamQuestion, MarkingSchemeItem } from '@/types/exam'
+
+function EditableSchemeItem({
+  item,
+  questionId,
+  canEdit,
+  onChanged,
+}: {
+  item: MarkingSchemeItem
+  questionId: number
+  canEdit: boolean
+  onChanged: () => void
+}) {
+  const { showToast } = useToast()
+  const [editing, setEditing] = useState(false)
+  const [value, setValue] = useState(item.criterion)
+  const [isSaving, setIsSaving] = useState(false)
+
+  async function handleSave() {
+    if (value.trim() === item.criterion) { setEditing(false); return }
+    setIsSaving(true)
+    try {
+      await updateMarkingSchemeItemCriterion(questionId, item.id, value.trim(), Number(item.marks), item.order)
+      setEditing(false)
+      onChanged()
+    } catch (err) {
+      showToast('error', getApiErrorMessage(err))
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  async function handleRemove() {
+    try {
+      await removeMarkingSchemeItem(questionId, item.id)
+      onChanged()
+    } catch (err) {
+      showToast('error', getApiErrorMessage(err))
+    }
+  }
+
+  return (
+    <li className="flex items-center gap-2 text-sm">
+      {editing ? (
+        <>
+          <input
+            autoFocus
+            className="flex-1 rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-slate-600 dark:bg-slate-800"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') setEditing(false) }}
+          />
+          <Button size="sm" disabled={isSaving} onClick={handleSave}>{isSaving ? '…' : 'Save'}</Button>
+          <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
+        </>
+      ) : (
+        <>
+          <span className="flex-1">
+            {item.criterion}{' '}
+            <span className="text-slate-500 dark:text-slate-400">({Number(item.marks).toFixed(2)} marks)</span>
+            {item.marks_source === 'inferred' && (
+              <span className="ml-1 text-xs text-amber-500" title="Inferred mark allocation">~</span>
+            )}
+          </span>
+          {canEdit && (
+            <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>Edit</Button>
+          )}
+          {canEdit && (
+            <Button variant="ghost" size="sm" onClick={handleRemove}>
+              <TrashIcon className="h-3.5 w-3.5" />
+            </Button>
+          )}
+        </>
+      )}
+    </li>
+  )
+}
 
 export function ExamQuestionCard({
   question,
@@ -131,17 +207,13 @@ export function ExamQuestionCard({
         {question.marking_scheme_items.length > 0 && (
           <ul className="flex flex-col gap-1.5">
             {question.marking_scheme_items.map((item) => (
-              <li key={item.id} className="flex items-center justify-between text-sm">
-                <span>
-                  {item.criterion} <span className="text-slate-500 dark:text-slate-400">({Number(item.marks).toFixed(2)} marks)</span>
-                </span>
-                {canEdit && (
-                  <Button variant="ghost" size="sm" onClick={() => handleRemoveItem(item.id)}>
-                    <TrashIcon className="h-3.5 w-3.5" />
-                    Remove
-                  </Button>
-                )}
-              </li>
+              <EditableSchemeItem
+                key={item.id}
+                item={item}
+                questionId={question.id}
+                canEdit={canEdit}
+                onChanged={onChanged}
+              />
             ))}
           </ul>
         )}

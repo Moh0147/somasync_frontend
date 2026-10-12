@@ -34,9 +34,9 @@ export function LoginForm() {
 
     setIsSubmitting(true)
     try {
-      const loggedInUser = await login(username.trim(), password)
+      const user = await login(username.trim(), password)
       const state = location.state as LocationState | null
-      const redirectTo = state?.from?.pathname ?? roleHomeRoute[loggedInUser.role]
+      const redirectTo = state?.from?.pathname ?? roleHomeRoute[user.role]
       navigate(redirectTo, { replace: true })
     } catch (error) {
       if (axios.isAxiosError(error)) {

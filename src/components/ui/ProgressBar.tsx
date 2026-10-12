@@ -13,7 +13,7 @@ export function ProgressBar({ value, max = 100, label, showPercentage = true }: 
       {(label || showPercentage) && (
         <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
           {label && <span>{label}</span>}
-          {showPercentage && <span>{Math.round(percentage)}%</span>}
+          {showPercentage && <span>{percentage.toFixed(1)}%</span>}
         </div>
       )}
       <div

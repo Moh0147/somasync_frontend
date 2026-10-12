@@ -85,6 +85,8 @@ export interface SystemUsers {
   by_role: Record<string, number>
 }
 
+export type UserRole = 'ADMIN' | 'TEACHER' | 'STUDENT'
+
 export interface SystemDirectoryUser {
   id: number
   username: string
@@ -92,7 +94,7 @@ export interface SystemDirectoryUser {
   first_name: string
   last_name: string
   phone_number: string
-  role: 'ADMIN' | 'TEACHER' | 'STUDENT'
+  role: UserRole
   admin_scope: 'SYSTEM' | 'SCHOOL' | null
   school: number | null
   school_name: string

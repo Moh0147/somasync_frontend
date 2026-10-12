@@ -143,7 +143,7 @@ export default function ClassesPage() {
               hideOnMobile: true,
               render: (row: SchoolClass) => {
                 const value = performanceByClassId.get(row.id)?.avg_quiz_percentage
-                return value === null || value === undefined ? '—' : `${value}%`
+                return value === null || value === undefined ? '—' : `${Number(value).toFixed(1)}%`
               },
             },
             {

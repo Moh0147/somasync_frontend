@@ -10,7 +10,7 @@ import { ProgressBar } from '@/components/ui/ProgressBar'
 import { Select } from '@/components/ui/Select'
 import type { StatusBadgeStatus } from '@/components/ui/StatusBadge'
 import { StatusBadge } from '@/components/ui/StatusBadge'
-import { CameraScriptScanner } from './CameraScriptScanner'
+import { CameraScriptScanner } from '@/features/exams/CameraScriptScanner'
 import { getApiErrorMessage } from '@/services/apiError'
 import { resolveMediaUrl } from '@/services/mediaUrl'
 import { uploadScript } from '@/services/examsService'
@@ -87,7 +87,7 @@ export function ScriptsPanel({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [candidateNumber, setCandidateNumber] = useState('')
   const [isUploading, setIsUploading] = useState(false)
-  const [uploadMode, setUploadMode] = useState<'file' | 'camera'>('file')
+  const [showScanner, setShowScanner] = useState(false)
 
   function candidateLabel(candidateId: number) {
     return candidates.find((candidate) => candidate.id === candidateId)?.candidate_number ?? `#${candidateId}`
@@ -95,7 +95,7 @@ export function ScriptsPanel({
 
   const finalizedCount = scripts.filter((s) => s.status === 'FINALIZED' || s.status === 'PUBLISHED').length
   const progressPercentage = scripts.length > 0 ? Math.round((finalizedCount / scripts.length) * 100) : 0
-  const canUpload = examStatus === 'CLOSED'
+  const canUpload = examStatus === 'CLOSED' || examStatus === 'MARKING'
   const breakdown = buildBreakdown(scripts)
 
   async function handleFileSelected(event: ChangeEvent<HTMLInputElement>) {
@@ -118,11 +118,18 @@ export function ScriptsPanel({
   return (
     <Card>
       <CardHeader>
-        <div>
-          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Upload student scripts</p>
-          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-            {candidates.length} registered {candidates.length === 1 ? 'candidate' : 'candidates'} · {scripts.length} {scripts.length === 1 ? 'script' : 'scripts'} uploaded
-          </p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Upload student scripts</p>
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+              {candidates.length} registered {candidates.length === 1 ? 'candidate' : 'candidates'} · {scripts.length} {scripts.length === 1 ? 'script' : 'scripts'} uploaded
+            </p>
+          </div>
+          {canUpload && candidates.length > 0 && (
+            <Button size="sm" variant="secondary" onClick={() => setShowScanner(true)}>
+              📷 Scan na kamera
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardBody className="flex flex-col gap-4">
@@ -183,70 +190,36 @@ export function ScriptsPanel({
             Register students as candidates first. Their generated candidate numbers will be used to match each script.
           </p>
         ) : canUpload ? (
-          <div className="flex flex-col gap-3">
-            {/* Mode toggle */}
-            <div className="flex gap-2 rounded-lg border border-slate-200 bg-slate-50 p-1 dark:border-slate-800 dark:bg-slate-800/40">
-              <button
-                onClick={() => setUploadMode('camera')}
-                className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  uploadMode === 'camera'
-                    ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-slate-100'
-                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                }`}
-              >
-                📷 Scan with Camera
-              </button>
-              <button
-                onClick={() => setUploadMode('file')}
-                className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  uploadMode === 'file'
-                    ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-slate-100'
-                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                }`}
-              >
-                📁 Upload File
-              </button>
-            </div>
-
-            {uploadMode === 'camera' ? (
-              <CameraScriptScanner
-                examId={examId}
-                candidates={candidates}
-                onDone={onChanged}
-              />
-            ) : (
-              <div className="flex flex-wrap items-end gap-2">
-                <Select
-                  label="Candidate"
-                  value={candidateNumber}
-                  onChange={(event) => setCandidateNumber(event.target.value)}
-                  className="w-48"
-                >
-                  <option value="" disabled>
-                    Select a candidate
-                  </option>
-                  {candidates.map((candidate) => (
-                    <option key={candidate.id} value={candidate.candidate_number}>
-                      {candidate.candidate_number}
-                    </option>
-                  ))}
-                </Select>
-                <Button
-                  size="sm"
-                  disabled={!candidateNumber || isUploading}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  {isUploading ? 'Uploading…' : 'Upload script'}
-                </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf,.png,.jpg,.jpeg"
-                  className="hidden"
-                  onChange={handleFileSelected}
-                />
-              </div>
-            )}
+          <div className="flex flex-wrap items-end gap-2">
+            <Select
+              label="Candidate"
+              value={candidateNumber}
+              onChange={(event) => setCandidateNumber(event.target.value)}
+              className="w-48"
+            >
+              <option value="" disabled>
+                Select a candidate
+              </option>
+              {candidates.map((candidate) => (
+                <option key={candidate.id} value={candidate.candidate_number}>
+                  {candidate.candidate_number}
+                </option>
+              ))}
+            </Select>
+            <Button
+              size="sm"
+              disabled={!candidateNumber || isUploading}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {isUploading ? 'Uploading…' : 'Upload script'}
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg"
+              className="hidden"
+              onChange={handleFileSelected}
+            />
           </div>
         ) : (
           <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-800 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200">
@@ -259,6 +232,17 @@ export function ScriptsPanel({
           </div>
         )}
       </CardBody>
+
+      {showScanner && (
+        <CameraScriptScanner
+          examId={examId}
+          candidates={candidates}
+          onDone={async () => {
+            setShowScanner(false)
+            onChanged()
+          }}
+        />
+      )}
     </Card>
   )
 }
