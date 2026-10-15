@@ -116,7 +116,7 @@ export function CandidatesPanel({
     <Card>
       <CardHeader>
         <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-          Wagombea (Candidates)
+          Candidates
           {candidates.length > 0 && (
             <span className="ml-2 text-xs font-normal text-slate-500 dark:text-slate-400">
               {candidates.length}
@@ -128,7 +128,7 @@ export function CandidatesPanel({
 
         {}
         {candidates.length === 0 ? (
-          <EmptyState title="Hakuna wagombea bado." description="Chagua wanafunzi hapa chini." />
+          <EmptyState title="No candidates yet." description="Select the student below." />
         ) : (
           <ul className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
             {candidates.map((candidate) => (
@@ -143,7 +143,7 @@ export function CandidatesPanel({
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => handleRemove(candidate.candidate_number)}>
                   <TrashIcon className="h-3.5 w-3.5" />
-                  Ondoa
+                  Remove
                 </Button>
               </li>
             ))}
@@ -154,14 +154,14 @@ export function CandidatesPanel({
         <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
           <div className="flex flex-wrap items-end gap-3">
             <Input
-              label="Prefix ya namba"
+              label="Prefix Number"
               placeholder="e.g. F4A"
               value={prefix}
               onChange={(e) => setPrefix(e.target.value)}
               className="w-28"
             />
             <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">
-              Namba zitaonekana kama: <span className="font-mono">{prefix.trim() ? `${prefix.trim()}-` : ''}{String(candidates.length + 1).padStart(3, '0')}</span>, <span className="font-mono">{prefix.trim() ? `${prefix.trim()}-` : ''}{String(candidates.length + 2).padStart(3, '0')}</span>, …
+              candidates Numbers: <span className="font-mono">{prefix.trim() ? `${prefix.trim()}-` : ''}{String(candidates.length + 1).padStart(3, '0')}</span>, <span className="font-mono">{prefix.trim() ? `${prefix.trim()}-` : ''}{String(candidates.length + 2).padStart(3, '0')}</span>, …
             </p>
           </div>
 
@@ -188,7 +188,7 @@ export function CandidatesPanel({
                     className="h-4 w-4 rounded border-slate-300"
                   />
                   <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
-                    Chagua wote ({available.length})
+                    Select all ({available.length})
                   </span>
                   {selectedIds.size > 0 && (
                     <span className="ml-auto text-xs text-slate-400">{selectedIds.size} waliochaguliwa</span>

@@ -77,7 +77,7 @@ export default function SchoolAnalyticsPage() {
         ) : (
           <BarChart
             items={classes.map((c) => ({ label: c.class_name, value: c.avg_quiz_percentage ?? 0 }))}
-            valueFormatter={(v) => `${v}%`}
+            valueFormatter={(v) => `${v.toFixed(1)}%`}
           />
         )}
       </div>
@@ -89,7 +89,7 @@ export default function SchoolAnalyticsPage() {
         ) : (
           <BarChart
             items={subjects.map((s) => ({ label: s.name, value: s.avg_quiz_percentage ?? 0 }))}
-            valueFormatter={(v) => `${v}%`}
+            valueFormatter={(v) => `${v.toFixed(1)}%`}
           />
         )}
       </div>

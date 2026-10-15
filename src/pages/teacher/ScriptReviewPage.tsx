@@ -14,6 +14,7 @@ import { ScriptPagesViewer } from '@/features/exams/ScriptPagesViewer'
 import { getApiErrorMessage } from '@/services/apiError'
 import {
   aiMarkScript,
+  markAnswer,
   ocrScript,
   finalizeScript,
   getExam,
@@ -60,6 +61,7 @@ export default function ScriptReviewPage() {
   const [isRunningOcr, setIsRunningOcr] = useState(false)
   const [isSubmittingReview, setIsSubmittingReview] = useState(false)
   const [isFinalizing, setIsFinalizing] = useState(false)
+  const [isAcceptingAll, setIsAcceptingAll] = useState(false)
   const [mobileTab, setMobileTab] = useState<'script' | 'answers'>('answers')
 
   async function load() {
@@ -132,6 +134,28 @@ export default function ScriptReviewPage() {
       showToast('error', getApiErrorMessage(err))
     } finally {
       setIsFinalizing(false)
+    }
+  }
+
+  async function handleAcceptAll() {
+    if (!attempt) return
+    const pending = attempt.answers.filter(
+      (a) => a.ai_marks_awarded !== null && a.teacher_final_marks === null,
+    )
+    if (pending.length === 0) return
+    setIsAcceptingAll(true)
+    try {
+      await Promise.all(
+        pending.map((a) =>
+          markAnswer(a.id, { teacher_final_marks: a.ai_marks_awarded!, teacher_comment: a.ai_feedback }),
+        ),
+      )
+      showToast('success', `${pending.length} AI mark${pending.length > 1 ? 's' : ''} accepted.`)
+      await load()
+    } catch (err) {
+      showToast('error', getApiErrorMessage(err))
+    } finally {
+      setIsAcceptingAll(false)
     }
   }
 
@@ -287,6 +311,22 @@ export default function ScriptReviewPage() {
 
         {/* Answer cards — hidden on mobile when script tab is active */}
         <div className={['flex flex-col gap-4', mobileTab === 'script' ? 'lg:flex hidden' : ''].join(' ')}>
+          {attempt && (() => {
+            const pendingAi = attempt.answers.filter(
+              (a) => a.ai_marks_awarded !== null && a.teacher_final_marks === null,
+            )
+            if (pendingAi.length === 0) return null
+            return (
+              <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-500/30 dark:bg-amber-500/10">
+                <p className="text-sm text-amber-800 dark:text-amber-300">
+                  {pendingAi.length} AI suggestion{pendingAi.length > 1 ? 's' : ''} awaiting your approval
+                </p>
+                <Button size="sm" disabled={isAcceptingAll} onClick={handleAcceptAll}>
+                  {isAcceptingAll ? 'Accepting…' : 'Accept All AI Marks'}
+                </Button>
+              </div>
+            )
+          })()}
           {!attempt && <EmptyState title="No attempt found for this script yet." />}
           {attempt && (() => {
             const sorted = attempt.answers
